@@ -89,7 +89,7 @@ html, body {
   border-radius: inherit;
 }
 
-/* ========== CREDITS ========== */
+/* ========== CREDITS (desktop floating) ========== */
 .credits {
   position: absolute;
   bottom: 8px;
@@ -112,26 +112,24 @@ html, body {
 }
 .credits-link:hover { color: #ffd700; border-bottom-color: #ffd700; }
 
-/* ========== MUTE BUTTON ========== */
-.mute-btn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: rgba(0,0,0,0.5);
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 8px;
-  color: white;
-  font-size: 16px;
-  width: 36px;
-  height: 36px;
-  cursor: pointer;
-  z-index: 999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
+/* Credits inside end screen — always visible on mobile */
+.credits-inline {
+  color: rgba(255,255,255,0.25);
+  font-size: clamp(9px, 1.8vw, 11px);
+  letter-spacing: 0.5px;
+  text-align: center;
+  white-space: nowrap;
+  margin-top: 8px;
+  padding-bottom: 4px;
 }
-.mute-btn:hover { background: rgba(255,255,255,0.15); }
+
+/* On desktop the floating .credits is enough, hide inline */
+@media (min-width: 900px) and (min-height: 600px) {
+  .credits-inline { display: none; }
+}
+
+/* ========== MUTE BUTTON — REMOVED ========== */
+.mute-btn { display: none !important; }
 
 /* ========== BG PARTICLES ========== */
 .bg-particles {
@@ -914,7 +912,7 @@ html, body {
   position: relative;
   z-index: 10;
   min-height: 100%;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .confetti-container {
@@ -1000,10 +998,14 @@ html, body {
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 8px;
   margin-bottom: 12px;
 }
+@media (min-width: 380px) {
+  .stats-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
 .stat-item { text-align: center; }
 .stat-val {
   color: #f0b429;
@@ -1080,3 +1082,17 @@ html, body {
 .btn-share { background: linear-gradient(135deg, #1252a0, #2471a3); color: #fff; }
 .end-btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
 .end-btn:active { transform: translateY(0); }
+
+/* ========== CREDITS INLINE (end screen mobile) ========== */
+.credits-inline {
+  color: rgba(255,255,255,0.25);
+  font-size: clamp(9px,1.8vw,11px);
+  letter-spacing: 0.5px;
+  text-align: center;
+  white-space: nowrap;
+  margin-top: 4px;
+  padding-bottom: 8px;
+}
+@media (min-width: 900px) and (min-height: 600px) {
+  .credits-inline { display: none; }
+}
