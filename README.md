@@ -3,7 +3,7 @@
 > Survive the most dangerous thing in engineering... **THE VIVA!**
 
 ## 🎮 Play Now
-**[Click to Play](https://escape-the-viva.vercel.app)**
+**[Click to Play](https://escape-the-viva-by-bhavish.vercel.app)**
 
 ## 📁 Project Structure    
 
