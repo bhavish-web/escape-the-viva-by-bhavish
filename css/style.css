@@ -197,6 +197,12 @@ html, body {
   .start-left { align-items: flex-start; text-align: left; }
 }
 
+/* Force all children centered on mobile */
+.start-left .diff-selector { align-items: center; }
+.start-left .diff-btns { justify-content: center; }
+.start-left .lifelines-info { justify-content: center; }
+.start-left .start-stats { justify-content: center; }
+
 .start-badge {
   background: rgba(230,48,48,0.15);
   border: 1px solid rgba(230,48,48,0.4);
@@ -371,11 +377,12 @@ html, body {
   display: flex;
   align-items: center;
   gap: clamp(6px,1.5vw,12px);
-  padding: clamp(5px,1.2vw,8px) clamp(8px,2vw,16px);
-  background: rgba(0,0,0,0.55);
-  border-bottom: 1px solid rgba(255,100,0,0.12);
+  padding: 8px clamp(8px,2vw,16px);
+  background: rgba(0,0,0,0.7);
+  border-bottom: 1px solid rgba(255,100,0,0.2);
   flex-shrink: 0;
   z-index: 20;
+  min-height: 44px;
 }
 
 .hud-stat {
@@ -391,16 +398,15 @@ html, body {
   display: flex;
   align-items: center;
   gap: 3px;
-  font-size: clamp(8px,1.6vw,10px);
-  font-weight: 800;
-  letter-spacing: 0.5px;
+  font-size: 11px;
+  font-weight: 900;
   white-space: nowrap;
-  color: #e74c3c;
+  color: #ff6b6b;
   flex-shrink: 0;
 }
-.hud-label-text { display: none; }
-@media (min-width: 500px) { .hud-label-text { display: inline; } }
-.anger-label { color: #f39c12; }
+/* Always show label text — emoji + short text fits fine */
+.hud-label-text { display: inline; font-size: 10px; }
+.anger-label { color: #f1c40f; }
 
 .bar-container {
   flex: 1;
@@ -430,15 +436,14 @@ html, body {
 .anger-bar { background: linear-gradient(90deg, #c47800, #f39c12, #f1c40f); }
 
 .bar-pct {
-  font-size: clamp(8px,1.6vw,11px);
-  font-weight: 800;
-  min-width: 26px;
+  font-size: 11px;
+  font-weight: 900;
+  min-width: 30px;
   text-align: right;
   flex-shrink: 0;
 }
 .stress-pct { color: #ff6b6b; }
 .anger-pct { color: #f1c40f; }
-
 /* FIX: question number now clearly visible */
 .hud-center {
   display: flex;
@@ -447,18 +452,20 @@ html, body {
   flex-shrink: 0;
   gap: 1px;
 }
+
 .hud-q-num {
   color: #ffffff;
-  font-size: clamp(11px,2vw,13px);
+  font-size: 13px;
   font-weight: 900;
   letter-spacing: 1px;
-  background: rgba(255,150,0,0.15);
-  border: 1px solid rgba(255,150,0,0.3);
+  background: rgba(255,150,0,0.2);
+  border: 1.5px solid rgba(255,150,0,0.5);
   border-radius: 6px;
-  padding: 2px 8px;
+  padding: 3px 10px;
+  white-space: nowrap;
 }
 .streak-display { color: #f0b429; font-size: clamp(8px,1.5vw,10px); font-weight: 800; letter-spacing: 1px; min-height: 12px; }
-.hud-score { color: rgba(255,255,255,0.6); font-size: clamp(9px,1.8vw,11px); font-weight: 700; }
+.hud-score { color: rgba(255,255,255,0.7); font-size: 11px; font-weight: 700; white-space: nowrap; }
 
 /* Lifelines bar */
 .lifelines-bar {
