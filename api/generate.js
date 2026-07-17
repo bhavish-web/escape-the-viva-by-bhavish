@@ -65,7 +65,7 @@ Use exactly this format:
 Note: "correct" is always 0 in your output (the first option). The game will shuffle options automatically.`;
 
   try {
-    const modelName = process.env.GEMINI_MODEL || "gemini-2.5-flash-lite";
+    const modelName = process.env.GEMINI_MODEL || "gemini-2.5-flash";
     const model = genAI.getGenerativeModel({ model: modelName });
 
     const result = await model.generateContent(prompt);
