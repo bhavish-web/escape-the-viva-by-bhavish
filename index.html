@@ -13,6 +13,57 @@
 <div id="game-container">
   <div class="vignette"></div>
   <div class="screen-flash" id="screen-flash"></div>
+  <!-- ===== AI SETUP SCREEN ===== -->
+<div class="screen" id="ai-setup-screen">
+  <div class="ai-setup-content">
+    <button class="ai-back-btn" onclick="backToStart()">← Back</button>
+    <div class="ai-setup-title">🎓 Create Your Viva</div>
+    <div class="ai-setup-sub">Upload your syllabus and get personalized questions</div>
+
+    <!-- Step 1: Upload -->
+    <div class="ai-step">
+      <div class="ai-step-label">Step 1 — Upload Your Syllabus</div>
+      <label class="ai-upload-area" for="ai-upload-input">
+        <span id="ai-upload-label">📄 Click to upload syllabus PDF</span>
+        <span class="ai-upload-hint">PDF only · Max 5MB · Must contain selectable text</span>
+      </label>
+      <input type="file" id="ai-upload-input" accept=".pdf,application/pdf"
+        style="display:none" onchange="handleSyllabusUpload(this)"/>
+    </div>
+
+    <!-- Step 2: Topics -->
+    <div class="ai-step" id="ai-step2" style="display:none">
+      <div class="ai-step-label">Step 2 — Choose Topic</div>
+      <div class="ai-topics-grid" id="ai-topics"></div>
+    </div>
+
+    <!-- Step 3: Difficulty -->
+    <div class="ai-step" id="ai-step3" style="display:none">
+      <div class="ai-step-label">Step 3 — Choose Difficulty</div>
+      <div class="ai-diff-row">
+        <button class="ai-diff-btn active" onclick="selectAIDifficulty('easy', this)">😅 Easy</button>
+        <button class="ai-diff-btn" onclick="selectAIDifficulty('medium', this)">😤 Medium</button>
+        <button class="ai-diff-btn" onclick="selectAIDifficulty('hard', this)">💀 Hard</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Generate -->
+    <div class="ai-step" id="ai-step4" style="display:none">
+      <button class="ai-generate-btn" id="ai-generate-btn" onclick="generateAndStart()">
+        ⚡ Generate My Viva
+      </button>
+    </div>
+
+    <!-- Loading -->
+    <div class="ai-loading" id="ai-loading" style="display:none">
+      <div class="ai-loading-spinner"></div>
+      <div id="ai-loading-text">Preparing your personalized viva...</div>
+    </div>
+
+    <!-- Error -->
+    <div class="ai-error" id="ai-error" style="display:none"></div>
+  </div>
+</div>
 
   <!-- ===== START SCREEN ===== -->
   <div class="screen active" id="start-screen">
