@@ -23,12 +23,26 @@
     <!-- Step 1: Upload -->
     <div class="ai-step">
       <div class="ai-step-label">Step 1 — Upload Your Syllabus</div>
-      <label class="ai-upload-area" for="ai-upload-input">
-        <span id="ai-upload-label">📄 Click to upload syllabus PDF</span>
-        <span class="ai-upload-hint">PDF only · Max 5MB · Must contain selectable text</span>
-      </label>
-      <input type="file" id="ai-upload-input" accept=".pdf,application/pdf"
-        style="display:none" onchange="handleSyllabusUpload(this)"/>
+      <label class="ai-upload-area" id="ai-upload-area" for="ai-upload-input">
+  <div class="ai-upload-icon-wrap">
+    <span id="ai-upload-icon">📎</span>
+    <span id="ai-upload-label">Upload Syllabus</span>
+  </div>
+  <div class="ai-format-badges">
+    <span class="ai-format-badge">📄 PDF</span>
+    <span class="ai-format-badge">🖼 JPG</span>
+    <span class="ai-format-badge">📷 PNG</span>
+    <span class="ai-format-badge">🌐 WEBP</span>
+  </div>
+  <span id="ai-upload-hint">PDF · JPG · JPEG · PNG · WEBP · Max 10MB</span>
+</label>
+<div class="ai-upload-loading" id="ai-upload-loading">
+  <div class="ai-upload-spinner"></div>
+  <span id="ai-upload-loading-text">Uploading...</span>
+</div>
+      <input type="file" id="ai-upload-input"
+  accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp"
+  style="display:none" onchange="handleSyllabusUpload(this)"/>
     </div>
 
     <!-- Step 2: Topics -->
