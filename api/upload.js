@@ -84,7 +84,7 @@ async function extractTextFromPDF(buffer) {
 // ── Use Gemini Vision to read an image buffer ─────────────────
 
 async function extractSyllabusViaVision(imageBuffer, mimeType) {
-  const modelName = process.env.GEMINI_MODEL || "gemini-2.5-flash-lite";
+  const modelName = process.env.GEMINI_MODEL || "gemini-2.5-flash";
   const model = genAI.getGenerativeModel({ model: modelName });
 
   const base64 = imageBuffer.toString("base64");
@@ -122,7 +122,7 @@ Rules:
 // ── Use Gemini text to extract topics from text ───────────────
 
 async function extractTopicsFromText(syllabusText) {
-  const modelName = process.env.GEMINI_MODEL || "gemini-2.5-flash-lite";
+  const modelName = process.env.GEMINI_MODEL || "gemini-2.5-flash";
   const model = genAI.getGenerativeModel({ model: modelName });
 
   const prompt = `You are analyzing a student's engineering syllabus.
@@ -254,7 +254,7 @@ export default async function handler(req, res) {
       } else {
         // Scanned PDF — convert first page to image and use Vision
         // We use the raw PDF bytes directly with Gemini's PDF support
-        const modelName = process.env.GEMINI_MODEL || "gemini-2.5-flash-lite";
+        const modelName = process.env.GEMINI_MODEL || "gemini-2.5-flash";
         const model = genAI.getGenerativeModel({ model: modelName });
 
         const base64PDF = file.buffer.toString("base64");
