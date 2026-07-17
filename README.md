@@ -1,6 +1,6 @@
 # 🎓 Escape The Viva
 
-> Survive the most dangerous thing in engineering... **THE VIVA!**
+> Survive the most dangerous thing in engineering... ***THE VIVA!***
 
 ## 🎮 Play Now
 **[Click to Play](https://escape-the-viva-by-bhavish.vercel.app)**
