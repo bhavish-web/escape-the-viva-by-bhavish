@@ -316,6 +316,9 @@ Rules:
     if (err.message && err.message.includes("SAFETY")) {
       return res.status(400).json({ error: "The document could not be processed. Please try a different file." });
     }
-    return res.status(500).json({ error: "Something went wrong processing your file. Please try again." });
+    return res.status(500).json({
+  error: err.message,
+  stack: err.stack
+});
   }
 }
