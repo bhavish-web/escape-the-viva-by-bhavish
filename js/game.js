@@ -311,7 +311,13 @@ function startGame() {
     if (pool.length < 10) pool = allQuestions;
   }
 
+  // Use AI-generated questions if available, otherwise use default bank
+if (window.AI_QUESTIONS && window.AI_QUESTIONS.length > 0) {
+  questions = shuffleAndPick(window.AI_QUESTIONS, Math.min(10, window.AI_QUESTIONS.length));
+  window.AI_QUESTIONS = null; // clear after use
+} else {
   questions = shuffleAndPick(pool, 10);
+}
 
   gameState = {
     currentQ: 0, stress: 20, anger: 10,
