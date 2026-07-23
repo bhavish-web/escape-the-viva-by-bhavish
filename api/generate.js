@@ -1,17 +1,13 @@
 // api/generate.js
-// Generates viva questions using Gemini based on syllabus + topic + difficulty
-
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+// Generates viva questions using Groq (Llama 3.3 70B) based on syllabus + topic + difficulty
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  if (!process.env.GEMINI_API_KEY) {
-    return res.status(500).json({ error: "Gemini API key not configured" });
+  if (!process.env.GROQ_API_KEY) {
+    return res.status(500).json({ error: "Groq API key not configured" });
   }
 
   const { topic, difficulty, syllabusText } = req.body;
@@ -65,11 +61,31 @@ Use exactly this format:
 Note: "correct" is always 0 in your output (the first option). The game will shuffle options automatically.`;
 
   try {
-    const modelName = process.env.GEMINI_MODEL || "gemini-2.5-flash";
-    const model = genAI.getGenerativeModel({ model: modelName });
+    const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.GROQ_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.8,
+        max_tokens: 8000
+      })
+    });
 
-    const result = await model.generateContent(prompt);
-    const responseText = result.response.text().trim();
+    if (!groqRes.ok) {
+      const errBody = await groqRes.text();
+      console.error("Groq API error:", groqRes.status, errBody);
+      if (groqRes.status === 429) {
+        return res.status(429).json({ error: "API quota reached. Please wait a moment and try again." });
+      }
+      return res.status(500).json({ error: "Question generation failed. Please try again." });
+    }
+
+    const groqData = await groqRes.json();
+    const responseText = (groqData.choices?.[0]?.message?.content || "").trim();
 
     // Parse and validate
     let questions = [];
@@ -77,7 +93,7 @@ Note: "correct" is always 0 in your output (the first option). The game will shu
       const cleaned = responseText.replace(/```json|```/g, "").trim();
       questions = JSON.parse(cleaned);
     } catch (e) {
-      console.error("JSON parse failed:", e);
+      console.error("JSON parse failed:", e, "\nRaw response:", responseText);
       return res.status(500).json({ error: "Failed to generate valid questions. Please try again." });
     }
 
@@ -116,9 +132,6 @@ Note: "correct" is always 0 in your output (the first option). The game will shu
 
   } catch (err) {
     console.error("Generate error:", err);
-    if (err.message && err.message.includes("429")) {
-      return res.status(429).json({ error: "API quota reached. Please wait a moment and try again." });
-    }
     return res.status(500).json({ error: "Question generation failed. Please try again." });
   }
 }
