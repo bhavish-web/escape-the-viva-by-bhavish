@@ -1,13 +1,12 @@
 // api/upload.js
-// Handles PDF + Image upload, extracts syllabus content, detects topics using Gemini Vision
-
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+// Handles PDF + Image upload, extracts syllabus content, detects topics using Groq
 
 export const config = {
   api: { bodyParser: false, sizeLimit: "10mb" }
 };
+
+const GROQ_TEXT_MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
+const GROQ_VISION_MODEL = process.env.GROQ_VISION_MODEL || "meta-llama/llama-4-scout-17b-16e-instruct";
 
 // ── Helpers ──────────────────────────────────────────────────
 
@@ -33,7 +32,6 @@ function extractFileFromMultipart(buffer, boundary) {
   for (const part of parts) {
     if (!part.includes("filename=")) continue;
 
-    // Grab Content-Type of the part
     const ctMatch = part.match(/Content-Type:\s*([^\r\n]+)/i);
     const partMime = ctMatch ? ctMatch[1].trim() : "";
 
@@ -43,7 +41,6 @@ function extractFileFromMultipart(buffer, boundary) {
     const fileContent = part.slice(headerEnd + 4, part.lastIndexOf(CRLF));
     const fileBuffer = Buffer.from(fileContent, "binary");
 
-    // Detect filename
     const fnMatch = part.match(/filename="([^"]+)"/i);
     const filename = fnMatch ? fnMatch[1].toLowerCase() : "";
 
@@ -57,7 +54,6 @@ function getMimeType(filename, declaredMime) {
   if (filename.endsWith(".jpg") || filename.endsWith(".jpeg")) return "image/jpeg";
   if (filename.endsWith(".png")) return "image/png";
   if (filename.endsWith(".webp")) return "image/webp";
-  // Fall back to declared MIME
   return declaredMime || "application/octet-stream";
 }
 
@@ -81,20 +77,78 @@ async function extractTextFromPDF(buffer) {
   }
 }
 
-// ── Use Gemini Vision to read an image buffer ─────────────────
+// ── Groq chat completion (text-only) ──────────────────────────
+
+async function groqTextCompletion(prompt) {
+  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${process.env.GROQ_API_KEY}`
+    },
+    body: JSON.stringify({
+      model: GROQ_TEXT_MODEL,
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.3,
+      max_tokens: 4000
+    })
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`Groq text API error ${res.status}: ${errText}`);
+  }
+
+  const data = await res.json();
+  return (data.choices?.[0]?.message?.content || "").trim();
+}
+
+// ── Groq vision completion (image input) ──────────────────────
+
+async function groqVisionCompletion(imageBuffer, mimeType, prompt) {
+  const base64 = imageBuffer.toString("base64");
+  const dataUrl = `data:${mimeType};base64,${base64}`;
+
+  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${process.env.GROQ_API_KEY}`
+    },
+    body: JSON.stringify({
+      model: GROQ_VISION_MODEL,
+      messages: [
+        {
+          role: "user",
+          content: [
+            { type: "text", text: prompt },
+            { type: "image_url", image_url: { url: dataUrl } }
+          ]
+        }
+      ],
+      temperature: 0.3,
+      max_tokens: 4000
+    })
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`Groq vision API error ${res.status}: ${errText}`);
+  }
+
+  const data = await res.json();
+  return (data.choices?.[0]?.message?.content || "").trim();
+}
+
+// ── Use Groq Vision to read an image buffer ────────────────────
 
 async function extractSyllabusViaVision(imageBuffer, mimeType) {
-  const modelName = process.env.GEMINI_MODEL || "gemini-2.5-flash";
-  const model = genAI.getGenerativeModel({ model: modelName });
-
-  const base64 = imageBuffer.toString("base64");
-
   const prompt = `You are reading a university engineering syllabus document.
-This may be a scanned PDF page, a photo, or a screenshot.
+This may be a scanned page, a photo, or a screenshot.
 
 Extract ALL syllabus content you can see. Focus on:
 - Subject / Course names
-- Unit numbers and unit titles  
+- Unit numbers and unit titles
 - Topic names and subtopic names
 - Chapter headings
 
@@ -111,20 +165,12 @@ Rules:
 - rawText should contain as much text from the image as possible
 - if you cannot read the document clearly, still return valid JSON with what you can see`;
 
-  const result = await model.generateContent([
-    { inlineData: { mimeType, data: base64 } },
-    prompt
-  ]);
-
-  return result.response.text().trim();
+  return await groqVisionCompletion(imageBuffer, mimeType, prompt);
 }
 
-// ── Use Gemini text to extract topics from text ───────────────
+// ── Use Groq text to extract topics from text ──────────────────
 
 async function extractTopicsFromText(syllabusText) {
-  const modelName = process.env.GEMINI_MODEL || "gemini-2.5-flash";
-  const model = genAI.getGenerativeModel({ model: modelName });
-
   const prompt = `You are analyzing a student's engineering syllabus.
 Extract the main subjects or topics from this syllabus text.
 Return ONLY a JSON array of topic strings. No explanation, no markdown, just raw JSON.
@@ -136,11 +182,10 @@ ${syllabusText.slice(0, 7000)}
 Example output:
 ["Operating Systems", "Database Management", "Computer Networks", "Data Structures", "OOP Concepts"]`;
 
-  const result = await model.generateContent(prompt);
-  return result.response.text().trim();
+  return await groqTextCompletion(prompt);
 }
 
-// ── Parse topics from any Gemini response ────────────────────
+// ── Parse topics from any Groq response ────────────────────────
 
 function parseTopics(responseText) {
   try {
@@ -153,7 +198,6 @@ function parseTopics(responseText) {
       return parsed.topics.filter(t => typeof t === "string" && t.length > 0).slice(0, 8);
     }
   } catch (e) {
-    // fallback line-by-line
     return responseText
       .split("\n")
       .map(l => l.replace(/[^a-zA-Z0-9 ]/g, "").trim())
@@ -170,8 +214,8 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  if (!process.env.GEMINI_API_KEY) {
-    return res.status(500).json({ error: "Gemini API key not configured on server." });
+  if (!process.env.GROQ_API_KEY) {
+    return res.status(500).json({ error: "Groq API key not configured on server." });
   }
 
   try {
@@ -187,7 +231,6 @@ export default async function handler(req, res) {
 
     const body = await readBody(req);
 
-    // 10MB max
     if (body.length > 10 * 1024 * 1024) {
       return res.status(400).json({ error: "File too large. Maximum size is 10MB." });
     }
@@ -210,7 +253,6 @@ export default async function handler(req, res) {
         const cleaned = visionResponse.replace(/```json|```/g, "").trim();
         parsed = JSON.parse(cleaned);
       } catch (e) {
-        // Vision response wasn't clean JSON — try to extract topics anyway
         topics = parseTopics(visionResponse);
         syllabusText = visionResponse;
       }
@@ -233,12 +275,11 @@ export default async function handler(req, res) {
 
     // ── BRANCH 2: PDF ──────────────────────────────────────────
     if (isPDF(mime)) {
-      // Try text extraction first
       const extractedText = await extractTextFromPDF(file.buffer);
       const hasText = extractedText && extractedText.trim().length > 80;
 
       if (hasText) {
-        // Text PDF — use text-based topic detection
+        // Text PDF — use text-based topic detection via Groq
         syllabusText = extractedText.slice(0, 8000);
         const topicsResponse = await extractTopicsFromText(syllabusText);
         topics = parseTopics(topicsResponse);
@@ -252,54 +293,14 @@ export default async function handler(req, res) {
         return res.status(200).json({ topics, syllabusText: syllabusText.slice(0, 6000) });
 
       } else {
-        // Scanned PDF — convert first page to image and use Vision
-        // We use the raw PDF bytes directly with Gemini's PDF support
-        const modelName = process.env.GEMINI_MODEL || "gemini-2.5-flash";
-        const model = genAI.getGenerativeModel({ model: modelName });
-
-        const base64PDF = file.buffer.toString("base64");
-
-        const prompt = `You are reading a scanned engineering syllabus PDF.
-Extract ALL syllabus content you can see including subjects, units, topics, subtopics.
-
-Return ONLY a JSON object in this exact format, no markdown, no extra text:
-{
-  "topics": ["Topic 1", "Topic 2", "Topic 3", "Topic 4", "Topic 5"],
-  "rawText": "all text you could read as a single string"
-}
-
-Rules:
-- topics must be 3 to 10 items, each 2-5 words, meaningful for viva exam preparation
-- rawText should contain all readable text from the document`;
-
-        const result = await model.generateContent([
-          { inlineData: { mimeType: "application/pdf", data: base64PDF } },
-          prompt
-        ]);
-
-        const visionResponse = result.response.text().trim();
-        let parsed = null;
-
-        try {
-          const cleaned = visionResponse.replace(/```json|```/g, "").trim();
-          parsed = JSON.parse(cleaned);
-        } catch (e) {
-          topics = parseTopics(visionResponse);
-          syllabusText = visionResponse;
-        }
-
-        if (parsed) {
-          topics = (parsed.topics || []).filter(t => typeof t === "string" && t.length > 0).slice(0, 8);
-          syllabusText = parsed.rawText || visionResponse;
-        }
-
-        if (topics.length === 0) {
-          return res.status(400).json({
-            error: "We couldn't extract enough readable syllabus content from this PDF. Please upload a clearer scan or a text-based PDF."
-          });
-        }
-
-        return res.status(200).json({ topics, syllabusText: syllabusText.slice(0, 6000) });
+        // Scanned PDF with no extractable text.
+        // Groq's vision model reads images, not raw PDF bytes, so we can't send
+        // the PDF directly the way Gemini could. Ask the user to upload it as
+        // an image instead (screenshot or photo of the page) rather than
+        // silently failing.
+        return res.status(400).json({
+          error: "This looks like a scanned PDF with no selectable text. Please upload a screenshot or photo (JPG/PNG) of the syllabus page instead — our current setup can read images directly but not scanned PDFs."
+        });
       }
     }
 
@@ -313,12 +314,9 @@ Rules:
     if (err.message && err.message.includes("429")) {
       return res.status(429).json({ error: "Too many requests. Please wait a moment and try again." });
     }
-    if (err.message && err.message.includes("SAFETY")) {
-      return res.status(400).json({ error: "The document could not be processed. Please try a different file." });
-    }
     return res.status(500).json({
-  error: err.message,
-  stack: err.stack
-});
+      error: err.message,
+      stack: err.stack
+    });
   }
 }
