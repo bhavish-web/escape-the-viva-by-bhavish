@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Escape The Viva</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
+<link rel="stylesheet" href="css/ai-setup.css">
+<link rel="stylesheet" href="css/features.css">
+</head>
+<body>
+
+<div id="game-container">
+  <div class="vignette"></div>
+  <div class="screen-flash" id="screen-flash"></div>
+
+  <!-- Screen Crack Effect (stress >= 90%) -->
+  <div class="screen-crack-overlay" id="screen-crack-overlay">
+    <svg viewBox="0 0 920 600" preserveAspectRatio="none">
+      <g>
+        <path class="crack-line stage-1" d="M460 0 L430 90 L480 160 L440 260 L470 340" />
+        <path class="crack-line stage-1" d="M440 260 L360 300 L300 260" />
+        <path class="crack-line stage-1" d="M470 340 L540 380 L600 350" />
+        <path class="crack-line stage-2" d="M480 160 L560 190 L620 150" />
+        <path class="crack-line stage-2" d="M430 90 L370 60 L320 90" />
+        <path class="crack-line stage-2" d="M300 260 L230 240 L180 280" />
+        <path class="crack-line stage-2" d="M600 350 L660 400 L700 380" />
+        <path class="crack-line stage-3" d="M320 90 L260 100 L220 70" />
+        <path class="crack-line stage-3" d="M620 150 L680 130 L720 160" />
+        <path class="crack-line stage-3" d="M180 280 L120 300 L90 340" />
+        <path class="crack-line stage-3" d="M700 380 L760 420 L800 400" />
+        <path class="crack-line stage-3" d="M540 380 L520 460 L560 520" />
+      </g>
+    </svg>
+  </div>
+
+  <!-- Professor Rage Mode overlay -->
+  <div class="rage-overlay" id="rage-overlay"></div>
+
+  <!-- Level up popup -->
+  <div class="levelup-popup" id="levelup-popup">
+    <div class="levelup-title">🎉 LEVEL UP!</div>
+    <div class="levelup-name" id="levelup-name">Topper</div>
+  </div>
+
+  <!-- Share preview overlay -->
+  <div class="share-preview-overlay" id="share-preview-overlay">
+    <img id="share-preview-img" alt="Result card" />
+    <div class="share-preview-btns">
+      <button class="share-download-btn" onclick="downloadShareImage()">⬇ Download</button>
+      <button class="share-close-btn" onclick="closeSharePreview()">✕ Close</button>
+    </div>
+  </div>
+  <!-- ===== AI SETUP SCREEN ===== -->
+<div class="screen" id="ai-setup-screen">
+  <div class="ai-setup-content">
+    <button class="ai-back-btn" onclick="backToStart()">← Back</button>
+    <div class="ai-setup-title">🎓 Create Your Viva</div>
+    <div class="ai-setup-sub">Upload your syllabus and get personalized questions</div>
+
+    <!-- Step 1: Upload -->
+    <div class="ai-step">
+      <div class="ai-step-label">Step 1 — Upload Your Syllabus</div>
+      <label class="ai-upload-area" id="ai-upload-area" for="ai-upload-input">
+  <div class="ai-upload-icon-wrap">
+    <span id="ai-upload-icon">📎</span>
+    <span id="ai-upload-label">Upload Syllabus</span>
+  </div>
+  <div class="ai-format-badges">
+    <span class="ai-format-badge">📄 PDF</span>
+    <span class="ai-format-badge">🖼 JPG</span>
+    <span class="ai-format-badge">📷 PNG</span>
+    <span class="ai-format-badge">🌐 WEBP</span>
+  </div>
+  <span id="ai-upload-hint">PDF · JPG · JPEG · PNG · WEBP · Max 10MB</span>
+</label>
+<div class="ai-upload-loading" id="ai-upload-loading">
+  <div class="ai-upload-spinner"></div>
+  <span id="ai-upload-loading-text">Uploading...</span>
+</div>
+      <input type="file" id="ai-upload-input"
+  accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp"
+  style="display:none" onchange="handleSyllabusUpload(this)"/>
+    </div>
+
+    <!-- Step 2: Topics -->
+    <div class="ai-step" id="ai-step2" style="display:none">
+      <div class="ai-step-label">Step 2 — Choose Topic</div>
+      <div class="ai-topics-grid" id="ai-topics"></div>
+    </div>
+
+    <!-- Step 3: Difficulty -->
+    <div class="ai-step" id="ai-step3" style="display:none">
+      <div class="ai-step-label">Step 3 — Choose Difficulty</div>
+      <div class="ai-diff-row">
+        <button class="ai-diff-btn active" onclick="selectAIDifficulty('easy', this)">😅 Easy</button>
+        <button class="ai-diff-btn" onclick="selectAIDifficulty('medium', this)">😤 Medium</button>
+        <button class="ai-diff-btn" onclick="selectAIDifficulty('hard', this)">💀 Hard</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Generate -->
+    <div class="ai-step" id="ai-step4" style="display:none">
+      <button class="ai-generate-btn" id="ai-generate-btn" onclick="generateAndStart()">
+        ⚡ Generate My Viva
+      </button>
+    </div>
+
+    <!-- Loading -->
+    <div class="ai-loading" id="ai-loading" style="display:none">
+      <div class="ai-loading-spinner"></div>
+      <div id="ai-loading-text">Preparing your personalized viva...</div>
+    </div>
+
+    <!-- Error -->
+    <div class="ai-error" id="ai-error" style="display:none"></div>
+  </div>
+</div>
+
+  <!-- ===== START SCREEN ===== -->
+  <div class="screen active" id="start-screen">
+    <div class="bg-particles" id="bg-particles"></div>
+
+    <div class="start-content">
+      <div class="start-left">
+        <div class="start-badge">🎓 ENGINEERING SURVIVAL GAME</div>
+        <div class="start-title">
+          <div class="escape">ESCAPE</div>
+          <div class="the">THE</div>
+          <div class="viva">VIVA</div>
+        </div>
+        <div class="start-subtitle">"Survive the most dangerous thing in engineering... THE VIVA!"</div>
+        <div class="start-stats">
+          <div class="start-stat">
+            <div class="start-stat-num">200+</div>
+            <div class="start-stat-label">Questions</div>
+          </div>
+          <div class="start-stat">
+            <div class="start-stat-num">4</div>
+            <div class="start-stat-label">Endings</div>
+          </div>
+          <div class="start-stat">
+            <div class="start-stat-num">∞</div>
+            <div class="start-stat-label">Regrets</div>
+          </div>
+        </div>
+
+        <!-- Lifelines info -->
+        <div class="lifelines-info">
+          <span>🆘 Lifelines per game:</span>
+          <span class="ll-badge">50/50</span>
+          <span class="ll-badge">💡 Hint</span>
+        </div>
+
+        <!-- Difficulty -->
+        <div class="diff-selector">
+          <div class="diff-label">SELECT DIFFICULTY:</div>
+          <div class="diff-btns">
+            <button class="diff-btn active" data-diff="easy" onclick="setDifficulty('easy')">😅 Easy</button>
+            <button class="diff-btn" data-diff="medium" onclick="setDifficulty('medium')">😤 Medium</button>
+            <button class="diff-btn" data-diff="hard" onclick="setDifficulty('hard')">💀 Hard</button>
+          </div>
+        </div>
+
+        <button class="start-btn" onclick="startGame()">▶ ENTER THE VIVA ROOM</button>
+        <button class="ai-viva-btn" onclick="showAISetupScreen()">🤖 AI Viva from Syllabus</button>
+
+        <!-- High score -->
+        <div class="high-score-display" id="high-score-display"></div>
+
+        <!-- XP / Level -->
+        <div class="level-display">
+          <span class="level-badge" id="level-badge">Fresher</span>
+          <div class="xp-bar-track"><div class="xp-bar-fill" id="xp-bar-fill" style="width:0%"></div></div>
+          <span class="xp-text" id="xp-text">0 XP</span>
+        </div>
+        <div class="personal-best-display" id="personal-best-display"></div>
+      </div>
+
+      <div class="start-right">
+        <div class="start-student" id="start-student-svg"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== GAME SCREEN ===== -->
+  <div class="screen" id="game-screen">
+    <div class="stress-bg-overlay" id="stress-bg-overlay"></div>
+
+    <!-- Boss Question Cinematic -->
+    <div class="boss-cinematic" id="boss-cinematic">
+      <div class="boss-cinematic-text">⚠️ FINAL QUESTION ⚠️</div>
+      <div class="boss-cinematic-sub">Everything comes down to this...</div>
+    </div>
+
+    <!-- Top timer bar -->
+    <div class="timer-wrapper">
+      <div class="timer-bar" id="timer-bar"></div>
+    </div>
+
+    <!-- HUD -->
+    <div class="hud">
+      <div class="hud-stat">
+        <span class="hud-label stress-label">❤️ <span class="hud-label-text">STRESS</span></span>
+        <div class="bar-container">
+          <div class="bar-fill stress-bar" id="stress-bar" style="width:20%"></div>
+        </div>
+        <span class="bar-pct stress-pct" id="stress-pct">20%</span>
+      </div>
+
+      <div class="hud-center">
+        <div class="hud-q-num" id="q-counter">Q1/10</div>
+        <div class="streak-display" id="streak-display"></div>
+        <div class="hud-score" id="hud-score">0 pts</div>
+      </div>
+
+      <div class="hud-stat reverse">
+        <span class="bar-pct anger-pct" id="anger-pct">10%</span>
+        <div class="bar-container">
+          <div class="bar-fill anger-bar" id="anger-bar" style="width:10%"></div>
+        </div>
+        <span class="hud-label anger-label">😤 <span class="hud-label-text">ANGER</span></span>
+      </div>
+    </div>
+
+    <!-- Lifelines bar -->
+    <div class="lifelines-bar">
+      <button class="lifeline-btn" id="btn-5050" onclick="useFiftyFifty()" title="50/50 - Remove 2 wrong answers">
+        <span>50/50</span>
+      </button>
+      <div class="timer-display" id="timer-display">
+        <span id="timer-num">10</span>s
+      </div>
+      <button class="lifeline-btn" id="btn-hint" onclick="useHint()" title="Hint - Get a clue">
+        <span>💡 Hint</span>
+      </button>
+    </div>
+
+    <!-- Main game area -->
+    <div class="game-area" id="game-area-wrapper">
+      <!-- Professor side -->
+      <div class="prof-panel">
+        <div class="speech-bubble" id="speech-bubble">
+          <span id="speech-text">Hmm...</span>
+        </div>
+        <div class="prof-character-wrap" style="position:relative">
+          <div class="prof-svg-wrapper" id="prof-svg-wrapper" id="prof-character">
+          </div>
+          <div class="prof-angry-effects" id="prof-angry-fx">💢</div>
+          <div class="lightning-bolts" id="lightning-bolts">
+            <span class="bolt bolt-1">⚡</span>
+            <span class="bolt bolt-2">⚡</span>
+            <span class="bolt bolt-3">⚡</span>
+          </div>
+        </div>
+        <div class="prof-name-tag">Prof. Sir 🎓</div>
+      </div>
+
+      <!-- Questions side -->
+      <div class="questions-panel">
+        <div class="question-header">
+          <div class="topic-badge" id="topic-badge">TOPIC</div>
+          <div class="diff-badge" id="diff-badge">MEDIUM</div>
+        </div>
+        <div class="question-text" id="question-text">Loading...</div>
+        <div class="hint-box" id="hint-box" style="display:none"></div>
+        <div class="options-grid" id="options-grid">
+          <button class="option-btn opt-a" onclick="selectAnswer(0)">
+            <span class="option-letter">A</span>
+            <span class="opt-text">Option A</span>
+            <span class="opt-tick" style="display:none">✓</span>
+          </button>
+          <button class="option-btn opt-b" onclick="selectAnswer(1)">
+            <span class="option-letter">B</span>
+            <span class="opt-text">Option B</span>
+            <span class="opt-tick" style="display:none">✓</span>
+          </button>
+          <button class="option-btn opt-c" onclick="selectAnswer(2)">
+            <span class="option-letter">C</span>
+            <span class="opt-text">Option C</span>
+            <span class="opt-tick" style="display:none">✓</span>
+          </button>
+          <button class="option-btn opt-d" onclick="selectAnswer(3)">
+            <span class="option-letter">D</span>
+            <span class="opt-text">Option D</span>
+            <span class="opt-tick" style="display:none">✓</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Overlays -->
+      <div class="stress-change" id="stress-change"></div>
+      <div class="streak-popup" id="streak-popup"></div>
+      <div class="achievement-popup" id="achievement-popup"></div>
+    </div>
+  </div>
+
+  <!-- ===== END SCREEN ===== -->
+  <div class="screen" id="end-screen">
+    <div class="confetti-container" id="confetti-container"></div>
+    <div class="end-content">
+      <div class="end-title" id="end-title">YOU ESCAPED!</div>
+      <div class="end-grade" id="end-grade"></div>
+      <div class="end-characters" id="end-characters"></div>
+      <div class="end-speech" id="end-speech" style="display:none"></div>
+
+      <div class="stats-panel">
+        <div class="stats-title">📊 FINAL STATS</div>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-val" id="stat-stress">-</div>
+            <div class="stat-lbl">Stress</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-val" id="stat-anger">-</div>
+            <div class="stat-lbl">Anger</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-val" id="stat-questions">-</div>
+            <div class="stat-lbl">Correct</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-val" id="stat-streak">-</div>
+            <div class="stat-lbl">Best Streak</div>
+          </div>
+        </div>
+        <div class="stat-score-row">
+          <span>Final Score</span>
+          <span id="stat-score">-</span>
+        </div>
+        <div class="stat-score-row highlight" id="high-score-row" style="display:none">
+          <span>🏆 NEW HIGH SCORE!</span>
+          <span id="stat-highscore">-</span>
+        </div>
+      </div>
+
+      <!-- Achievements -->
+      <div class="achievements-panel" id="achievements-panel" style="display:none">
+        <div class="achievements-title">🏅 ACHIEVEMENTS UNLOCKED</div>
+        <div class="achievements-list" id="achievements-list"></div>
+      </div>
+
+      <div class="end-btns">
+        <button class="end-btn btn-play-again" onclick="restartGame()">🔄 PLAY AGAIN</button>
+        <button class="end-btn btn-share" onclick="shareResult()">📤 SHARE TEXT</button>
+        <button class="end-btn btn-share" onclick="shareResultAsImage()">🖼️ SHARE IMAGE</button>
+      </div>
+
+      <!-- Credits inside end screen so always visible on mobile -->
+      <div class="credits-inline">
+        Designed &amp; Developed by
+        <a href="https://bhavish-portfolio-2006.vercel.app/" target="_blank" rel="noopener" class="credits-link">Bhavish</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CREDITS (desktop) ===== -->
+  <div class="credits">
+    Designed &amp; Developed by
+    <a href="https://bhavish-portfolio-2006.vercel.app/" target="_blank" rel="noopener" class="credits-link">Bhavish</a>
+  </div>
+
+</div>
+
+<!-- Scripts - ORDER MATTERS -->
+<script src="js/audio.js"></script>
+<script src="js/questions.js"></script>
+<script src="js/characters.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/game.js"></script>
+<script src="js/features.js"></script>
+<script src="js/ai-setup.js"></script>
+</body>
+</html>
