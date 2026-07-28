@@ -4,6 +4,16 @@
    cinematic, XP/level bar, dynamic background, share card
    ============================================================ */
 
+/* ========== SAFETY NET ==========
+   These overlays must only ever be visible during actual gameplay.
+   Belt-and-braces alongside the JS reset calls. */
+#game-container:not(:has(#game-screen.active)) .screen-crack-overlay,
+#game-container:not(:has(#game-screen.active)) .rage-overlay,
+#game-container:not(:has(#game-screen.active)) .lightning-bolts {
+  display: none !important;
+  opacity: 0 !important;
+}
+
 /* ========== DYNAMIC STRESS BACKGROUND ========== */
 .stress-bg-overlay {
   position: absolute;
@@ -210,6 +220,12 @@
   animation: bossSubFade 1.4s ease-in-out infinite;
 }
 @keyframes bossSubFade { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+/* ========== FIX: keep new start-screen elements clear of the
+   fixed credits bar at the bottom of the container ========== */
+.start-content { padding-bottom: clamp(38px, 7vw, 50px) !important; }
+.level-display { margin-top: 10px; }
+.personal-best-display { margin-bottom: 4px; }
 
 /* ========== XP / LEVEL SYSTEM (start screen) ========== */
 .level-display {
