@@ -574,17 +574,29 @@ function scheduleIdleSleepCheck(totalTime) {
     };
   }
 
+/* ================================================================
+   Reset helper — clears crack/rage/lightning so they never persist
+   onto the end screen or start screen after a game finishes.
+   ================================================================ */
+function resetVisualEffects() {
+  const overlay = document.getElementById('screen-crack-overlay');
+  if (overlay) overlay.classList.remove('crack-show', 'crack-stage-1', 'crack-stage-2', 'crack-stage-3', 'crack-critical');
+  const rage = document.getElementById('rage-overlay');
+  if (rage) rage.classList.remove('rage-on');
+  const profWrapper = document.getElementById('prof-svg-wrapper');
+  if (profWrapper) profWrapper.classList.remove('rage-shake');
+  const bolts = document.getElementById('lightning-bolts');
+  if (bolts) bolts.classList.remove('show');
+  const bgOverlay = document.getElementById('stress-bg-overlay');
+  if (bgOverlay) bgOverlay.style.background = '';
+}
+
   /* -- Hook startGame: reset visual effects + refresh personal best -- */
   if (typeof startGame === 'function') {
     const _origStartGame = startGame;
     window.startGame = function () {
       _origStartGame();
-      const overlay = document.getElementById('screen-crack-overlay');
-      if (overlay) overlay.classList.remove('crack-show', 'crack-stage-1', 'crack-stage-2', 'crack-stage-3', 'crack-critical');
-      const rage = document.getElementById('rage-overlay');
-      if (rage) rage.classList.remove('rage-on');
-      const bolts = document.getElementById('lightning-bolts');
-      if (bolts) bolts.classList.remove('show');
+      resetVisualEffects();
     };
   }
 
@@ -602,6 +614,7 @@ function scheduleIdleSleepCheck(totalTime) {
     const _origShowEndScreen = showEndScreen;
     window.showEndScreen = function () {
       _origShowEndScreen();
+      resetVisualEffects();
       const s = gameState;
       const isNewPB = maybeUpdatePersonalBest(s.difficulty, s.score);
       const xpResult = awardXP(s);
@@ -643,6 +656,7 @@ function scheduleIdleSleepCheck(totalTime) {
     const _origRestartGame = restartGame;
     window.restartGame = function () {
       _origRestartGame();
+      resetVisualEffects();
       renderStartProgression();
       const xpRow = document.getElementById('xp-earned-row');
       if (xpRow) xpRow.remove();
