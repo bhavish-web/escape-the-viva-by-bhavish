@@ -1,0 +1,332 @@
+/* ============================================================
+   ESCAPE THE VIVA - NEW FEATURES STYLESHEET
+   Screen crack, rage mode, chalk throw, combo popup, boss
+   cinematic, XP/level bar, dynamic background, share card
+   ============================================================ */
+
+/* ========== DYNAMIC STRESS BACKGROUND ========== */
+.stress-bg-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  transition: background 1.2s ease;
+  background: radial-gradient(ellipse at center, rgba(45,18,0,0.55), rgba(20,8,0,0.15));
+}
+
+/* ========== SCREEN CRACK EFFECT (stress >= 90%) ========== */
+.screen-crack-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 550;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.screen-crack-overlay.crack-show { opacity: 1; }
+.screen-crack-overlay svg { width: 100%; height: 100%; }
+.crack-line {
+  stroke: rgba(255,255,255,0.85);
+  stroke-width: 1.4;
+  fill: none;
+  filter: drop-shadow(0 0 2px rgba(0,0,0,0.9));
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.screen-crack-overlay.crack-stage-1 .crack-line.stage-1,
+.screen-crack-overlay.crack-stage-2 .crack-line.stage-1,
+.screen-crack-overlay.crack-stage-2 .crack-line.stage-2,
+.screen-crack-overlay.crack-stage-3 .crack-line.stage-1,
+.screen-crack-overlay.crack-stage-3 .crack-line.stage-2,
+.screen-crack-overlay.crack-stage-3 .crack-line.stage-3 { opacity: 1; }
+.screen-crack-overlay.crack-critical { animation: crackShudder 0.25s infinite; }
+@keyframes crackShudder {
+  0%,100% { transform: translate(0,0); }
+  25% { transform: translate(-1px,1px); }
+  75% { transform: translate(1px,-1px); }
+}
+
+/* ========== PROFESSOR RAGE MODE (anger >= 80%) ========== */
+.rage-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 480;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, rgba(200,0,0,0.0) 40%, rgba(180,0,0,0.35) 100%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.rage-overlay.rage-on {
+  opacity: 1;
+  animation: ragePulse 0.9s ease-in-out infinite;
+}
+@keyframes ragePulse {
+  0%,100% { background: radial-gradient(ellipse at center, rgba(200,0,0,0.0) 40%, rgba(180,0,0,0.28) 100%); }
+  50% { background: radial-gradient(ellipse at center, rgba(200,0,0,0.05) 30%, rgba(255,0,0,0.5) 100%); }
+}
+
+.prof-svg-wrapper.rage-shake { animation: profRageShake 0.1s ease-in-out infinite !important; }
+@keyframes profRageShake {
+  0%,100% { transform: rotate(0) scale(1) translate(0,0); }
+  20% { transform: rotate(-6deg) scale(1.04) translate(-3px,-2px); }
+  40% { transform: rotate(5deg) scale(1.04) translate(3px,1px); }
+  60% { transform: rotate(-5deg) scale(1.05) translate(-2px,-3px); }
+  80% { transform: rotate(6deg) scale(1.04) translate(2px,2px); }
+}
+
+.lightning-bolts {
+  position: absolute;
+  inset: -20px;
+  pointer-events: none;
+  display: none;
+  z-index: 5;
+}
+.lightning-bolts.show { display: block; }
+.bolt {
+  position: absolute;
+  font-size: clamp(20px,4vw,32px);
+  filter: drop-shadow(0 0 6px #fffb00) drop-shadow(0 0 12px #ff9900);
+  animation: boltFlicker 0.35s steps(2) infinite;
+}
+.bolt-1 { top: -14px; left: -18px; animation-delay: 0s; }
+.bolt-2 { top: -10px; right: -20px; animation-delay: 0.12s; transform: scaleX(-1); }
+.bolt-3 { bottom: 10px; left: -24px; animation-delay: 0.2s; }
+@keyframes boltFlicker {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.15; }
+}
+
+/* ========== CHALK THROW ANIMATION ========== */
+.chalk-piece {
+  position: absolute;
+  width: 22px;
+  height: 8px;
+  background: linear-gradient(180deg,#fffef2,#e8e3c8);
+  border-radius: 3px;
+  box-shadow: 0 0 4px rgba(255,255,255,0.6);
+  z-index: 300;
+  pointer-events: none;
+  animation: chalkFly 0.55s cubic-bezier(0.3,0,0.7,1) forwards;
+}
+@keyframes chalkFly {
+  0% { transform: translate(0,0) rotate(0deg); opacity: 1; }
+  85% { transform: translate(var(--chalk-tx), var(--chalk-ty)) rotate(500deg); opacity: 1; }
+  100% { transform: translate(var(--chalk-tx), var(--chalk-ty)) rotate(520deg); opacity: 0; }
+}
+.chalk-shard {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  background: #f5f2e0;
+  border-radius: 1px;
+  z-index: 300;
+  pointer-events: none;
+  animation: chalkShard 0.5s ease-out forwards;
+}
+@keyframes chalkShard {
+  to {
+    transform: translate(var(--sx), var(--sy)) rotate(360deg);
+    opacity: 0;
+  }
+}
+.chalk-dust {
+  position: absolute;
+  z-index: 299;
+  pointer-events: none;
+  width: 50px; height: 50px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 70%);
+  animation: chalkDustFade 0.5s ease-out forwards;
+}
+@keyframes chalkDustFade {
+  from { opacity: 0.9; transform: scale(0.4); }
+  to { opacity: 0; transform: scale(1.6); }
+}
+
+/* ========== COMBO MULTIPLIER POPUP ========== */
+.combo-popup {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  font-size: clamp(22px,5vw,40px);
+  font-weight: 900;
+  font-style: italic;
+  color: #ffd700;
+  text-shadow: 0 0 10px rgba(255,180,0,0.9), 2px 2px 0 rgba(0,0,0,0.6);
+  z-index: 350;
+  pointer-events: none;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  transform: translate(-50%,0) scale(0.4);
+  opacity: 0;
+}
+.combo-popup.fly {
+  animation: comboFly 1s cubic-bezier(0.2,0.8,0.3,1) forwards;
+}
+@keyframes comboFly {
+  0% { transform: translate(-50%,20px) scale(0.3) rotate(-8deg); opacity: 0; }
+  15% { transform: translate(-50%,0) scale(1.25) rotate(4deg); opacity: 1; }
+  30% { transform: translate(-50%,-10px) scale(1) rotate(-2deg); opacity: 1; }
+  80% { transform: translate(-50%,-90px) scale(1) rotate(0deg); opacity: 1; }
+  100% { transform: translate(-50%,-130px) scale(0.9) rotate(0deg); opacity: 0; }
+}
+
+/* ========== BOSS QUESTION CINEMATIC ========== */
+.boss-cinematic {
+  position: absolute;
+  inset: 0;
+  z-index: 700;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.92);
+  flex-direction: column;
+  gap: 14px;
+  text-align: center;
+}
+.boss-cinematic.show { display: flex; }
+.boss-cinematic-text {
+  font-size: clamp(24px,6vw,46px);
+  font-weight: 900;
+  letter-spacing: 3px;
+  color: #ff2d2d;
+  text-shadow: 0 0 20px rgba(255,0,0,0.8), 0 0 60px rgba(255,0,0,0.5);
+  animation: bossTextPulse 0.7s ease-in-out infinite alternate, bossTextIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes bossTextIn {
+  from { transform: scale(2.5); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+@keyframes bossTextPulse {
+  from { text-shadow: 0 0 20px rgba(255,0,0,0.8), 0 0 60px rgba(255,0,0,0.5); }
+  to { text-shadow: 0 0 34px rgba(255,60,0,1), 0 0 90px rgba(255,0,0,0.8); }
+}
+.boss-cinematic-sub {
+  color: #f0b429;
+  font-size: clamp(11px,2.5vw,15px);
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  animation: bossSubFade 1.4s ease-in-out infinite;
+}
+@keyframes bossSubFade { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+/* ========== XP / LEVEL SYSTEM (start screen) ========== */
+.level-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  width: 100%;
+}
+.level-badge {
+  background: linear-gradient(135deg, #b87200, #f0b429);
+  color: #1a0f00;
+  font-weight: 900;
+  font-size: clamp(9px,1.8vw,11px);
+  padding: 4px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+}
+.xp-bar-track {
+  flex: 1;
+  height: 8px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.xp-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #2980b9, #6dd5fa);
+  border-radius: 6px;
+  transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
+}
+.xp-text {
+  font-size: clamp(8px,1.5vw,10px);
+  color: rgba(255,255,255,0.55);
+  white-space: nowrap;
+}
+
+.personal-best-display {
+  font-size: clamp(9px,1.8vw,11px);
+  color: rgba(255,255,255,0.5);
+  margin-top: 4px;
+  font-weight: 600;
+}
+.personal-best-display b { color: #f0b429; }
+
+/* Level up popup on end screen */
+.levelup-popup {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%) scale(0.5);
+  z-index: 900;
+  background: linear-gradient(145deg, #1a0f00, #2d1600);
+  border: 2.5px solid #f0b429;
+  border-radius: 16px;
+  padding: 22px 30px;
+  text-align: center;
+  box-shadow: 0 0 60px rgba(240,180,41,0.6);
+  opacity: 0;
+  pointer-events: none;
+}
+.levelup-popup.show {
+  animation: levelUpIn 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+@keyframes levelUpIn {
+  0% { transform: translate(-50%,-50%) scale(0.3); opacity: 0; }
+  60% { transform: translate(-50%,-50%) scale(1.1); opacity: 1; }
+  100% { transform: translate(-50%,-50%) scale(1); opacity: 1; }
+}
+.levelup-title {
+  color: #ffd700;
+  font-size: clamp(14px,3vw,18px);
+  font-weight: 900;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+.levelup-name {
+  color: #fff;
+  font-size: clamp(18px,4vw,26px);
+  font-weight: 900;
+}
+
+/* ========== SHARE CARD (hidden canvas host) ========== */
+#share-canvas { display: none; }
+.share-preview-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 950;
+  background: rgba(0,0,0,0.85);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+}
+.share-preview-overlay.show { display: flex; }
+.share-preview-overlay img {
+  max-width: min(320px,85vw);
+  border-radius: 14px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+}
+.share-preview-btns { display: flex; gap: 10px; }
+.share-preview-btns button {
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 800;
+  cursor: pointer;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+}
+.share-download-btn { background: linear-gradient(135deg,#b87200,#f0b429); color: #000; }
+.share-close-btn { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2) !important; }
+
+/* ========== Screen shake (wrong answer, subtle) reuse existing .screen-shake ========== */
+
+/* ========== Answer glow on hover ========== */
+.option-btn.opt-glow { box-shadow: 0 0 0 2px #f0b429, 0 0 18px rgba(240,180,41,0.5) !important; }
