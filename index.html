@@ -8,6 +8,7 @@
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
 <link rel="stylesheet" href="css/ai-setup.css">
 <link rel="stylesheet" href="css/features.css">
+<link rel="stylesheet" href="css/enhance.css">
 </head>
 <body>
 
@@ -118,12 +119,30 @@
   </div>
 </div>
 
-  <!-- ===== START SCREEN ===== -->
-  <div class="screen active" id="start-screen">
+  <!-- ===== SUBJECT SELECT (HOME) ===== -->
+  <div class="screen active" id="subject-screen">
+    <div class="bg-particles" id="bg-particles-2"></div>
+    <div class="subject-wrap">
+      <div class="subject-hero">
+        <div class="start-badge">🎓 CHOOSE YOUR BATTLE</div>
+        <h1 class="subject-heading">ESCAPE <span>THE</span> VIVA</h1>
+        <p class="subject-tagline">Pick a subject to enter its viva room — or read the notes first.</p>
+      </div>
+      <div class="subject-grid" id="subject-grid"></div>
+      <div class="subject-foot">
+        <button class="ai-viva-btn subject-ai-btn" onclick="showAISetupScreen()">🤖 AI Viva from Your Syllabus</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== START / LAUNCH SCREEN ===== -->
+  <div class="screen" id="start-screen">
     <div class="bg-particles" id="bg-particles"></div>
 
     <div class="start-content">
       <div class="start-left">
+        <button class="back-to-subjects" onclick="backToSubjects()">← Subjects</button>
+        <div class="chosen-subject-pill" id="chosen-subject-pill"></div>
         <div class="start-badge">🎓 ENGINEERING SURVIVAL GAME</div>
         <div class="start-title">
           <div class="escape">ESCAPE</div>
@@ -164,7 +183,10 @@
         </div>
 
         <button class="start-btn" onclick="startGame()">▶ ENTER THE VIVA ROOM</button>
-        <button class="ai-viva-btn" onclick="showAISetupScreen()">🤖 AI Viva from Syllabus</button>
+        <div class="launch-secondary">
+          <button class="ai-viva-btn launch-notes-btn" id="launch-notes-btn">📄 View Notes</button>
+          <button class="ai-viva-btn" onclick="showAISetupScreen()">🤖 AI Viva</button>
+        </div>
 
         <!-- High score -->
         <div class="high-score-display" id="high-score-display"></div>
@@ -287,6 +309,7 @@
             <span class="opt-tick" style="display:none">✓</span>
           </button>
         </div>
+        <button class="next-btn" id="next-btn" style="display:none" onclick="nextQuestion()">Next Question →</button>
       </div>
 
       <!-- Overlays -->
@@ -302,6 +325,7 @@
     <div class="end-content">
       <div class="end-title" id="end-title">YOU ESCAPED!</div>
       <div class="end-grade" id="end-grade"></div>
+      <div class="end-meta" id="end-meta"></div>
       <div class="end-characters" id="end-characters"></div>
       <div class="end-speech" id="end-speech" style="display:none"></div>
 
@@ -343,6 +367,8 @@
 
       <div class="end-btns">
         <button class="end-btn btn-play-again" onclick="restartGame()">🔄 PLAY AGAIN</button>
+        <button class="end-btn btn-change" onclick="changeSubject()">📚 CHANGE SUBJECT</button>
+        <button class="end-btn btn-notes" id="end-notes-btn">📄 VIEW NOTES</button>
         <button class="end-btn btn-share" onclick="shareResult()">📤 SHARE TEXT</button>
         <button class="end-btn btn-share" onclick="shareResultAsImage()">🖼️ SHARE IMAGE</button>
       </div>
@@ -351,6 +377,31 @@
       <div class="credits-inline">
         Designed &amp; Developed by
         <a href="https://bhavish-portfolio-2006.vercel.app/" target="_blank" rel="noopener" class="credits-link">Bhavish</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== NOTES / PDF VIEWER MODAL ===== -->
+  <div class="notes-modal" id="notes-modal">
+    <div class="notes-box" id="notes-box">
+      <div class="notes-topbar">
+        <div class="notes-title">📄 <span id="notes-subject-name">Notes</span></div>
+        <div class="notes-actions">
+          <button class="notes-act" id="notes-fs-btn" onclick="toggleNotesFullscreen()" title="Fullscreen">⛶</button>
+          <button class="notes-act" id="notes-open-btn" title="Open in new tab">↗</button>
+          <button class="notes-act" id="notes-download-btn" title="Download">⬇</button>
+          <button class="notes-act notes-close" onclick="closeNotes()" title="Close">✕</button>
+        </div>
+      </div>
+      <iframe class="notes-frame" id="notes-frame" title="Subject notes"></iframe>
+      <div class="notes-missing" id="notes-missing">
+        <div class="notes-missing-icon">📄</div>
+        <div class="notes-missing-title">Notes coming soon</div>
+        <div class="notes-missing-text">
+          Drop this subject's PDF at<br>
+          <code id="notes-missing-path">notes/subject.pdf</code><br>
+          and it'll open right here.
+        </div>
       </div>
     </div>
   </div>
@@ -366,10 +417,12 @@
 <!-- Scripts - ORDER MATTERS -->
 <script src="js/audio.js"></script>
 <script src="js/questions.js"></script>
+<script src="js/subjects.js"></script>
 <script src="js/characters.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/game.js"></script>
 <script src="js/features.js"></script>
 <script src="js/ai-setup.js"></script>
+<script src="js/enhancements.js"></script>
 </body>
 </html>
