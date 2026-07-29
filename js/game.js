@@ -10,7 +10,7 @@ let gameState = {
   totalQ: 10, streak: 0, bestStreak: 0,
   timeLeft: 10, difficulty: 'medium',
   lifelineUsed5050: false, lifelineUsedHint: false,
-  achievements: []
+  achievements: [], subject: null, advancing: false
 };
 
 let timerInterval = null;
@@ -118,13 +118,18 @@ function timeUp() {
   playWrongSound();
   flashScreen('rgba(255,0,0,0.28)');
 
-  setTimeout(() => advanceQuestion(), 2600);
+  revealAnswer();   // show correct answer + Skip/Next (enhancements.js)
 }
 
 /* ---------- Load Question ---------- */
 function loadQuestion() {
   const q = questions[gameState.currentQ];
   gameState.answered = false;
+  gameState.advancing = false;
+
+  // hide the reveal Next/Skip button for the fresh question
+  const _nb = document.getElementById('next-btn');
+  if (_nb) { _nb.style.display = 'none'; _nb.classList.remove('show'); }
 
   hideHintBox();
 
@@ -235,7 +240,7 @@ function selectAnswer(idx) {
   }
 
   updateHUD(gameState);
-  setTimeout(() => advanceQuestion(), 2900);
+  revealAnswer();   // show correct answer + Skip/Next (enhancements.js)
 }
 
 function advanceQuestion() {
@@ -301,15 +306,10 @@ function startGame() {
   playStartSound();
   playWhoosh();
 
-  // Filter by difficulty if hard - pick harder questions more
-  let pool = allQuestions;
-  if (gameState.difficulty === 'hard') {
-    pool = allQuestions.filter(q => q.difficulty === 'hard' || q.difficulty === 'medium');
-    if (pool.length < 10) pool = allQuestions;
-  } else if (gameState.difficulty === 'easy') {
-    pool = allQuestions.filter(q => q.difficulty === 'easy' || q.difficulty === 'medium');
-    if (pool.length < 10) pool = allQuestions;
-  }
+  // Pool by SELECTED SUBJECT + importance tier (easy=full, medium>=2, hard>=3)
+  const _subj = (typeof getSubject === 'function') ? getSubject(gameState.subject) : null;
+  const _topics = _subj ? _subj.topics : SUBJECTS.flatMap(s => s.topics);
+  let pool = getSubjectPool(_topics, gameState.difficulty);
 
   // Use AI-generated questions if available, otherwise use default bank
 if (window.AI_QUESTIONS && window.AI_QUESTIONS.length > 0) {
@@ -326,7 +326,7 @@ if (window.AI_QUESTIONS && window.AI_QUESTIONS.length > 0) {
     timeLeft: diffConfig[gameState.difficulty].time,
     difficulty: gameState.difficulty,
     lifelineUsed5050: false, lifelineUsedHint: false,
-    achievements: []
+    achievements: [], subject: gameState.subject, advancing: false
   };
 
   document.getElementById('start-screen').classList.remove('active');
