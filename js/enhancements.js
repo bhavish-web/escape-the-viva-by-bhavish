@@ -32,14 +32,44 @@ function selectSubject(id) {
   gameState.subject = id;
   if (typeof playClickSound === 'function') playClickSound();
 
-  // highlight the chosen chip
+  // update the dropdown button label to the chosen subject
+  const label = document.getElementById('subject-dropdown-label');
+  if (label) label.innerHTML = `${subj.icon} ${subj.name}`;
+
+  // highlight the chosen row in the list
   document.querySelectorAll('.hero-subject-chip').forEach(c =>
     c.classList.toggle('selected', c.dataset.id === id));
+
+  closeSubjectDropdown();
 
   // reveal + enable the Start Game button
   const startBtn = document.getElementById('start-game-btn');
   if (startBtn) { startBtn.style.display = 'block'; startBtn.disabled = false; }
 }
+
+function toggleSubjectDropdown() {
+  const wrap = document.getElementById('subject-select-inline');
+  const panel = document.getElementById('subject-dropdown-panel');
+  if (!wrap || !panel) return;
+  const open = wrap.classList.toggle('open');
+  panel.style.display = open ? 'block' : 'none';
+  if (typeof playClickSound === 'function') playClickSound();
+}
+
+function closeSubjectDropdown() {
+  const wrap = document.getElementById('subject-select-inline');
+  const panel = document.getElementById('subject-dropdown-panel');
+  if (wrap) wrap.classList.remove('open');
+  if (panel) panel.style.display = 'none';
+}
+
+// close the dropdown when clicking anywhere outside it
+document.addEventListener('click', e => {
+  const wrap = document.getElementById('subject-select-inline');
+  if (wrap && wrap.classList.contains('open') && !wrap.contains(e.target)) {
+    closeSubjectDropdown();
+  }
+});
 
 function backToSubjects() {
   if (typeof playClickSound === 'function') playClickSound();
