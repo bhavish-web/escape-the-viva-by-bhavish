@@ -9,7 +9,6 @@
 <link rel="stylesheet" href="css/ai-setup.css">
 <link rel="stylesheet" href="css/features.css">
 <link rel="stylesheet" href="css/enhance.css">
-<link rel="stylesheet" href="css/enhance.css">
 <link rel="stylesheet" href="css/phase4.css">
 </head>
 <body>
@@ -121,30 +120,12 @@
   </div>
 </div>
 
-  <!-- ===== SUBJECT SELECT (HOME) ===== -->
-  <div class="screen active" id="subject-screen">
-    <div class="bg-particles" id="bg-particles-2"></div>
-    <div class="subject-wrap">
-      <div class="subject-hero">
-        <div class="start-badge">🎓 CHOOSE YOUR BATTLE</div>
-        <h1 class="subject-heading">ESCAPE <span>THE</span> VIVA</h1>
-        <p class="subject-tagline">Pick a subject to enter its viva room — or read the notes first.</p>
-      </div>
-      <div class="subject-grid" id="subject-grid"></div>
-      <div class="subject-foot">
-        <button class="ai-viva-btn subject-ai-btn" onclick="showAISetupScreen()">🤖 AI Viva from Your Syllabus</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== START / LAUNCH SCREEN ===== -->
-  <div class="screen" id="start-screen">
+  <!-- ===== START / LAUNCH SCREEN (home) ===== -->
+  <div class="screen active" id="start-screen">
     <div class="bg-particles" id="bg-particles"></div>
 
     <div class="start-content">
       <div class="start-left">
-        <button class="back-to-subjects" onclick="backToSubjects()">← Subjects</button>
-        <div class="chosen-subject-pill" id="chosen-subject-pill"></div>
         <div class="start-badge">🎓 ENGINEERING SURVIVAL GAME</div>
         <div class="start-title">
           <div class="escape">ESCAPE</div>
@@ -184,9 +165,16 @@
           </div>
         </div>
 
-        <button class="start-btn" onclick="startGame()">▶ ENTER THE VIVA ROOM</button>
+        <!-- Subject selection (inline) -->
+        <div class="subject-select-inline">
+          <div class="diff-label">SELECT SUBJECT:</div>
+          <div class="hero-subject-grid" id="hero-subject-grid"></div>
+        </div>
+
+        <button class="start-btn" id="start-game-btn" onclick="startGame()" style="display:none">▶ START GAME</button>
+
         <div class="launch-secondary">
-          <button class="ai-viva-btn launch-notes-btn" id="launch-notes-btn">📄 View Notes</button>
+          <button class="ai-viva-btn launch-notes-btn" id="launch-notes-btn" onclick="openNotes()">📄 View Notes</button>
           <button class="ai-viva-btn" onclick="showAISetupScreen()">🤖 AI Viva</button>
         </div>
 
@@ -425,7 +413,6 @@
 <script src="js/game.js"></script>
 <script src="js/features.js"></script>
 <script src="js/ai-setup.js"></script>
-<script src="js/enhancements.js"></script>
 <script src="js/enhancements.js"></script>
 <script src="js/phase4.js"></script>
 </body>
