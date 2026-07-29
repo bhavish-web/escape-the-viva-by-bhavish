@@ -165,10 +165,16 @@
           </div>
         </div>
 
-        <!-- Subject selection (inline) -->
-        <div class="subject-select-inline">
+        <!-- Subject selection (dropdown) -->
+        <div class="subject-select-inline" id="subject-select-inline">
           <div class="diff-label">SELECT SUBJECT:</div>
-          <div class="hero-subject-grid" id="hero-subject-grid"></div>
+          <button type="button" class="subject-dropdown-btn" id="subject-dropdown-btn" onclick="toggleSubjectDropdown()">
+            <span id="subject-dropdown-label">📚 Select Subject</span>
+            <span class="subject-dropdown-caret">▾</span>
+          </button>
+          <div class="subject-dropdown-panel" id="subject-dropdown-panel" style="display:none">
+            <div class="hero-subject-grid" id="hero-subject-grid"></div>
+          </div>
         </div>
 
         <button class="start-btn" id="start-game-btn" onclick="startGame()" style="display:none">▶ START GAME</button>
