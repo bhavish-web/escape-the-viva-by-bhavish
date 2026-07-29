@@ -1,71 +1,72 @@
 /* ============================================================
-   ESCAPE THE VIVA - Phase 5 : Hero UI Refresh
+   ESCAPE THE VIVA - Phase 5 : Hero UI Refresh (v3)
    Loads LAST. Restyles the start/launch screen only.
+   No enclosing card (it overflowed); instead: tamed title,
+   tighter spacing that fits the viewport, a tidy stats strip,
+   a balanced student stage, and higher-contrast text.
    Scoped to #start-screen; no JS or markup changes.
    ============================================================ */
 
-/* ---------- 1. Background: warm spotlight stage ---------- */
+/* ---------- Background: subtle warm spotlight ---------- */
 #start-screen{
   background:
-    radial-gradient(900px 520px at 70% 44%, rgba(255,150,30,.10), transparent 60%),
-    radial-gradient(680px 460px at 18% 26%, rgba(230,48,48,.07), transparent 62%),
-    linear-gradient(160deg,#0a0400 0%,#170a03 55%,#0b0502 100%) !important;
+    radial-gradient(760px 460px at 68% 46%, rgba(255,150,30,.10), transparent 60%),
+    linear-gradient(160deg,#0b0501 0%,#180b04 55%,#0c0602 100%);
 }
 
-/* ---------- 2. Layout balance (desktop) ---------- */
+/* ---------- Desktop: center the pair, balanced margins ---------- */
 @media (min-width:650px){
   #start-screen .start-content{
-    gap:clamp(18px,3vw,40px);
-    padding:clamp(18px,3vw,40px);
-    max-width:1040px; margin:0 auto;
+    justify-content:center;
+    gap:clamp(30px,5vw,72px);
+    padding:clamp(20px,3vw,44px);
+    max-width:1000px; margin:0 auto;
   }
 }
 
-/* ---------- 3. Left column → elevated control panel ---------- */
+/* ---------- Left column: clean, constrained (NO card) ---------- */
 .start-left{
-  max-width:380px; width:100%;
-  padding:clamp(16px,3vw,22px);
-  gap:clamp(8px,1.2vw,12px) !important;
-  background:linear-gradient(160deg, rgba(34,18,8,.72), rgba(14,7,3,.8));
-  border:1px solid rgba(255,160,60,.16);
-  border-radius:20px;
-  box-shadow:0 20px 48px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.05);
-  backdrop-filter:blur(6px);
+  max-width:360px; width:100%;
+  gap:clamp(7px,1vw,11px) !important;
 }
-@media (min-width:650px){ .start-left{ max-width:380px; } }
 
-/* ---------- 4. Typography & contrast ---------- */
-.start-title{ text-shadow:2px 3px 0 rgba(0,0,0,.55); letter-spacing:-1px; }
+/* ---------- Title: tamed so it stops dominating ---------- */
+.start-title{
+  font-size:clamp(34px,6vw,54px);
+  line-height:.92;
+  text-shadow:2px 2px 0 rgba(0,0,0,.5);
+}
 .start-title .the{ color:#e6d2b0; }
-.start-title .viva{ text-shadow:2px 3px 0 rgba(0,0,0,.55), 0 0 30px rgba(230,48,48,.5); }
+.start-title .viva{ text-shadow:2px 2px 0 rgba(0,0,0,.5), 0 0 26px rgba(230,48,48,.5); }
 .start-subtitle{ color:#cbb08c; max-width:290px; }
 .start-badge{
   background:linear-gradient(120deg, rgba(255,140,30,.16), rgba(230,48,48,.16));
   border-color:rgba(255,160,60,.4); color:#ffc185;
 }
 
-/* stats as a tidy divided strip */
+/* ---------- Stats as a tidy divided strip ---------- */
 .start-stats{
   width:100%; justify-content:space-around; gap:0;
-  padding:8px 6px; border-radius:12px;
+  padding:8px 4px; border-radius:12px;
   background:rgba(255,160,60,.06); border:1px solid rgba(255,160,60,.14);
 }
 .start-stat{ flex:1; position:relative; }
 .start-stat + .start-stat::before{
-  content:''; position:absolute; left:0; top:18%; height:64%; width:1px;
+  content:''; position:absolute; left:0; top:20%; height:60%; width:1px;
   background:rgba(255,160,60,.18);
 }
 .start-stat-num{ color:#ffc247; }
 .start-stat-label{ color:#b0906a; }
 
-/* lifelines line */
+/* ---------- Contrast lifts ---------- */
 .lifelines-info{ color:#c9ab84; }
 .ll-badge{ background:rgba(255,160,60,.14); border-color:rgba(255,160,60,.32); color:#ffce76; }
-
-/* section labels */
 .diff-label{ color:#b0906a; }
+.high-score-display{ color:#ffcf6a; }
+.high-score-display:empty,
+.personal-best-display:empty{ display:none; }
 
-/* ---------- 5. Difficulty buttons ---------- */
+/* ---------- Difficulty buttons ---------- */
 .diff-btns{ gap:8px; }
 .diff-btn{
   border-radius:10px; padding:8px 12px;
@@ -74,7 +75,7 @@
 }
 .diff-btn:hover{ border-color:rgba(255,200,120,.55); color:#fff; background:rgba(255,160,60,.1); }
 
-/* ---------- 6. Buttons hierarchy ---------- */
+/* ---------- Buttons ---------- */
 .start-btn{ border-radius:12px; letter-spacing:1.5px; }
 .launch-secondary{ gap:10px; }
 .launch-secondary .ai-viva-btn{
@@ -86,37 +87,32 @@
 .launch-secondary .ai-viva-btn:hover{ background:rgba(255,160,60,.18); border-color:#ff8a1e; }
 .launch-secondary .ai-viva-btn:active{ transform:scale(.97); }
 
-/* ---------- 7. Footer meta (XP / scores) — quieter, hide when empty ---------- */
-.high-score-display{ color:#ffcf6a; }
-.high-score-display:empty,
-.personal-best-display:empty{ display:none; }
-.level-display{ width:100%; opacity:.96; }
-
-/* ---------- 8. Right side → a modest stage for the student ---------- */
+/* ---------- Right: a modest stage for the student ---------- */
 @media (min-width:650px){
-  .start-right{ position:relative; flex:0 0 auto; max-width:420px; }
-  .start-right::before{                        /* soft spotlight */
+  .start-right{ position:relative; flex:0 0 auto; }
+  .start-right::before{
     content:''; position:absolute; left:50%; top:50%;
-    width:min(42vh,380px); aspect-ratio:1; border-radius:50%;
+    width:min(40vh,340px); aspect-ratio:1; border-radius:50%;
     transform:translate(-50%,-48%);
-    background:radial-gradient(circle, rgba(255,150,30,.18), rgba(255,120,0,.05) 46%, transparent 70%);
+    background:radial-gradient(circle, rgba(255,150,30,.16), rgba(255,120,0,.05) 46%, transparent 70%);
     z-index:0; pointer-events:none;
   }
   .start-student{ position:relative; z-index:1; }
-  .start-student::after{                        /* ground shadow */
+  .start-student::after{
     content:''; position:absolute; left:50%; bottom:-4px; transform:translateX(-50%);
-    width:54%; height:22px; border-radius:50%;
+    width:54%; height:20px; border-radius:50%;
     background:radial-gradient(ellipse, rgba(0,0,0,.45), transparent 70%);
     z-index:-1;
   }
   .start-student svg{
-    width:clamp(180px,22vw,260px);
-    filter:drop-shadow(0 18px 32px rgba(0,0,0,.5));
+    width:clamp(180px,20vw,240px);
+    filter:drop-shadow(0 16px 30px rgba(0,0,0,.5));
   }
 }
 
-/* ---------- 9. Mobile tightening ---------- */
+/* ---------- Mobile ---------- */
 @media (max-width:649px){
-  #start-screen .start-content{ padding:clamp(16px,5vw,24px); gap:14px; }
+  #start-screen .start-content{ padding:clamp(16px,5vw,24px); gap:13px; }
   .start-left{ margin:0 auto; }
+  .start-title{ font-size:clamp(40px,13vw,58px); }
 }
