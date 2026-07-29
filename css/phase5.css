@@ -1,41 +1,37 @@
 /* ============================================================
-   ESCAPE THE VIVA - Phase 5 : Hero UI Refresh (v3)
+   ESCAPE THE VIVA - Phase 5 : Hero UI Refresh (v4)
    Loads LAST. Restyles the start/launch screen only.
-   No enclosing card (it overflowed); instead: tamed title,
-   tighter spacing that fits the viewport, a tidy stats strip,
-   a balanced student stage, and higher-contrast text.
+   - hero now fills the full screen width (no narrow center box)
+   - the empty right becomes a "viva room": chalkboard on the wall
+     behind the student, warm lighting
+   - tamed title, tidy stats, higher contrast, tighter spacing
    Scoped to #start-screen; no JS or markup changes.
    ============================================================ */
 
-/* ---------- Background: subtle warm spotlight ---------- */
+/* ---------- Room lighting ---------- */
 #start-screen{
   background:
-    radial-gradient(760px 460px at 68% 46%, rgba(255,150,30,.10), transparent 60%),
-    linear-gradient(160deg,#0b0501 0%,#180b04 55%,#0c0602 100%);
+    radial-gradient(720px 520px at 66% 42%, rgba(255,150,30,.10), transparent 62%),
+    linear-gradient(160deg,#0b0501 0%,#170b04 55%,#0c0602 100%);
 }
 
-/* ---------- Desktop: center the pair, balanced margins ---------- */
+/* ---------- Desktop: use the WHOLE width ---------- */
 @media (min-width:650px){
   #start-screen .start-content{
-    justify-content:center;
-    gap:clamp(30px,5vw,72px);
-    padding:clamp(20px,3vw,44px);
-    max-width:1000px; margin:0 auto;
+    justify-content:space-between;
+    align-items:center;
+    max-width:none;
+    padding:clamp(20px,3vw,40px) clamp(36px,7vw,120px);
+    gap:clamp(20px,4vw,56px);
   }
+  .start-left{ flex:0 0 auto; max-width:380px; }
 }
 
-/* ---------- Left column: clean, constrained (NO card) ---------- */
-.start-left{
-  max-width:360px; width:100%;
-  gap:clamp(7px,1vw,11px) !important;
-}
+/* ---------- Left column: clean, constrained (no card) ---------- */
+.start-left{ width:100%; gap:clamp(7px,1vw,11px) !important; }
 
-/* ---------- Title: tamed so it stops dominating ---------- */
-.start-title{
-  font-size:clamp(34px,6vw,54px);
-  line-height:.92;
-  text-shadow:2px 2px 0 rgba(0,0,0,.5);
-}
+/* ---------- Title ---------- */
+.start-title{ font-size:clamp(32px,5.5vw,52px); line-height:.92; text-shadow:2px 2px 0 rgba(0,0,0,.5); }
 .start-title .the{ color:#e6d2b0; }
 .start-title .viva{ text-shadow:2px 2px 0 rgba(0,0,0,.5), 0 0 26px rgba(230,48,48,.5); }
 .start-subtitle{ color:#cbb08c; max-width:290px; }
@@ -44,7 +40,7 @@
   border-color:rgba(255,160,60,.4); color:#ffc185;
 }
 
-/* ---------- Stats as a tidy divided strip ---------- */
+/* ---------- Stats strip ---------- */
 .start-stats{
   width:100%; justify-content:space-around; gap:0;
   padding:8px 4px; border-radius:12px;
@@ -52,8 +48,7 @@
 }
 .start-stat{ flex:1; position:relative; }
 .start-stat + .start-stat::before{
-  content:''; position:absolute; left:0; top:20%; height:60%; width:1px;
-  background:rgba(255,160,60,.18);
+  content:''; position:absolute; left:0; top:20%; height:60%; width:1px; background:rgba(255,160,60,.18);
 }
 .start-stat-num{ color:#ffc247; }
 .start-stat-label{ color:#b0906a; }
@@ -63,8 +58,7 @@
 .ll-badge{ background:rgba(255,160,60,.14); border-color:rgba(255,160,60,.32); color:#ffce76; }
 .diff-label{ color:#b0906a; }
 .high-score-display{ color:#ffcf6a; }
-.high-score-display:empty,
-.personal-best-display:empty{ display:none; }
+.high-score-display:empty, .personal-best-display:empty{ display:none; }
 
 /* ---------- Difficulty buttons ---------- */
 .diff-btns{ gap:8px; }
@@ -87,27 +81,35 @@
 .launch-secondary .ai-viva-btn:hover{ background:rgba(255,160,60,.18); border-color:#ff8a1e; }
 .launch-secondary .ai-viva-btn:active{ transform:scale(.97); }
 
-/* ---------- Right: a modest stage for the student ---------- */
+/* ---------- Right: VIVA ROOM (chalkboard behind the student) ---------- */
 @media (min-width:650px){
-  .start-right{ position:relative; flex:0 0 auto; }
+  .start-right{
+    position:relative; flex:1 1 auto; align-self:stretch;
+    display:flex; align-items:center; justify-content:center;
+  }
+  /* chalkboard on the wall */
   .start-right::before{
-    content:''; position:absolute; left:50%; top:50%;
-    width:min(40vh,340px); aspect-ratio:1; border-radius:50%;
-    transform:translate(-50%,-48%);
-    background:radial-gradient(circle, rgba(255,150,30,.16), rgba(255,120,0,.05) 46%, transparent 70%);
-    z-index:0; pointer-events:none;
+    content:''; position:absolute; z-index:0; pointer-events:none;
+    left:50%; top:44%; transform:translate(-50%,-50%);
+    width:min(62%,600px); height:min(56%,350px); border-radius:10px;
+    background:
+      repeating-linear-gradient(118deg, rgba(255,255,255,.015) 0 2px, transparent 2px 28px),
+      linear-gradient(160deg,#123529,#0b2219);
+    border:12px solid #5b3a1d;
+    box-shadow:0 24px 60px rgba(0,0,0,.55), inset 0 0 70px rgba(0,0,0,.5);
   }
-  .start-student{ position:relative; z-index:1; }
-  .start-student::after{
-    content:''; position:absolute; left:50%; bottom:-4px; transform:translateX(-50%);
-    width:54%; height:20px; border-radius:50%;
-    background:radial-gradient(ellipse, rgba(0,0,0,.45), transparent 70%);
-    z-index:-1;
+  /* faint chalk doodles */
+  .start-right::after{
+    content:'∫ f(x) dx      O(n log n)      Σ      E = mc²';
+    position:absolute; z-index:0; pointer-events:none;
+    left:50%; top:27%; transform:translate(-50%,-50%);
+    width:min(56%,520px); text-align:center; white-space:nowrap;
+    color:rgba(210,235,225,.15); letter-spacing:1px;
+    font-size:clamp(12px,1.3vw,16px);
+    font-family:'Segoe Script','Comic Sans MS',cursive;
   }
-  .start-student svg{
-    width:clamp(180px,20vw,240px);
-    filter:drop-shadow(0 16px 30px rgba(0,0,0,.5));
-  }
+  .start-student{ position:relative; z-index:2; }
+  .start-student svg{ width:clamp(200px,20vw,260px); filter:drop-shadow(0 16px 30px rgba(0,0,0,.55)); }
 }
 
 /* ---------- Mobile ---------- */
