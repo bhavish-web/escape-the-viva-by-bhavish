@@ -38,15 +38,16 @@ const ACCEPTED_EXTENSIONS = [".pdf", ".jpg", ".jpeg", ".png", ".webp"];
 
 function showAISetupScreen() {
   playClickSound();
-  document.getElementById("start-screen").classList.remove("active");
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
   document.getElementById("ai-setup-screen").classList.add("active");
   resetAISetup();
 }
 
 function backToStart() {
   playClickSound();
-  document.getElementById("ai-setup-screen").classList.remove("active");
-  document.getElementById("start-screen").classList.add("active");
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  // return to the home (subject) screen if no subject picked yet, else the launch screen
+  document.getElementById(gameState && gameState.subject ? "start-screen" : "subject-screen").classList.add("active");
 }
 
 function resetAISetup() {
