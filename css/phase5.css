@@ -1,48 +1,44 @@
 /* ============================================================
    ESCAPE THE VIVA - Phase 5 : Hero UI Refresh
-   Loads LAST. Restyles the start/launch screen only:
-   - contains the left column in an elevated panel
-   - gives the student a real "stage" so the right isn't empty
-   - modern spacing / shadows / rounded corners
-   - higher-contrast, cohesive amber palette
-   Additive & scoped to #start-screen; no JS or markup changes.
+   Loads LAST. Restyles the start/launch screen only.
+   Scoped to #start-screen; no JS or markup changes.
    ============================================================ */
 
 /* ---------- 1. Background: warm spotlight stage ---------- */
 #start-screen{
   background:
-    radial-gradient(1100px 620px at 70% 42%, rgba(255,150,30,.12), transparent 60%),
-    radial-gradient(760px 520px at 18% 26%, rgba(230,48,48,.08), transparent 62%),
+    radial-gradient(900px 520px at 70% 44%, rgba(255,150,30,.10), transparent 60%),
+    radial-gradient(680px 460px at 18% 26%, rgba(230,48,48,.07), transparent 62%),
     linear-gradient(160deg,#0a0400 0%,#170a03 55%,#0b0502 100%) !important;
 }
 
-/* ---------- 2. Layout balance ---------- */
+/* ---------- 2. Layout balance (desktop) ---------- */
 @media (min-width:650px){
   #start-screen .start-content{
-    gap:clamp(24px,4vw,60px);
-    padding:clamp(24px,4vw,56px);
-    max-width:1180px; margin:0 auto;
+    gap:clamp(18px,3vw,40px);
+    padding:clamp(18px,3vw,40px);
+    max-width:1040px; margin:0 auto;
   }
 }
 
 /* ---------- 3. Left column → elevated control panel ---------- */
 .start-left{
-  max-width:440px; width:100%;
-  padding:clamp(18px,4vw,26px);
-  gap:clamp(10px,1.6vw,15px) !important;
+  max-width:380px; width:100%;
+  padding:clamp(16px,3vw,22px);
+  gap:clamp(8px,1.2vw,12px) !important;
   background:linear-gradient(160deg, rgba(34,18,8,.72), rgba(14,7,3,.8));
   border:1px solid rgba(255,160,60,.16);
-  border-radius:22px;
-  box-shadow:0 24px 60px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.05);
+  border-radius:20px;
+  box-shadow:0 20px 48px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.05);
   backdrop-filter:blur(6px);
 }
-@media (min-width:650px){ .start-left{ max-width:440px; } }
+@media (min-width:650px){ .start-left{ max-width:380px; } }
 
 /* ---------- 4. Typography & contrast ---------- */
 .start-title{ text-shadow:2px 3px 0 rgba(0,0,0,.55); letter-spacing:-1px; }
 .start-title .the{ color:#e6d2b0; }
-.start-title .viva{ text-shadow:2px 3px 0 rgba(0,0,0,.55), 0 0 34px rgba(230,48,48,.55); }
-.start-subtitle{ color:#cbb08c; max-width:300px; }
+.start-title .viva{ text-shadow:2px 3px 0 rgba(0,0,0,.55), 0 0 30px rgba(230,48,48,.5); }
+.start-subtitle{ color:#cbb08c; max-width:290px; }
 .start-badge{
   background:linear-gradient(120deg, rgba(255,140,30,.16), rgba(230,48,48,.16));
   border-color:rgba(255,160,60,.4); color:#ffc185;
@@ -51,7 +47,7 @@
 /* stats as a tidy divided strip */
 .start-stats{
   width:100%; justify-content:space-around; gap:0;
-  padding:10px 6px; border-radius:14px;
+  padding:8px 6px; border-radius:12px;
   background:rgba(255,160,60,.06); border:1px solid rgba(255,160,60,.14);
 }
 .start-stat{ flex:1; position:relative; }
@@ -72,17 +68,17 @@
 /* ---------- 5. Difficulty buttons ---------- */
 .diff-btns{ gap:8px; }
 .diff-btn{
-  border-radius:11px; padding:9px 12px;
+  border-radius:10px; padding:8px 12px;
   background:rgba(255,255,255,.045); border:1.5px solid rgba(255,255,255,.12);
   color:#cbb493; font-weight:700;
 }
 .diff-btn:hover{ border-color:rgba(255,200,120,.55); color:#fff; background:rgba(255,160,60,.1); }
 
 /* ---------- 6. Buttons hierarchy ---------- */
-.start-btn{ border-radius:14px; letter-spacing:1.5px; }
+.start-btn{ border-radius:12px; letter-spacing:1.5px; }
 .launch-secondary{ gap:10px; }
 .launch-secondary .ai-viva-btn{
-  flex:1; min-width:130px; padding:11px 12px; border-radius:12px;
+  flex:1; min-width:120px; padding:10px 12px; border-radius:11px;
   font-weight:800; font-size:clamp(12px,1.6vw,13px); color:#ffdca8;
   background:rgba(255,160,60,.08); border:1px solid rgba(255,160,60,.28);
   transition:background .15s ease, border-color .15s ease, transform .1s ease;
@@ -96,32 +92,31 @@
 .personal-best-display:empty{ display:none; }
 .level-display{ width:100%; opacity:.96; }
 
-/* ---------- 8. Right side → a real stage for the student ---------- */
+/* ---------- 8. Right side → a modest stage for the student ---------- */
 @media (min-width:650px){
-  .start-right{ position:relative; flex:1; max-width:560px; }
-  .start-right::before{                        /* warm spotlight */
+  .start-right{ position:relative; flex:0 0 auto; max-width:420px; }
+  .start-right::before{                        /* soft spotlight */
     content:''; position:absolute; left:50%; top:50%;
-    width:min(56vh,560px); aspect-ratio:1; border-radius:50%;
+    width:min(42vh,380px); aspect-ratio:1; border-radius:50%;
     transform:translate(-50%,-48%);
-    background:radial-gradient(circle, rgba(255,150,30,.22), rgba(255,120,0,.06) 46%, transparent 70%);
+    background:radial-gradient(circle, rgba(255,150,30,.18), rgba(255,120,0,.05) 46%, transparent 70%);
     z-index:0; pointer-events:none;
   }
   .start-student{ position:relative; z-index:1; }
   .start-student::after{                        /* ground shadow */
     content:''; position:absolute; left:50%; bottom:-4px; transform:translateX(-50%);
-    width:58%; height:26px; border-radius:50%;
-    background:radial-gradient(ellipse, rgba(0,0,0,.5), transparent 70%);
+    width:54%; height:22px; border-radius:50%;
+    background:radial-gradient(ellipse, rgba(0,0,0,.45), transparent 70%);
     z-index:-1;
   }
   .start-student svg{
-    width:clamp(230px,32vw,360px);
-    filter:drop-shadow(0 22px 38px rgba(0,0,0,.55));
+    width:clamp(180px,22vw,260px);
+    filter:drop-shadow(0 18px 32px rgba(0,0,0,.5));
   }
 }
 
 /* ---------- 9. Mobile tightening ---------- */
 @media (max-width:649px){
-  #start-screen .start-content{ padding:clamp(16px,5vw,26px); gap:14px; }
+  #start-screen .start-content{ padding:clamp(16px,5vw,24px); gap:14px; }
   .start-left{ margin:0 auto; }
-  .start-title{ font-size:clamp(40px,13vw,60px); }
 }
