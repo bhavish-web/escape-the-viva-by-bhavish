@@ -1207,3 +1207,30 @@ function shuffleAndPick(arr, count) {
   const shuffled = [...arr].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, count).map(q => randomizeAnswers(q));
 }
+/* ============================================================
+   DIFFICULTY = VIVA IMPORTANCE  (added)
+   EASY   → complete pool for the subject
+   MEDIUM → important questions (importance >= 2)
+   HARD   → only highest-value must-know (importance >= 3)
+   importance defaults are derived from the legacy `difficulty`
+   tag; set `importance: 3` etc. on any question to curate.
+   ============================================================ */
+allQuestions.forEach(q => {
+  if (q.importance === undefined) {
+    q.importance = q.difficulty === 'hard' ? 3 : q.difficulty === 'medium' ? 2 : 1;
+  }
+});
+
+function getSubjectPool(topics, difficulty) {
+  const inSubject = allQuestions.filter(q => topics.includes(q.topic));
+  let pool;
+  if (difficulty === 'hard')        pool = inSubject.filter(q => q.importance >= 3);
+  else if (difficulty === 'medium') pool = inSubject.filter(q => q.importance >= 2);
+  else                              pool = inSubject.slice();       // easy = full pool
+
+  if (pool.length < 10) {                                          // relax so a round is always possible
+    if (difficulty === 'hard') pool = inSubject.filter(q => q.importance >= 2);
+    if (pool.length < 10)      pool = inSubject.slice();
+  }
+  return pool.length ? pool : allQuestions.slice();
+}
