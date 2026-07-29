@@ -16,18 +16,14 @@ function showScreen(id) {
    1. SUBJECT-FIRST FLOW
    ============================================================ */
 function renderSubjects() {
-  const grid = document.getElementById('subject-grid');
+  const grid = document.getElementById('hero-subject-grid');
   if (!grid) return;
   grid.innerHTML = SUBJECTS.map(s => `
-    <div class="subject-card" data-id="${s.id}" style="--accent:${s.accent}"
-         role="button" tabindex="0"
-         onclick="selectSubject('${s.id}')"
-         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectSubject('${s.id}')}">
-      <div class="subject-icon">${s.icon}</div>
-      <div class="subject-name">${s.name}</div>
-      <div class="subject-blurb">${s.blurb}</div>
-      <button class="subject-notes-btn" onclick="event.stopPropagation();openNotes('${s.id}')">📄 Notes</button>
-    </div>`).join('');
+    <button type="button" class="hero-subject-chip" data-id="${s.id}" style="--accent:${s.accent}"
+            onclick="selectSubject('${s.id}')" title="${s.name}">
+      <span class="chip-icon">${s.icon}</span>
+      <span class="chip-name">${s.name}</span>
+    </button>`).join('');
 }
 
 function selectSubject(id) {
@@ -36,18 +32,18 @@ function selectSubject(id) {
   gameState.subject = id;
   if (typeof playClickSound === 'function') playClickSound();
 
-  // reflect selection on the launch (old start) screen
-  const pill = document.getElementById('chosen-subject-pill');
-  if (pill) pill.innerHTML = `<span class="pill-icon">${subj.icon}</span> ${subj.name}`;
-  const launchNotes = document.getElementById('launch-notes-btn');
-  if (launchNotes) launchNotes.onclick = () => openNotes(id);
+  // highlight the chosen chip
+  document.querySelectorAll('.hero-subject-chip').forEach(c =>
+    c.classList.toggle('selected', c.dataset.id === id));
 
-  showScreen('start-screen');
+  // reveal + enable the Start Game button
+  const startBtn = document.getElementById('start-game-btn');
+  if (startBtn) { startBtn.style.display = 'block'; startBtn.disabled = false; }
 }
 
 function backToSubjects() {
   if (typeof playClickSound === 'function') playClickSound();
-  showScreen('subject-screen');
+  showScreen('start-screen');
 }
 
 /* ============================================================
@@ -162,7 +158,7 @@ function changeSubject() {
   if (typeof playClickSound === 'function') playClickSound();
   if (typeof stopTimer === 'function') stopTimer();
   document.getElementById('confetti-container').innerHTML = '';
-  showScreen('subject-screen');
+  showScreen('start-screen');
 }
 
 /* ============================================================
