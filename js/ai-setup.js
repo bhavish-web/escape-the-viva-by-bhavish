@@ -46,8 +46,7 @@ function showAISetupScreen() {
 function backToStart() {
   playClickSound();
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-  // return to the home (subject) screen if no subject picked yet, else the launch screen
-  document.getElementById(gameState && gameState.subject ? "start-screen" : "subject-screen").classList.add("active");
+  document.getElementById("start-screen").classList.add("active");
 }
 
 function resetAISetup() {
