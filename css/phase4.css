@@ -1,0 +1,124 @@
+/* ============================================================
+   ESCAPE THE VIVA - Phase 4 : Visual & Animation Polish
+   Purely additive. Every new keyframe/class is prefixed `p4`
+   so nothing here collides with the existing animation layer.
+   Loads AFTER all other CSS so small enhancements win.
+   ============================================================ */
+
+/* ---------- 1. Unified button feel (press + focus ring) ---------- */
+.start-btn:active,
+.end-btn:active,
+.ai-viva-btn:active,
+.diff-btn:active,
+.lifeline-btn:not(:disabled):active { transform: scale(0.96); }
+
+.start-btn:focus-visible,
+.end-btn:focus-visible,
+.ai-viva-btn:focus-visible,
+.diff-btn:focus-visible,
+.lifeline-btn:focus-visible,
+.option-btn:focus-visible {
+  outline: 2px solid #ffd76a;
+  outline-offset: 3px;
+}
+
+/* a soft breathing glow on the primary CTA so the eye lands on it */
+.start-btn { animation: p4CtaGlow 2.8s ease-in-out infinite; }
+@keyframes p4CtaGlow {
+  0%,100% { box-shadow: 0 8px 22px rgba(255,140,0,.35); }
+  50%     { box-shadow: 0 8px 30px rgba(255,170,40,.6); }
+}
+
+/* ---------- 2. Difficulty selection feedback ---------- */
+.diff-btn.active {
+  box-shadow: 0 0 0 2px rgba(255,215,106,.55), 0 6px 18px rgba(255,140,0,.35);
+}
+.diff-btn.p4-diff-pulse { animation: p4Pop .32s cubic-bezier(.2,1.5,.3,1); }
+@keyframes p4Pop {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.14); }
+  100% { transform: scale(1); }
+}
+
+/* ---------- 3. In-game progress bar (injected by phase4.js) ---------- */
+.p4-progress {
+  position: relative; height: 6px; margin: 0 0 10px;
+  border-radius: 6px; overflow: hidden;
+  background: rgba(255,160,60,.12); border: 1px solid rgba(255,160,60,.18);
+}
+.p4-progress-fill {
+  position: relative; height: 100%; width: 10%; border-radius: 6px; overflow: hidden;
+  background: linear-gradient(90deg,#ffd76a,#ff9a1e);
+  box-shadow: 0 0 10px rgba(255,150,0,.5);
+  transition: width .5s cubic-bezier(.4,0,.2,1);
+}
+.p4-progress-fill::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent);
+  transform: translateX(-100%);
+  animation: p4Shimmer 2s linear infinite;
+}
+@keyframes p4Shimmer { to { transform: translateX(100%); } }
+
+/* ---------- 4. Live HUD reactions ---------- */
+.hud-score.p4-bump { animation: p4Bump .42s ease; }
+@keyframes p4Bump {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.28); color: #ffe98a; text-shadow: 0 0 12px rgba(255,210,90,.8); }
+  100% { transform: scale(1); }
+}
+.bar-pct.p4-tick { animation: p4Tick .35s ease; display: inline-block; }
+@keyframes p4Tick {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.32); }
+  100% { transform: scale(1); }
+}
+.bar-container { box-shadow: inset 0 1px 3px rgba(0,0,0,.5); }
+.timer-bar { box-shadow: 0 0 8px rgba(255,150,0,.45); }
+
+/* ---------- 5. Character life ---------- */
+/* professor already floats (profIdle); give the student a gentle idle too */
+.start-student svg { animation: p4Float 4s ease-in-out infinite; transform-origin: center bottom; }
+@keyframes p4Float {
+  0%,100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(-1deg); }
+}
+
+/* ---------- 6. Question refresh on each load (via .p4-qin) ---------- */
+.p4-qin .question-text { animation: p4QIn .4s ease both; }
+@keyframes p4QIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ---------- 7. Results screen ---------- */
+.end-grade.p4-stamp { animation: p4Stamp .6s cubic-bezier(.2,1.4,.3,1) both; display: inline-block; }
+@keyframes p4Stamp {
+  0% { opacity: 0; transform: scale(2.2) rotate(-8deg); }
+  60% { opacity: 1; transform: scale(.92) rotate(2deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+.stats-panel { box-shadow: 0 10px 30px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,160,60,.12); }
+.stat-item .stat-val { transition: transform .2s ease; }
+.end-btn { transition: transform .12s ease, box-shadow .15s ease, filter .15s ease; }
+.end-btn:hover { transform: translateY(-2px) scale(1.03); filter: brightness(1.08); }
+.btn-play-again { position: relative; overflow: hidden; }
+.btn-play-again::after {
+  content: ''; position: absolute; top: 0; left: -120%;
+  width: 60%; height: 100%; transform: skewX(-20deg);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent);
+  animation: p4Sheen 3.2s ease-in-out infinite;
+}
+@keyframes p4Sheen { 0%,70% { left: -120%; } 100% { left: 160%; } }
+
+/* ---------- 8. Subject cards: idle icon breathing + press ---------- */
+.subject-card .subject-icon { animation: p4IconBreathe 3.5s ease-in-out infinite; }
+@keyframes p4IconBreathe { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+.subject-card:active { transform: translateY(-2px) scale(.99); }
+
+/* ---------- 9. Reduced-motion: kill idle/ambient loops ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .start-btn,
+  .start-student svg,
+  .p4-progress-fill::after,
+  .subject-card .subject-icon,
+  .btn-play-again::after { animation: none !important; }
+  .end-btn:hover { transform: none; }
+}
