@@ -11,7 +11,6 @@
 <link rel="stylesheet" href="css/enhance.css">
 <link rel="stylesheet" href="css/phase4.css">
 <link rel="stylesheet" href="css/phase5.css">
-<link rel="stylesheet" href="css/phase6.css">
 </head>
 <body>
 
@@ -204,112 +203,117 @@
     </div>
   </div>
 
-  <!-- ===== GAME SCREEN (Viva HUD) ===== -->
+  <!-- ===== GAME SCREEN ===== -->
   <div class="screen" id="game-screen">
     <div class="stress-bg-overlay" id="stress-bg-overlay"></div>
+
+    <!-- Boss Question Cinematic -->
     <div class="boss-cinematic" id="boss-cinematic">
       <div class="boss-cinematic-text">⚠️ FINAL QUESTION ⚠️</div>
       <div class="boss-cinematic-sub">Everything comes down to this...</div>
     </div>
 
-    <!-- TOP HUD BAR -->
-    <div class="hud-topbar">
-      <div class="hud-chip"><span class="chip-ico">❤️</span><div class="chip-tx"><div class="chip-lbl">STRESS</div><div class="chip-val red" id="stress-pct">20%</div></div></div>
-      <div class="hud-chip"><span class="chip-ico">😠</span><div class="chip-tx"><div class="chip-lbl">ANGER</div><div class="chip-val orange" id="anger-pct">10%</div></div></div>
-      <div class="hud-chip"><span class="chip-ico">🔥</span><div class="chip-tx"><div class="chip-lbl">STREAK</div><div class="chip-val" id="streak-num">0</div></div></div>
-      <div class="hud-chip"><span class="chip-ico">🏆</span><div class="chip-tx"><div class="chip-lbl">SCORE</div><div class="chip-val gold" id="hud-score">0 pts</div></div></div>
-      <div class="hud-chip questions"><div class="chip-lbl">QUESTIONS</div><div class="chip-val big" id="q-counter">01 / 10</div></div>
-      <div class="hud-actions">
-        <button class="hud-lifeline" id="btn-hint" onclick="useHint()">💡 HINT</button>
-        <button class="hud-lifeline" id="btn-5050" onclick="useFiftyFifty()">✂ 50/50</button>
-        <button class="hud-pause" title="Quit to menu" onclick="restartGame()">⏸</button>
-      </div>
-      <div class="streak-display" id="streak-display" style="display:none"></div>
+    <!-- Top timer bar -->
+    <div class="timer-wrapper">
+      <div class="timer-bar" id="timer-bar"></div>
     </div>
 
-    <!-- SCENE: classroom + professor + mood ladder -->
-    <div class="viva-scene">
-      <div class="prof-stage">
-        <div class="speech-bubble" id="speech-bubble"><span id="speech-text">Hmm...</span></div>
-        <div class="prof-character-wrap">
-          <div class="prof-svg-wrapper" id="prof-svg-wrapper"></div>
+    <!-- HUD -->
+    <div class="hud">
+      <div class="hud-stat">
+        <span class="hud-label stress-label">❤️ <span class="hud-label-text">STRESS</span></span>
+        <div class="bar-container">
+          <div class="bar-fill stress-bar" id="stress-bar" style="width:20%"></div>
+        </div>
+        <span class="bar-pct stress-pct" id="stress-pct">20%</span>
+      </div>
+
+      <div class="hud-center">
+        <div class="hud-q-num" id="q-counter">Q1/10</div>
+        <div class="streak-display" id="streak-display"></div>
+        <div class="hud-score" id="hud-score">0 pts</div>
+      </div>
+
+      <div class="hud-stat reverse">
+        <span class="bar-pct anger-pct" id="anger-pct">10%</span>
+        <div class="bar-container">
+          <div class="bar-fill anger-bar" id="anger-bar" style="width:10%"></div>
+        </div>
+        <span class="hud-label anger-label">😤 <span class="hud-label-text">ANGER</span></span>
+      </div>
+    </div>
+
+    <!-- Lifelines bar -->
+    <div class="lifelines-bar">
+      <button class="lifeline-btn" id="btn-5050" onclick="useFiftyFifty()" title="50/50 - Remove 2 wrong answers">
+        <span>50/50</span>
+      </button>
+      <div class="timer-display" id="timer-display">
+        <span id="timer-num">10</span>s
+      </div>
+      <button class="lifeline-btn" id="btn-hint" onclick="useHint()" title="Hint - Get a clue">
+        <span>💡 Hint</span>
+      </button>
+    </div>
+
+    <!-- Main game area -->
+    <div class="game-area" id="game-area-wrapper">
+      <!-- Professor side -->
+      <div class="prof-panel">
+        <div class="speech-bubble" id="speech-bubble">
+          <span id="speech-text">Hmm...</span>
+        </div>
+        <div class="prof-character-wrap" style="position:relative">
+          <div class="prof-svg-wrapper" id="prof-svg-wrapper" id="prof-character">
+          </div>
           <div class="prof-angry-effects" id="prof-angry-fx">💢</div>
-          <div class="lightning-bolts" id="lightning-bolts"><span class="bolt bolt-1">⚡</span><span class="bolt bolt-2">⚡</span><span class="bolt bolt-3">⚡</span></div>
+          <div class="lightning-bolts" id="lightning-bolts">
+            <span class="bolt bolt-1">⚡</span>
+            <span class="bolt bolt-2">⚡</span>
+            <span class="bolt bolt-3">⚡</span>
+          </div>
         </div>
-        <div class="prof-nameplate">PROFESSOR</div>
+        <div class="prof-name-tag">Prof. Sir 🎓</div>
       </div>
 
-      <div class="mood-ladder">
-        <div class="mood-title">PROFESSOR MOOD</div>
-        <div class="mood-rows" id="mood-rows"></div>
+      <!-- Questions side -->
+      <div class="questions-panel">
+        <div class="question-header">
+          <div class="topic-badge" id="topic-badge">TOPIC</div>
+          <div class="diff-badge" id="diff-badge">MEDIUM</div>
+        </div>
+        <div class="question-text" id="question-text">Loading...</div>
+        <div class="hint-box" id="hint-box" style="display:none"></div>
+        <div class="options-grid" id="options-grid">
+          <button class="option-btn opt-a" onclick="selectAnswer(0)">
+            <span class="option-letter">A</span>
+            <span class="opt-text">Option A</span>
+            <span class="opt-tick" style="display:none">✓</span>
+          </button>
+          <button class="option-btn opt-b" onclick="selectAnswer(1)">
+            <span class="option-letter">B</span>
+            <span class="opt-text">Option B</span>
+            <span class="opt-tick" style="display:none">✓</span>
+          </button>
+          <button class="option-btn opt-c" onclick="selectAnswer(2)">
+            <span class="option-letter">C</span>
+            <span class="opt-text">Option C</span>
+            <span class="opt-tick" style="display:none">✓</span>
+          </button>
+          <button class="option-btn opt-d" onclick="selectAnswer(3)">
+            <span class="option-letter">D</span>
+            <span class="opt-text">Option D</span>
+            <span class="opt-tick" style="display:none">✓</span>
+          </button>
+        </div>
+        <button class="next-btn" id="next-btn" style="display:none" onclick="nextQuestion()">Next Question →</button>
       </div>
+
+      <!-- Overlays -->
+      <div class="stress-change" id="stress-change"></div>
+      <div class="streak-popup" id="streak-popup"></div>
+      <div class="achievement-popup" id="achievement-popup"></div>
     </div>
-
-    <!-- MAIN ROW: status | question + timer | events -->
-    <div class="game-main">
-      <div class="status-card">
-        <div class="panel-title">◆ YOUR STATUS</div>
-        <div class="status-body">
-          <div class="student-portrait">
-            <div class="student-svg-wrapper" id="student-panel-wrapper"></div>
-            <div class="student-sub">B.Tech CSE</div>
-          </div>
-          <div class="status-bars">
-            <div class="sbar"><div class="sbar-row"><span>STRESS</span><b id="stress-pct2">20%</b></div><div class="sbar-track"><div class="bar-fill stress-bar" id="stress-bar"></div></div></div>
-            <div class="sbar"><div class="sbar-row"><span>CONFIDENCE</span><b id="confidence-pct">80%</b></div><div class="sbar-track"><div class="conf-fill" id="confidence-bar"></div></div></div>
-          </div>
-        </div>
-        <div class="status-tip">💡 <b>TIPS:</b> <span id="status-tip-text">Take a deep breath. You've got this!</span></div>
-        <div class="bar-fill anger-bar" id="anger-bar" style="display:none"></div>
-      </div>
-
-      <div class="question-zone">
-        <div class="questions-panel">
-          <div class="question-header">
-            <div class="topic-badge" id="topic-badge">TOPIC</div>
-            <div class="diff-badge" id="diff-badge">MEDIUM</div>
-          </div>
-          <div class="question-text" id="question-text">Loading...</div>
-          <div class="hint-box" id="hint-box" style="display:none"></div>
-          <div class="options-grid" id="options-grid">
-            <button class="option-btn opt-a" onclick="selectAnswer(0)"><span class="option-letter">A</span><span class="opt-text">Option A</span><span class="opt-tick" style="display:none">✓</span></button>
-            <button class="option-btn opt-b" onclick="selectAnswer(1)"><span class="option-letter">B</span><span class="opt-text">Option B</span><span class="opt-tick" style="display:none">✓</span></button>
-            <button class="option-btn opt-c" onclick="selectAnswer(2)"><span class="option-letter">C</span><span class="opt-text">Option C</span><span class="opt-tick" style="display:none">✓</span></button>
-            <button class="option-btn opt-d" onclick="selectAnswer(3)"><span class="option-letter">D</span><span class="opt-text">Option D</span><span class="opt-tick" style="display:none">✓</span></button>
-          </div>
-          <button class="next-btn" id="next-btn" style="display:none" onclick="nextQuestion()">Next Question →</button>
-        </div>
-
-        <div class="timer-orb" id="timer-display">
-          <svg class="timer-ring" viewBox="0 0 120 120">
-            <circle class="ring-bg" cx="60" cy="60" r="52"></circle>
-            <circle class="ring-fg" id="timer-ring-fg" cx="60" cy="60" r="52"></circle>
-          </svg>
-          <div class="timer-num-wrap"><span id="timer-num">10</span><small>SEC</small></div>
-          <div class="timer-bar" id="timer-bar" style="display:none"></div>
-        </div>
-      </div>
-
-      <div class="events-card">
-        <div class="panel-title">RECENT EVENTS</div>
-        <div class="events-list" id="recent-events"></div>
-      </div>
-    </div>
-
-    <!-- PROFESSOR FEEDBACK legend -->
-    <div class="feedback-bar">
-      <div class="panel-title small">PROFESSOR FEEDBACK</div>
-      <div class="fb-chips">
-        <div class="fb-chip hint" data-fb="hint"><b>💡 HINT</b><small>lifeline</small></div>
-        <div class="fb-chip correct" data-fb="correct"><b>✔ CORRECT</b><small>Great Answer!</small></div>
-        <div class="fb-chip wrong" data-fb="wrong"><b>✖ WRONG</b><small>Think Carefully.</small></div>
-        <div class="fb-chip timeup" data-fb="timeup"><b>! TIME UP</b><small>Move Faster!</small></div>
-      </div>
-    </div>
-
-    <div class="stress-change" id="stress-change"></div>
-    <div class="streak-popup" id="streak-popup"></div>
-    <div class="achievement-popup" id="achievement-popup"></div>
   </div>
 
   <!-- ===== END SCREEN ===== -->
@@ -411,8 +415,6 @@
 <script src="js/audio.js"></script>
 <script src="js/questions.js"></script>
 <script src="js/subjects.js"></script>
-<script src="js/assets.js"></script>
-<script src="js/character-system.js"></script>
 <script src="js/characters.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/game.js"></script>
@@ -420,6 +422,5 @@
 <script src="js/ai-setup.js"></script>
 <script src="js/enhancements.js"></script>
 <script src="js/phase4.js"></script>
-<script src="js/phase7.js"></script>
 </body>
 </html>
