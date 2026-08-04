@@ -1,0 +1,77 @@
+/* ============================================================
+   ESCAPE THE VIVA - Phase 6 : Image Characters + Viva Layout
+   Loads LAST. Renders the professor (left) and student (right)
+   as illustrated images around the centered question panel,
+   over the classroom background. No JS/markup dependencies
+   beyond the panels added in index.html.
+   ============================================================ */
+
+/* ---------- Character images (shared) ---------- */
+.char-img{
+  display:block; width:100%; height:auto; object-fit:contain;
+  -webkit-user-drag:none; user-select:none;
+}
+
+/* ---------- GAME SCREEN: classroom backdrop ---------- */
+#game-screen{
+  background:url('../assets/background/classroom.png') center/cover no-repeat #0b0501;
+  position:relative;
+}
+#game-screen::before{
+  content:''; position:absolute; inset:0; z-index:0; pointer-events:none;
+  background:linear-gradient(0deg, rgba(7,3,0,.80), rgba(7,3,0,.48) 45%, rgba(7,3,0,.55));
+}
+#game-screen > *{ position:relative; z-index:1; }
+
+/* professor + student sprite sizing on the game screen */
+#game-screen .prof-svg-wrapper,
+#game-screen .student-svg-wrapper{
+  width:100%; display:flex; align-items:flex-end; justify-content:center;
+}
+#game-screen .prof-svg-wrapper .char-img,
+#game-screen .student-svg-wrapper .char-img{
+  width:clamp(150px,17vw,250px);
+  filter:drop-shadow(0 16px 26px rgba(0,0,0,.6));
+}
+
+/* student panel mirrors the professor panel */
+.student-panel{ display:flex; flex-direction:column; align-items:center; gap:8px; }
+.student-name-tag{
+  font-weight:800; font-size:13px; color:#eaf4ff;
+  padding:5px 14px; border-radius:16px;
+  background:linear-gradient(120deg, rgba(36,113,163,.55), rgba(20,60,90,.55));
+  border:1px solid rgba(120,180,220,.4);
+  box-shadow:0 6px 16px rgba(0,0,0,.35);
+}
+
+/* ---------- 3-column viva layout (desktop) ---------- */
+@media (min-width:900px){
+  #game-screen .game-area{
+    display:grid;
+    grid-template-columns:minmax(150px,0.9fr) minmax(360px,2.1fr) minmax(150px,0.9fr);
+    align-items:center; gap:clamp(12px,2vw,30px);
+  }
+  .prof-panel{ order:0; }
+  .questions-panel{ order:1; }
+  .student-panel{ order:2; }
+}
+
+/* ---------- Tablet / phone: smaller characters, student below ---------- */
+@media (max-width:899px){
+  #game-screen .prof-svg-wrapper .char-img,
+  #game-screen .student-svg-wrapper .char-img{ width:clamp(90px,26vw,150px); }
+  .student-panel{ order:3; }
+}
+
+/* ---------- HERO (start screen) student is now an image ---------- */
+#start-student-svg .char-img{
+  width:clamp(180px,20vw,260px); height:auto;
+  filter:drop-shadow(0 16px 26px rgba(0,0,0,.55));
+}
+
+/* ---------- END SCREEN character images ---------- */
+.end-char{
+  width:clamp(120px,22vw,180px); height:auto;
+  filter:drop-shadow(0 14px 22px rgba(0,0,0,.5));
+}
+.end-duo{ display:flex; gap:12px; align-items:flex-end; justify-content:center; }
