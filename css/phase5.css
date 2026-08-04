@@ -2,14 +2,14 @@
    ESCAPE THE VIVA - Phase 5 : Hero UI Refresh
    Loads LAST. DESKTOP ONLY (min-width:650px).
    Mobile is left completely untouched — original behavior.
-   Requires: assets/background/classroom.png
+   Requires: assets/viva-room.png
    ============================================================ */
 
 @media (min-width:650px){
 
   /* ---------- Room background image ---------- */
   #start-screen{
-    background:url('../assets/background/classroom.png') center/cover no-repeat #0b0501;
+    background:url('../assets/viva-room.png') center/cover no-repeat #0b0501;
     position:relative;
   }
   #start-screen::before{
