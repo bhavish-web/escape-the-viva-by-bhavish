@@ -10,7 +10,7 @@ let gameState = {
   totalQ: 10, streak: 0, bestStreak: 0,
   timeLeft: 10, difficulty: 'medium',
   lifelineUsed5050: false, lifelineUsedHint: false,
-  achievements: [], subject: null, advancing: false, wrongStreak: 0
+  achievements: [], subject: null, advancing: false
 };
 
 let timerInterval = null;
@@ -111,8 +111,6 @@ function timeUp() {
   gameState.anger = Math.min(100, gameState.anger + cfg.angerUp + 5);
 
   setProfExpression('very-angry');
-  gameState.wrongStreak = (gameState.wrongStreak || 0) + 1;
-  if (typeof setStudentExpression === 'function') setStudentExpression('repeatedWrong');
   setSpeechText('⏰ TIME IS UP! Useless student! 😡');
   showStressChange(cfg.stressUp + 5, true);
   spawnParticles(false);
@@ -175,8 +173,6 @@ function loadQuestion() {
 
   resetOptionAnimations();
   setProfExpression('neutral');
-  if (typeof setProfessorState === 'function') setProfessorState('asking', 'prof-svg-wrapper');
-  if (typeof setStudentExpression === 'function') setStudentExpression('thinking');
   updateHUD(gameState);
   startTimer();
 }
@@ -202,9 +198,7 @@ function selectAnswer(idx) {
 
   if (isCorrect) {
     playCorrectSound();
-    gameState.wrongStreak = 0;
     setProfExpression('happy');
-    if (typeof setStudentExpression === 'function') setStudentExpression('correct');
 
     const timeBonus = gameState.timeLeft * 6;
     const streakBonus = gameState.streak * 12;
@@ -229,12 +223,9 @@ function selectAnswer(idx) {
   } else {
     playWrongSound();
     gameState.streak = 0;
-    gameState.wrongStreak = (gameState.wrongStreak || 0) + 1;
 
-    const repeated = gameState.wrongStreak >= 2;
-    const angerState = (repeated || gameState.anger > 65) ? 'very-angry' : 'angry';
+    const angerState = gameState.anger > 65 ? 'very-angry' : 'angry';
     setProfExpression(angerState);
-    if (typeof setStudentExpression === 'function') setStudentExpression(repeated ? 'repeatedWrong' : 'wrong');
 
     const stressInc = cfg.stressUp + Math.floor(gameState.anger / 9);
     gameState.stress = Math.min(100, gameState.stress + stressInc);
@@ -335,12 +326,8 @@ if (window.AI_QUESTIONS && window.AI_QUESTIONS.length > 0) {
     timeLeft: diffConfig[gameState.difficulty].time,
     difficulty: gameState.difficulty,
     lifelineUsed5050: false, lifelineUsedHint: false,
-    achievements: [], subject: gameState.subject, advancing: false, wrongStreak: 0
+    achievements: [], subject: gameState.subject, advancing: false
   };
-
-  // render the image characters for the viva (professor left, student right)
-  if (typeof renderProfessor === 'function') renderProfessor();
-  if (typeof renderGameStudent === 'function') renderGameStudent();
 
   document.getElementById('start-screen').classList.remove('active');
   document.getElementById('end-screen').classList.remove('active');
