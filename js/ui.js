@@ -30,42 +30,25 @@ function setSpeechText(text) {
 /* ---------- Professor Expressions ---------- */
 function setProfExpression(state) {
   const wrapper = document.getElementById('prof-svg-wrapper');
-  const mouth = document.getElementById('prof-mouth');
-  const browL = document.getElementById('prof-brow-l');
-  const browR = document.getElementById('prof-brow-r');
   const angryFx = document.getElementById('prof-angry-fx');
-  const eyeL = document.getElementById('prof-eye-l');
-  const eyeR = document.getElementById('prof-eye-r');
-
-  if (!mouth) return;
+  if (!wrapper) return;
 
   wrapper.className = 'prof-svg-wrapper';
-  angryFx.style.display = 'none';
+  if (angryFx) angryFx.style.display = 'none';
 
-  const states = {
-    neutral: { mouth:'M82 146 Q95 149 108 146', browL:'M58 97 Q73 92 88 97', browR:'M100 97 Q115 92 130 97', eyeRy:8 },
-    happy:   { mouth:'M80 144 Q95 157 110 144', browL:'M58 92 Q73 87 88 92', browR:'M100 92 Q115 87 130 92', eyeRy:10 },
-    angry:   { mouth:'M82 149 Q95 145 108 149', browL:'M58 103 Q73 96 88 101', browR:'M100 101 Q115 96 130 103', eyeRy:5 },
-    'very-angry': { mouth:'M82 151 Q95 144 108 151', browL:'M58 106 Q73 97 88 103', browR:'M100 103 Q115 97 130 106', eyeRy:4 },
-    surprised: { mouth:'M88 149 Q95 155 102 149', browL:'M58 90 Q73 83 88 90', browR:'M100 90 Q115 83 130 90', eyeRy:11 }
-  };
-
-  const s = states[state] || states.neutral;
-  mouth.setAttribute('d', s.mouth);
-  browL.setAttribute('d', s.browL);
-  browR.setAttribute('d', s.browR);
-  eyeL.setAttribute('ry', s.eyeRy);
-  eyeR.setAttribute('ry', s.eyeRy);
+  // Swap the professor IMAGE via the legacy bridge
+  // (neutral -> idle, happy -> impressed, angry -> annoyed, very-angry -> angry)
+  if (typeof setProfessorLegacy === 'function') {
+    setProfessorLegacy(state, 'prof-svg-wrapper');
+  }
 
   if (state === 'angry') {
     wrapper.classList.add('angry');
-    angryFx.style.display = 'block';
-    angryFx.textContent = '💢';
+    if (angryFx) { angryFx.style.display = 'block'; angryFx.textContent = '\u{1F4A2}'; }
     playAngrySound();
   } else if (state === 'very-angry') {
     wrapper.classList.add('very-angry');
-    angryFx.style.display = 'block';
-    angryFx.textContent = '💢🔥';
+    if (angryFx) { angryFx.style.display = 'block'; angryFx.textContent = '\u{1F4A2}\u{1F525}'; }
     flashScreen('rgba(255,0,0,0.22)');
     shakeScreen();
     playAngrySound();
@@ -73,6 +56,14 @@ function setProfExpression(state) {
   } else if (state === 'happy') {
     wrapper.classList.add('happy');
     playHappyChime();
+  }
+}
+
+/* Swap the game-screen STUDENT image. Accepts semantic states:
+   idle | thinking | correct | wrong | repeatedWrong | confident | nervous | talking */
+function setStudentExpression(state) {
+  if (typeof setStudentState === 'function') {
+    setStudentState(state, 'student-panel-wrapper');
   }
 }
 
