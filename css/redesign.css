@@ -135,12 +135,17 @@
   #game-screen .rd-chip .ic{ font-size:18px; } #game-screen .rd-chip .lb{ font-size:8px; } #game-screen .rd-chip .vl{ font-size:14px; min-height:14px; }
   #game-screen .rd-chip.q{ margin:0; padding:0; border-left:none; }
   #game-screen .rd-chip.q .vl{ color:#eaf1ff; }
-  #game-screen #streak-display{ display:block; font-size:14px; font-weight:900; color:#ff9f45; line-height:1; animation:none !important; transform:none !important; white-space:nowrap; }
+  #game-screen #streak-display{ display:block; font-size:14px; font-weight:900; color:#ff9f45; line-height:1; animation:none !important; transform:none !important; white-space:nowrap; overflow:hidden; max-width:100%; }
   #game-screen #streak-display *{ display:none !important; }
+  #game-screen #streak-popup{ display:none !important; }
+  #game-screen .rd-chip:nth-child(3){ overflow:hidden; }
   #game-screen .rd-chip .mini{ display:none; }
   #game-screen .rd-hud .rd-lifelines{ display:none; }
   #game-screen #rd-fs{ display:none; }
   #game-screen .rd-context{ display:none; }
+
+  /* stress-change popup floats at top-center, out of the way */
+  #game-screen #stress-change{ position:fixed; top:64px; left:50%; transform:translateX(-50%); z-index:20; white-space:nowrap; pointer-events:none; }
 
   /* characters row */
   #game-screen .rd-scene{ position:relative; inset:auto; left:auto; right:auto; top:auto; bottom:auto; z-index:2;
@@ -157,10 +162,10 @@
   /* question panel: pushed down, stretched to the bottom, options stacked vertically */
   #game-screen .rd-qzone{ position:static; left:auto; right:auto; bottom:auto; transform:none; width:auto; z-index:4;
     margin-top:6px; flex:1 1 auto; display:flex; flex-direction:column; }
-  #game-screen .rd-qcard{ max-width:none; padding:12px 14px; flex:1 1 auto; display:flex; flex-direction:column; border-radius:16px 16px 0 0; }
+  #game-screen .rd-qcard{ max-width:none; padding:12px 14px 16px; flex:1 1 auto; display:flex; flex-direction:column; border-radius:16px 16px 0 0; }
   #game-screen .rd-qcard .options-grid{ margin-top:auto; grid-template-columns:1fr; gap:8px; }
   #game-screen .question-text{ font-size:15px; margin-bottom:10px; }
   #game-screen .option-btn{ padding:11px 12px; font-size:12.5px; }
   #game-screen .option-letter{ width:22px; height:22px; font-size:11px; }
+  #game-screen .next-btn{ margin-top:12px; margin-bottom:4px; }
 }
-
