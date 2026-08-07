@@ -1,7 +1,7 @@
 /* ============================================================
    ESCAPE THE VIVA — Gameplay Redesign controller (loads LAST)
-   v6: crash-proof wrappers, portrait mobile layout (Hint·Timer·50/50
-       row above the question), sticky impressed.
+   v7: does NOT override startGame (fixes the skipped home screen
+       + Loading freeze). Layout, images, timer, guards intact.
    ============================================================ */
 (function(){
   const PROF_BY_ANGER = [
@@ -31,7 +31,7 @@
   function setProfImpressed(){ impressedUntil=Date.now()+1600; const img=ensureProfImg(); if(img) img.src=PROF_IMPRESSED; }
   function setStud(state){ const img=document.getElementById('rd-student-img'); if(!img) return; const s=STUD[state]||STUD.nervous; if(img.getAttribute('src')!==s) img.src=s; const p=document.getElementById('rd-student'); if(p) p.classList.remove('noimg'); }
 
-  /* ---- mobile layout: move Hint · Timer · 50/50 into a row above the question ---- */
+  /* ---- mobile layout: Hint · Timer · 50/50 into a row above the question ---- */
   function applyLayout(){
     try{
       const gs=document.getElementById('game-screen'); if(!gs) return;
@@ -61,13 +61,12 @@
   window.addEventListener('load',function(){
     [PROF_IMPRESSED,'assets/classroom.png','assets/classroom-portrait.png',...PROF_BY_ANGER.map(p=>p.src),...Object.values(STUD)].forEach(u=>{ const i=new Image(); i.src=u; });
     applyLayout();
-    // make old effect fns crash-proof (they append to elements this redesign removed)
     ['spawnParticles','createParticles','spawnConfetti','shakeScreen','flashScreen','emojiRain','createStressParticle'].forEach(function(fn){
       if(typeof window[fn]==='function'){ const _o=window[fn]; window[fn]=function(){ try{ return _o.apply(this,arguments); }catch(e){} }; }
     });
   });
 
-  /* professor + student (replace SVG) — bodies guarded so engine flow never breaks */
+  /* professor + student (replace SVG) — guarded */
   window.renderProfessor=function(){ try{ setProfByAnger(); }catch(e){} };
   window.setProfExpression=function(state){
     try{
@@ -90,10 +89,11 @@
     }catch(e){}
   }
 
-  /* crash-proof wrappers: original runs first, my code in try/catch */
   if(typeof updateHUD==='function'){ const _u=updateHUD; window.updateHUD=function(){ const r=_u.apply(this,arguments); updateContext(); return r; }; }
   if(typeof loadQuestion==='function'){ const _l=loadQuestion; window.loadQuestion=function(){ const r=_l.apply(this,arguments);
     try{ impressedUntil=0;
+      // reset lifelines display for a fresh game/question
+      ['btn-hint','btn-5050'].forEach(id=>{ const b=document.getElementById(id); if(b && !gameState['lifelineUsed'+(id==='btn-hint'?'Hint':'5050')]) b.classList.remove('used'); });
       const m=document.getElementById('rd-motivate'); if(m) m.textContent=MOTIVES[Math.floor(Math.random()*MOTIVES.length)];
       const pr=document.getElementById('rd-progress'); if(pr){ const p=Math.round(((gameState.currentQ||0)/(gameState.totalQ||10))*100); pr.style.width=p+'%'; }
       setStud('nervous'); setProfByAnger(); updateContext(); applyLayout();
@@ -108,25 +108,4 @@
       const dur=parseInt(num&&num.textContent)||15; if(orb) orb.classList.remove('urgent');
       if(ring){ ring.style.animation='none'; void ring.offsetWidth; ring.style.animation='rdRing '+dur+'s linear forwards'; } }catch(e){} return r; }; }
   if(typeof stopTimer==='function'){ const _st=stopTimer; window.stopTimer=function(){ const r=_st.apply(this,arguments); try{ const x=document.getElementById('rd-ring'); if(x) x.style.animationPlayState='paused'; }catch(e){} return r; }; }
-
-  function isMobile(){ return matchMedia('(pointer:coarse)').matches || innerWidth<900; }
-  function fsElement(){ return document.fullscreenElement || document.webkitFullscreenElement; }
-  window.rdToggleFS=function(){ const el=document.getElementById('game-container')||document.documentElement;
-    if(!fsElement()){ const rf=el.requestFullscreen||el.webkitRequestFullscreen; if(rf){ try{ rf.call(el); }catch(e){} } }
-    else { const ef=document.exitFullscreen||document.webkitExitFullscreen; if(ef){ try{ ef.call(document); }catch(e){} } } };
-
-  if(typeof startGame==='function'){ const _sg=startGame; window.startGame=function(){
-    try{ if(typeof playStartSound==='function') playStartSound(); }catch(e){}
-    try{ const ov=document.getElementById('cine-transition'); if(ov){ ov.classList.remove('play'); void ov.offsetWidth; ov.classList.add('play'); setTimeout(function(){ ov.classList.remove('play'); },1000); } }catch(e){}
-    const r=_sg.apply(this,arguments);          // <-- run the real game start, always
-    try{
-      const g=document.getElementById('game-screen'); if(g){ g.classList.remove('cine-in'); void g.offsetWidth; g.classList.add('cine-in'); }
-      ['btn-hint','btn-5050'].forEach(id=>{ const b=document.getElementById(id); if(b) b.classList.remove('used'); });
-      const hc=document.getElementById('hint-count'); if(hc) hc.textContent='x1';
-      const fc=document.getElementById('fifty-count'); if(fc) fc.textContent='x1';
-      const ai=document.getElementById('rd-aihint'); if(ai){ ai.textContent='\uD83D\uDCA1 Hint ready'; ai.classList.remove('used'); }
-      impressedUntil=0; setStud('nervous'); setProfByAnger(); updateContext(); applyLayout();
-    }catch(e){}
-    return r;
-  }; }
 })();
