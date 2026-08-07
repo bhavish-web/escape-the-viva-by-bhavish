@@ -125,9 +125,9 @@
 /* ============ PHONE / PORTRAIT (matches the mockup) ============ */
 @media (max-width:820px){
   #game-container{ width:100vw; height:100vh; height:100dvh; }
-  #game-screen{ display:flex; flex-direction:column; padding:8px; gap:8px; overflow-y:auto; }
+  #game-screen:not(.active){ display:none; }
+  #game-screen.active{ display:flex; flex-direction:column; padding:8px; gap:8px; overflow-y:auto; }
   #game-screen .rd-bg{ background-image:url('../assets/classroom-portrait.png'); transform:none; }
-
   /* 5 HUD cards in a row */
   #game-screen .rd-hud{ position:static; top:auto; left:auto; right:auto; display:flex; flex-wrap:nowrap; gap:6px; padding:8px; border-radius:14px; }
   #game-screen .rd-chip{ flex:1; min-width:0; flex-direction:column; align-items:center; gap:3px; text-align:center; }
