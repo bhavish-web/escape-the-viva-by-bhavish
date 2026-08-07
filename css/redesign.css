@@ -1,10 +1,9 @@
 /* ============================================================
    ESCAPE THE VIVA — Gameplay Redesign (scoped to #game-screen)
-   v2: fixed click-blocking, character placement, mobile landscape.
+   v3: characters raised to sides, question card lower-center only.
    ============================================================ */
 :root{ --neon:#4ee1ff; --neon2:#a78bfa; --gold:#ffcf4a; --red:#ff5a5a; --org:#ff9f45; --grn:#39e08a; --glass:rgba(14,20,34,.62); --line:rgba(120,200,255,.16); }
 
-/* hide the fixed credit bar (it overlapped and blocked the buttons) */
 .credits{ display:none !important; }
 
 #game-screen{ position:relative; overflow:hidden; padding:0; }
@@ -43,33 +42,32 @@
 #game-screen .rd-ai{ font-size:11px; font-weight:800; padding:4px 12px; border-radius:20px; white-space:nowrap; background:rgba(57,224,138,.14); color:#8ff0ad; border:1px solid rgba(57,224,138,.35); }
 #game-screen .rd-ai.used{ background:rgba(255,90,90,.12); color:#ff9a90; border-color:rgba(255,90,90,.3); }
 
-/* SCENE: characters at the far edges, faces up */
-#game-screen .rd-scene{ position:absolute; inset:0; z-index:2; pointer-events:none; }
-#game-screen .rd-student{ position:absolute; left:0; bottom:0; width:25%; max-width:320px; display:flex; align-items:flex-end; justify-content:center; }
+/* SCENE: characters raised, anchored to the sides, ABOVE the question card */
+#game-screen .rd-scene{ position:absolute; left:0; right:0; top:104px; bottom:250px; z-index:2; pointer-events:none; }
+#game-screen .rd-student{ position:absolute; left:1%; bottom:0; width:22%; max-width:280px; display:flex; align-items:flex-end; justify-content:center; }
 #game-screen .rd-student img{ width:100%; height:auto; filter:drop-shadow(0 18px 26px rgba(0,0,0,.6)); transition:opacity .2s; }
 #game-screen .rd-student.noimg{ display:none; }
-#game-screen .rd-prof{ position:absolute; right:0; bottom:0; width:25%; max-width:320px; display:flex; flex-direction:column; align-items:center; }
+#game-screen .rd-prof{ position:absolute; right:1%; bottom:0; width:22%; max-width:280px; display:flex; flex-direction:column; align-items:center; }
 #game-screen .prof-wrap{ position:relative; width:100%; }
 #game-screen .rd-prof-img{ width:100%; height:auto; filter:drop-shadow(0 18px 26px rgba(0,0,0,.6)); transition:opacity .25s, transform .25s; }
 #game-screen .rd-prof.shake{ animation:rdShake .4s; }
 @keyframes rdShake{ 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
 #game-screen .rd-nameplate{ display:none; }
-#game-screen .prof-angry-effects{ position:absolute; top:4%; right:10%; font-size:28px; display:none; }
-#game-screen .speech-bubble{ position:absolute; top:6%; left:50%; transform:translateX(-50%); z-index:3; max-width:60%; text-align:center; background:rgba(250,250,255,.95); color:#1a2340; padding:9px 16px; border-radius:14px; font-size:13px; font-weight:600; pointer-events:none; }
-#game-screen .speech-bubble::after{ content:""; position:absolute; left:50%; bottom:-7px; transform:translateX(-50%); border:7px solid transparent; border-top-color:rgba(250,250,255,.95); border-bottom:0; }
+#game-screen .prof-angry-effects{ position:absolute; top:0; right:8%; font-size:26px; display:none; }
+#game-screen .speech-bubble{ display:none; }
 
-/* QUESTION ZONE — narrow, centered, raised above the lifeline row */
-#game-screen .rd-qzone{ position:absolute; left:50%; bottom:58px; transform:translateX(-50%); z-index:4; width:min(600px,54%); display:flex; gap:12px; align-items:flex-end; }
-#game-screen .rd-qcard{ flex:1; padding:14px 16px; border-radius:18px; }
+/* QUESTION ZONE — lower-center ONLY (question + options + timer) */
+#game-screen .rd-qzone{ position:absolute; left:50%; bottom:64px; transform:translateX(-50%); z-index:4; width:min(720px,64%); display:flex; gap:14px; align-items:flex-start; }
+#game-screen .rd-qcard{ flex:1; padding:14px 18px; border-radius:18px; }
 #game-screen .rd-qhead{ display:flex; gap:8px; margin-bottom:8px; }
 #game-screen .topic-badge,#game-screen .diff-badge{ font-size:10px; font-weight:800; padding:4px 10px; border-radius:8px; }
 #game-screen .topic-badge{ background:rgba(78,225,255,.16); color:#8fe9ff; border:1px solid rgba(78,225,255,.3); }
 #game-screen .diff-badge{ background:rgba(255,160,60,.16); color:#ffc27a; border:1px solid rgba(255,160,60,.3); }
-#game-screen .question-text{ font-size:clamp(14px,1.4vw,17px); font-weight:800; line-height:1.3; margin-bottom:10px; color:#eef4ff; }
+#game-screen .question-text{ font-size:clamp(15px,1.5vw,18px); font-weight:800; line-height:1.3; margin-bottom:10px; color:#eef4ff; }
 #game-screen .hint-box{ background:rgba(255,210,80,.1); border:1px solid rgba(255,210,80,.25); color:#ffe6a0; border-radius:10px; padding:8px 10px; font-size:12px; margin-bottom:8px; }
 #game-screen .options-grid{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-#game-screen .option-btn{ display:flex; align-items:center; gap:9px; text-align:left; cursor:pointer; padding:10px 12px; border-radius:12px; background:rgba(18,26,44,.8); border:1.5px solid rgba(120,200,255,.2); color:#e6eeff; font-size:12.5px; font-weight:600; transition:.15s; }
-#game-screen .option-btn:hover{ border-color:var(--neon); background:rgba(30,60,90,.8); box-shadow:0 0 14px rgba(78,225,255,.25); }
+#game-screen .option-btn{ display:flex; align-items:center; gap:9px; text-align:left; cursor:pointer; padding:11px 13px; border-radius:12px; background:rgba(18,26,44,.82); border:1.5px solid rgba(120,200,255,.2); color:#e6eeff; font-size:13px; font-weight:600; transition:.15s; }
+#game-screen .option-btn:hover{ border-color:var(--neon); background:rgba(30,60,90,.82); box-shadow:0 0 14px rgba(78,225,255,.25); }
 #game-screen .option-letter{ width:24px; height:24px; flex:0 0 auto; display:grid; place-items:center; border-radius:7px; font-weight:900; font-size:12px; color:#bfe9ff; background:rgba(78,225,255,.16); border:1px solid rgba(78,225,255,.3); }
 #game-screen .opt-text{ flex:1; }
 #game-screen .option-btn.correct{ border-color:var(--grn)!important; background:rgba(57,224,138,.24)!important; box-shadow:0 0 16px rgba(57,224,138,.3); }
@@ -80,8 +78,8 @@
 #game-screen .opt-tick{ margin-left:auto; color:var(--grn); font-weight:900; }
 #game-screen .next-btn{ display:inline-flex; align-items:center; gap:6px; margin:10px auto 0; padding:10px 26px; border:none; border-radius:24px; cursor:pointer; font-weight:800; color:#062; background:linear-gradient(120deg,#6dffa0,#2ecc71); box-shadow:0 8px 22px rgba(46,204,113,.4); }
 
-/* circular timer */
-#game-screen .rd-timer{ position:relative; width:clamp(74px,8vw,100px); aspect-ratio:1; flex:0 0 auto; display:grid; place-items:center; border-radius:50%; padding:0; }
+/* circular timer beside the card */
+#game-screen .rd-timer{ position:relative; width:clamp(78px,8vw,104px); aspect-ratio:1; flex:0 0 auto; display:grid; place-items:center; border-radius:50%; padding:0; margin-top:6px; }
 #game-screen .rd-timer svg{ width:100%; height:100%; transform:rotate(-90deg); }
 #game-screen .rr-bg{ fill:none; stroke:rgba(255,255,255,.12); stroke-width:9; }
 #game-screen .rr-fg{ fill:none; stroke:var(--org); stroke-width:9; stroke-linecap:round; stroke-dasharray:327; stroke-dashoffset:0; filter:drop-shadow(0 0 6px var(--org)); }
@@ -92,8 +90,8 @@
 #game-screen .rd-timer.urgent .rd-tnum span{ color:var(--red); }
 @keyframes rdRing{ to{ stroke-dashoffset:327; } }
 
-/* LIFELINES — centered row at the very bottom (clear of characters) */
-#game-screen .rd-lifelines{ position:absolute; left:50%; transform:translateX(-50%); bottom:12px; z-index:5; display:flex; flex-direction:row; gap:12px; }
+/* LIFELINES — centered row at the very bottom */
+#game-screen .rd-lifelines{ position:absolute; left:50%; transform:translateX(-50%); bottom:14px; z-index:5; display:flex; flex-direction:row; gap:12px; }
 #game-screen .rd-life{ display:flex; align-items:center; gap:8px; cursor:pointer; padding:9px 16px; border-radius:14px; color:#e7f6ff; font-weight:800; font-size:13px; }
 #game-screen .rd-life .li-ic{ font-size:16px; }
 #game-screen .rd-life b{ color:var(--neon); }
@@ -133,22 +131,22 @@
   #game-screen .rd-chip .mini{ display:none; }
   #game-screen .rd-context{ top:44px; left:6px; right:6px; padding:4px 10px; gap:8px; }
   #game-screen .rd-msg{ display:none; } #game-screen .rd-tag{ font-size:9px; padding:3px 8px; }
-  #game-screen .rd-student{ width:16%; } #game-screen .rd-prof{ width:16%; }
+  #game-screen .rd-scene{ top:74px; bottom:150px; }
+  #game-screen .rd-student{ width:15%; } #game-screen .rd-prof{ width:15%; }
   #game-screen .speech-bubble{ display:none; }
-  #game-screen .rd-qzone{ bottom:44px; width:66%; gap:8px; }
+  #game-screen .rd-qzone{ bottom:46px; width:74%; gap:8px; }
   #game-screen .rd-qcard{ padding:8px 12px; border-radius:12px; }
-  #game-screen .question-text{ font-size:12.5px; margin-bottom:7px; }
+  #game-screen .question-text{ font-size:13px; margin-bottom:7px; }
   #game-screen .option-btn{ padding:7px 9px; font-size:11px; gap:6px; }
   #game-screen .option-letter{ width:19px; height:19px; font-size:10px; }
-  #game-screen .rd-timer{ width:58px; }
+  #game-screen .rd-timer{ width:60px; margin-top:2px; }
   #game-screen .rd-tnum span{ font-size:16px; } #game-screen .rd-tnum small{ font-size:6px; }
-  #game-screen .rd-lifelines{ bottom:5px; gap:8px; }
+  #game-screen .rd-lifelines{ bottom:6px; gap:8px; }
   #game-screen .rd-life{ padding:6px 12px; font-size:11px; }
   #game-screen .next-btn{ padding:7px 18px; font-size:12px; margin-top:7px; }
 }
-/* very small / portrait fallback (rotate hint covers phones in portrait) */
 @media (max-width:600px) and (min-height:521px){
-  #game-screen .rd-student,#game-screen .rd-prof{ width:22%; }
-  #game-screen .rd-qzone{ width:88%; }
+  #game-screen .rd-student,#game-screen .rd-prof{ width:20%; }
+  #game-screen .rd-qzone{ width:90%; }
   #game-screen .rd-context{ flex-wrap:wrap; } #game-screen .rd-msg{ display:none; }
 }
