@@ -1,10 +1,10 @@
 /* ============================================================
    ESCAPE THE VIVA — Gameplay Redesign controller (loads LAST)
-   Wraps existing engine globals. No game logic changed.
+   v2: adds student reactions (4 images). No game logic changed.
    Assets:
      assets/classroom.png
      assets/professor/calm.png annoyed.png angry.png impressed.png
-     assets/student.png   (single; optional — hides if missing)
+     assets/student/nervous.png happy.png panic.png confident.png
    ============================================================ */
 (function(){
   const PROF_BY_ANGER = [
@@ -13,11 +13,21 @@
     {max:100, src:'assets/professor/angry.png'}
   ];
   const PROF_IMPRESSED = 'assets/professor/impressed.png';
-  const PROF_FALLBACK = 'assets/professor/calm.png';
+  const PROF_FALLBACK  = 'assets/professor/calm.png';
+
+  const STUD = {
+    nervous:   'assets/student/nervous.png',
+    happy:     'assets/student/happy.png',
+    panic:     'assets/student/panic.png',
+    confident: 'assets/student/confident.png'
+  };
+
   const MOTIVES = ['Stay calm. Think smart.','Breathe. You know this.','One question at a time.','Confidence beats panic.','Trust your prep.','Keep your cool.','You\u2019ve got this.'];
 
   function profSrc(a){ a=Math.max(0,Math.min(100,a||0)); return (PROF_BY_ANGER.find(t=>a<=t.max)||PROF_BY_ANGER[0]).src; }
   function anger(){ try{ return gameState.anger||0; }catch(e){ return 0; } }
+  function streak(){ try{ return gameState.streak||0; }catch(e){ return 0; } }
+
   function ensureProfImg(){
     const w=document.getElementById('prof-svg-wrapper'); if(!w) return null;
     let img=w.querySelector('img.rd-prof-img');
@@ -27,26 +37,40 @@
     return img;
   }
   function setProfByAnger(){ const img=ensureProfImg(); if(img){ const s=profSrc(anger()); if(img.getAttribute('src')!==s) img.src=s; } }
+  function setProfImpressed(){ const img=ensureProfImg(); if(img) img.src=PROF_IMPRESSED; }
 
-  window.addEventListener('load',function(){ ['assets/classroom.png','assets/student.png',PROF_IMPRESSED,...PROF_BY_ANGER.map(p=>p.src)].forEach(u=>{ const i=new Image(); i.src=u; }); });
+  function setStud(state){
+    const img=document.getElementById('rd-student-img'); if(!img) return;
+    const s=STUD[state]||STUD.nervous;
+    if(img.getAttribute('src')!==s) img.src=s;
+    const p=document.getElementById('rd-student'); if(p) p.classList.remove('noimg');
+  }
 
+  window.addEventListener('load',function(){
+    [PROF_IMPRESSED,'assets/classroom.png',...PROF_BY_ANGER.map(p=>p.src),...Object.values(STUD)].forEach(u=>{ const i=new Image(); i.src=u; });
+  });
+
+  /* professor + student rendering (was SVG) */
   window.renderProfessor=function(){ setProfByAnger(); };
   window.setProfExpression=function(state){
     const fx=document.getElementById('prof-angry-fx');
     if(fx) fx.style.display=(state==='angry'||state==='very-angry')?'block':'none';
     if(state==='happy'){
-      const img=ensureProfImg();
-      if(img) img.src=PROF_IMPRESSED;                 // show impressed on correct answers
+      setProfImpressed();                               // impressed on correct
+      setStud(streak()>=3 ? 'confident' : 'happy');     // student happy / confident
       if(typeof playHappyChime==='function') playHappyChime();
+    } else if(state==='angry' || state==='very-angry'){
+      setProfByAnger(); setStud('panic');               // student panics
+      if(state==='very-angry'){ flashScene(); shakeProf(); }
+      if(typeof playAngrySound==='function') playAngrySound();
     } else {
-      setProfByAnger();                               // back to anger-based mood
-      if(state==='very-angry'){ flashScene(); shakeProf(); if(typeof playAngrySound==='function') playAngrySound(); }
-      else if(state==='angry'){ if(typeof playAngrySound==='function') playAngrySound(); }
+      setProfByAnger(); setStud('nervous');             // default nervous
     }
   };
   function flashScene(){ const f=document.getElementById('rd-flash'); if(!f) return; f.style.opacity=.5; setTimeout(()=>f.style.opacity=0,150); }
   function shakeProf(){ const p=document.querySelector('#game-screen .rd-prof'); if(!p) return; p.classList.remove('shake'); void p.offsetWidth; p.classList.add('shake'); setTimeout(()=>p.classList.remove('shake'),420); }
 
+  /* context strip */
   function updateContext(){
     try{
       const subj=(typeof getSubject==='function'&&gameState.subject)?getSubject(gameState.subject):null;
@@ -61,18 +85,22 @@
   if(typeof loadQuestion==='function'){ const _l=loadQuestion; window.loadQuestion=function(){ _l.apply(this,arguments);
     const m=document.getElementById('rd-motivate'); if(m) m.textContent=MOTIVES[Math.floor(Math.random()*MOTIVES.length)];
     const pr=document.getElementById('rd-progress'); if(pr){ const p=Math.round(((gameState.currentQ||0)/(gameState.totalQ||10))*100); pr.style.width=p+'%'; }
-    updateContext(); }; }
+    setStud('nervous'); updateContext();
+  }; }
 
+  /* lifelines */
   function markUsed(btnId,countId){ const b=document.getElementById(btnId); if(b) b.classList.add('used'); const c=document.getElementById(countId); if(c) c.textContent='x0'; }
   if(typeof useHint==='function'){ const _h=useHint; window.useHint=function(){ _h.apply(this,arguments); markUsed('btn-hint','hint-count'); const ai=document.getElementById('rd-aihint'); if(ai){ ai.textContent='\uD83D\uDCA1 Hint used'; ai.classList.add('used'); } }; }
   if(typeof useFiftyFifty==='function'){ const _f=useFiftyFifty; window.useFiftyFifty=function(){ _f.apply(this,arguments); markUsed('btn-5050','fifty-count'); }; }
 
+  /* circular timer */
   if(typeof startTimer==='function'){ const _s=startTimer; window.startTimer=function(){ _s.apply(this,arguments);
     const ring=document.getElementById('rd-ring'), num=document.getElementById('timer-num'), orb=document.getElementById('timer-display');
     const dur=parseInt(num&&num.textContent)||15; if(orb) orb.classList.remove('urgent');
     if(ring){ ring.style.animation='none'; void ring.offsetWidth; ring.style.animation='rdRing '+dur+'s linear forwards'; } }; }
   if(typeof stopTimer==='function'){ const _st=stopTimer; window.stopTimer=function(){ _st.apply(this,arguments); const r=document.getElementById('rd-ring'); if(r) r.style.animationPlayState='paused'; }; }
 
+  /* landscape + cinematic start */
   function isMobile(){ return matchMedia('(pointer:coarse)').matches || innerWidth<900; }
   function goLandscape(){ if(!isMobile()) return;
     try{ const el=document.documentElement; const rf=el.requestFullscreen||el.webkitRequestFullscreen; if(rf) rf.call(el); }catch(e){}
@@ -94,7 +122,7 @@
       const hc=document.getElementById('hint-count'); if(hc) hc.textContent='x1';
       const fc=document.getElementById('fifty-count'); if(fc) fc.textContent='x1';
       const ai=document.getElementById('rd-aihint'); if(ai){ ai.textContent='\uD83D\uDCA1 Hint ready'; ai.classList.remove('used'); }
-      setProfByAnger(); updateContext();
+      setStud('nervous'); setProfByAnger(); updateContext();
     },300);
     setTimeout(function(){ if(ov) ov.classList.remove('play'); },1000);
   }; }
