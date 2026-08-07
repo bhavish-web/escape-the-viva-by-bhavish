@@ -390,5 +390,13 @@
 <script src="js/enhancements.js"></script>
 <script src="js/phase4.js"></script>
 <script src="js/redesign.js"></script>
+<script>
+  window.addEventListener('load', function(){
+    if (typeof spawnParticles === 'function') {
+      const _sp = spawnParticles;
+      window.spawnParticles = function(){ try { return _sp.apply(this, arguments); } catch(e){} };
+    }
+  });
+</script>
 </body>
 </html>
