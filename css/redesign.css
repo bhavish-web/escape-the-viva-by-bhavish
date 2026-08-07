@@ -8,6 +8,11 @@
 .credits{ display:none !important; }
 /* kill the duplicate lifelines block left in the markup (direct child of #game-screen) */
 #game-screen > .rd-lifelines{ display:none !important; }
+/* A: fit the game to the VISIBLE viewport on phones (dvh excludes the browser bars) */
+@media (max-width:900px){ #game-container{ width:100vw; height:100vh; height:100dvh; } }
+/* B: fullscreen toggle button in the HUD (Android hides the bars; iOS keeps everything fitted) */
+#game-screen #rd-fs{ margin-left:8px; flex:0 0 auto; width:32px; height:32px; display:grid; place-items:center; border-radius:10px; font-size:15px; color:#dbe6ff; cursor:pointer; background:rgba(30,40,66,.7); border:1px solid var(--line); }
+#game-screen #rd-fs:hover{ filter:brightness(1.2); }
 
 #game-screen{ position:relative; overflow:hidden; padding:0; }
 #game-screen .rd-bg{ position:absolute; inset:0; z-index:0; background:url('../assets/classroom.png') center/cover no-repeat #0a0e18; transform:scale(1.04); }
