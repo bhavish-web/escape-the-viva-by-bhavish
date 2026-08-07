@@ -1,6 +1,6 @@
 /* ============================================================
    ESCAPE THE VIVA — Gameplay Redesign controller (loads LAST)
-   v2: adds student reactions (4 images). No game logic changed.
+   v3: student reactions + freeze guard. No game logic changed.
    Assets:
      assets/classroom.png
      assets/professor/calm.png annoyed.png angry.png impressed.png
@@ -48,6 +48,10 @@
 
   window.addEventListener('load',function(){
     [PROF_IMPRESSED,'assets/classroom.png',...PROF_BY_ANGER.map(p=>p.src),...Object.values(STUD)].forEach(u=>{ const i=new Image(); i.src=u; });
+    // freeze guard: old effect fns append to elements removed in the redesign -> make them safe
+    ['spawnParticles','createParticles','spawnConfetti','shakeScreen','flashScreen'].forEach(function(fn){
+      if(typeof window[fn]==='function'){ const _o=window[fn]; window[fn]=function(){ try{ return _o.apply(this,arguments); }catch(e){} }; }
+    });
   });
 
   /* professor + student rendering (was SVG) */
@@ -56,15 +60,15 @@
     const fx=document.getElementById('prof-angry-fx');
     if(fx) fx.style.display=(state==='angry'||state==='very-angry')?'block':'none';
     if(state==='happy'){
-      setProfImpressed();                               // impressed on correct
-      setStud(streak()>=3 ? 'confident' : 'happy');     // student happy / confident
+      setProfImpressed();
+      setStud(streak()>=3 ? 'confident' : 'happy');
       if(typeof playHappyChime==='function') playHappyChime();
     } else if(state==='angry' || state==='very-angry'){
-      setProfByAnger(); setStud('panic');               // student panics
+      setProfByAnger(); setStud('panic');
       if(state==='very-angry'){ flashScene(); shakeProf(); }
       if(typeof playAngrySound==='function') playAngrySound();
     } else {
-      setProfByAnger(); setStud('nervous');             // default nervous
+      setProfByAnger(); setStud('nervous');
     }
   };
   function flashScene(){ const f=document.getElementById('rd-flash'); if(!f) return; f.style.opacity=.5; setTimeout(()=>f.style.opacity=0,150); }
