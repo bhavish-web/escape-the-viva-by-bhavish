@@ -1,5 +1,5 @@
 // api/generate.js
-// Generates viva questions using Groq (Llama 3.3 70B) based on syllabus + topic + difficulty
+// Generates viva questions using Groq based on syllabus + topic + difficulty (Bloom's taxonomy)
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -17,10 +17,17 @@ export default async function handler(req, res) {
   }
 
   const difficultyGuide = {
-    easy: "definitions, basic terminology, simple recall questions",
-    medium: "conceptual understanding, comparisons, practical applications",
-    hard: "deep analysis, advanced scenarios, edge cases, tricky concepts"
+    easy: "Bloom's Levels L1-L2 (Remember, Understand): recall of definitions and terminology, and explaining or describing concepts in simple terms",
+    medium: "Bloom's Levels L3-L4 (Apply, Analyze): applying concepts to new situations, working through problems, comparing approaches, and breaking down how things relate",
+    hard: "Bloom's Levels L5-L6 (Evaluate, Create): judging trade-offs, justifying choices, critiquing approaches, and designing or proposing solutions to non-obvious scenarios"
   };
+
+  const bloomForDifficulty = {
+    easy: ["L1", "L2"],
+    medium: ["L3", "L4"],
+    hard: ["L5", "L6"]
+  };
+  const allowedBloom = bloomForDifficulty[difficulty] || bloomForDifficulty.medium;
 
   const prompt = `You are a strict engineering professor creating viva exam questions.
 Generate exactly 30 multiple choice questions based ONLY on this syllabus content.
@@ -39,6 +46,8 @@ STRICT RULES:
 - Questions must be technically accurate
 - Keep questions clear and concise
 - The wrong options should be plausible but clearly wrong
+- Every question MUST match the cognitive level for this difficulty: ${difficulty.toUpperCase()} uses Bloom's levels ${allowedBloom.join(" and ")} only
+- Tag each question with its Bloom's level in a "bloom" field (one of ${allowedBloom.join(", ")})
 
 Return ONLY a valid JSON array. No explanation, no markdown, no extra text.
 Use exactly this format:
@@ -54,7 +63,8 @@ Use exactly this format:
     "professorAsk": "Short version of question for professor bubble",
     "correctReaction": "Short funny positive reaction from professor",
     "wrongReaction": "Short funny angry reaction from professor",
-    "wrongComment": "Short educational comment about correct answer"
+    "wrongComment": "Short educational comment about correct answer",
+    "bloom": "${allowedBloom[0]}"
   }
 ]
 
@@ -125,7 +135,8 @@ Note: "correct" is always 0 in your output (the first option). The game will shu
       professorAsk: q.professorAsk || q.question,
       correctReaction: q.correctReaction || "Good answer! You actually studied! 👍",
       wrongReaction: q.wrongReaction || "WRONG! Did you even open the textbook?! 😡",
-      wrongComment: q.wrongComment || "Study this topic carefully!"
+      wrongComment: q.wrongComment || "Study this topic carefully!",
+      bloom: (typeof q.bloom === "string" && /^L[1-6]$/.test(q.bloom.trim().toUpperCase())) ? q.bloom.trim().toUpperCase() : allowedBloom[0]
     }));
 
     return res.status(200).json({ questions: final });
