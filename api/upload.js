@@ -254,38 +254,43 @@ function cleanTopicList(list) {
   return out;
 }
 
-// ── Split raw syllabus text into UNITS (Unit I/II/... with title + body) ──
+// ── Split raw syllabus text into UNITS (Unit 1/2/... — number only) ──
 function splitIntoUnits(rawText) {
   if (!rawText) return [];
   const text = rawText.replace(/\r/g, "");
-  // Match "UNIT - I", "UNIT I", "UNIT-1", "Unit 1", etc. and capture where each starts
-  const re = /(?:^|\n)\s*UNIT\s*[-:]?\s*([IVXLCDM]+|\d+)\b[^\n]*/gi;
+  // Match a unit HEADER at the start of a line: "UNIT - I", "UNIT I", "UNIT-1", "Unit 1"
+  const re = /(?:^|\n)\s*UNIT\s*[-:]?\s*([IVXLCDM]+|\d+)\b/gi;
   const marks = [];
   let m;
   while ((m = re.exec(text)) !== null) {
-    marks.push({ label: m[1].toUpperCase(), index: m.index, headerEnd: re.lastIndex });
+    const num = romanOrNum(m[1].toUpperCase());
+    marks.push({ num, index: m.index, headerEnd: re.lastIndex });
   }
   if (marks.length < 2) return []; // not a clearly unit-structured syllabus
-  const units = [];
+
+  const byNum = new Map();  // de-duplicate: keep first occurrence per unit number
   for (let i = 0; i < marks.length; i++) {
+    const n = marks[i].num;
+    if (byNum.has(n)) continue;
     const start = marks[i].headerEnd;
     const end = i + 1 < marks.length ? marks[i + 1].index : text.length;
-    let body = text.slice(start, end).trim();
-    // First non-empty line of the body is usually the unit TITLE
-    const lines = body.split("\n").map(l => l.trim()).filter(Boolean);
-    let title = "";
-    if (lines.length) {
-      // A good title is short-ish and not a full paragraph
-      if (lines[0].length <= 70) title = lines[0].replace(/[:.]$/, "").trim();
-    }
-    const num = romanOrNum(marks[i].label);
-    units.push({
-      id: "Unit " + num,
-      title: title || "",
-      label: title ? ("Unit " + num + " — " + title) : ("Unit " + num),
-      text: body.slice(0, 4000)
+    const body = text.slice(start, end).trim().slice(0, 4000);
+    // Require some real content so we don't create empty/junk units
+    if (body.replace(/\s/g, "").length < 25) continue;
+    byNum.set(n, {
+      id: "Unit " + n,
+      title: "",                 // number only, per request
+      label: "Unit " + n,        // button shows just "Unit 1", "Unit 2", ...
+      text: body
     });
   }
+
+  // Sort by numeric unit order and return
+  const units = Array.from(byNum.values()).sort((a, b) => {
+    const na = parseInt(a.id.replace(/\D/g, ""), 10);
+    const nb = parseInt(b.id.replace(/\D/g, ""), 10);
+    return na - nb;
+  });
   return units.slice(0, 12);
 }
 
@@ -359,7 +364,10 @@ export default async function handler(req, res) {
         });
       }
 
-      const unitsImg = splitIntoUnits(syllabusText);
+      // Only attempt unit-splitting on image text if it clearly has multiple real UNIT headers.
+      // (Vision output is often the model's rewrite, so be conservative to avoid junk units.)
+      let unitsImg = splitIntoUnits(syllabusText);
+      if (unitsImg.length < 2) unitsImg = [];
       return res.status(200).json({ topics, units: unitsImg, syllabusText: syllabusText.slice(0, 6000) });
     }
 
@@ -369,6 +377,7 @@ export default async function handler(req, res) {
       const hasText = extractedText && extractedText.trim().length > 80;
 
       if (hasText) {
+        // Text PDF — use text-based topic detection via Groq
         syllabusText = extractedText.slice(0, 8000);
         const topicsResponse = await extractTopicsFromText(syllabusText);
         topics = parseTopics(topicsResponse);
