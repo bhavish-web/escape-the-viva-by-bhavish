@@ -88,9 +88,14 @@
       setProfByAnger();
     }catch(e){}
   }
-
-  if(typeof updateHUD==='function'){ const _u=updateHUD; window.updateHUD=function(){ const r=_u.apply(this,arguments); updateContext();
-    try{ const cur=streak(); if(cur>_lastStreak){ const sd=document.getElementById('streak-display'); const chip=sd&&sd.closest?sd.closest('.rd-chip'):null; if(chip){ chip.classList.remove('pop'); void chip.offsetWidth; chip.classList.add('pop'); } } _lastStreak=cur; }catch(e){}
+if(typeof updateHUD==='function'){ const _u=updateHUD; window.updateHUD=function(){ const r=_u.apply(this,arguments); updateContext();
+    try{
+      const cur=streak();
+      const sd=document.getElementById('streak-display');
+      if(sd) sd.textContent = String(cur);          // overwrite engine's "🔥 N STREAK" -> just the number
+      if(cur>_lastStreak){ const chip=sd&&sd.closest?sd.closest('.rd-chip'):null; if(chip){ chip.classList.remove('pop'); void chip.offsetWidth; chip.classList.add('pop'); } }
+      _lastStreak=cur;
+    }catch(e){}
     return r; }; }
   if(typeof loadQuestion==='function'){ const _l=loadQuestion; window.loadQuestion=function(){ const r=_l.apply(this,arguments);
     try{ impressedUntil=0;
