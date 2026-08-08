@@ -134,16 +134,16 @@
   #game-screen .rd-bg{ background-image:url('../assets/classroom-portrait.png'); transform:none; }
 
   /* HUD — shorter, streak shows just 🔥 + number */
-  #game-screen .rd-hud{ position:static; top:auto; left:auto; right:auto; display:flex; flex-wrap:nowrap; gap:6px; padding:6px 8px; border-radius:13px; }
+ #game-screen .rd-hud{ position:static; top:auto; left:auto; right:auto; display:flex; flex-wrap:nowrap; gap:6px; padding:6px 8px; border-radius:13px; }
   #game-screen .rd-chip{ flex:1; min-width:0; flex-direction:column; align-items:center; gap:2px; text-align:center; }
   #game-screen .rd-chip .ic{ font-size:16px; } #game-screen .rd-chip .lb{ font-size:7px; } #game-screen .rd-chip .vl{ font-size:13px; min-height:13px; }
   #game-screen .rd-chip.q{ margin:0; padding:0; border-left:none; }
   #game-screen .rd-chip.q .vl{ color:#eaf1ff; }
-  #game-screen .rd-chip:nth-child(3){ flex-direction:row; gap:5px; overflow:hidden; }
-  #game-screen .rd-chip:nth-child(3) .lb{ display:none; }         /* remove "STREAK" text */
-  #game-screen .rd-chip:nth-child(3) .ic{ font-size:16px; }
-  #game-screen #streak-display{ display:inline-block; font-size:16px; font-weight:900; color:#ff9f45; line-height:1; animation:none !important; transform:none !important; white-space:nowrap; overflow:hidden; }
-  #game-screen #streak-display *{ display:none !important; }
+  #game-screen .streak-chip{ flex-direction:row !important; gap:5px; overflow:hidden; }
+  #game-screen .streak-chip .lb{ display:none !important; }         /* remove "STREAK" text */
+  #game-screen .streak-chip .ic{ font-size:16px; }
+  #game-screen .streak-chip #streak-display{ display:inline-block; font-size:16px; font-weight:900; color:#ff9f45; line-height:1; animation:none !important; transform:none !important; white-space:nowrap; overflow:hidden; }
+  #game-screen .streak-chip #streak-display *{ display:none !important; }
   #game-screen #streak-popup{ display:none !important; }
   #game-screen .rd-chip.pop{ animation:streakPop .45s ease; }
   #game-screen .rd-chip .mini{ display:none; }
