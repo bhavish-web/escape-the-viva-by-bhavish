@@ -143,33 +143,53 @@ async function groqVisionCompletion(imageBuffer, mimeType, prompt) {
 // ── Use Groq Vision to read an image buffer ────────────────────
 
 async function extractSyllabusViaVision(imageBuffer, mimeType) {
-  const prompt = `You are reading a university engineering syllabus document.
-This may be a scanned page, a photo, or a screenshot.
+  const prompt = `You are reading a university engineering syllabus document (a photo, scan, or screenshot).
 
-Extract ALL syllabus content you can see. Focus on:
-- Subject / Course names
-- Unit numbers and unit titles
-- Topic names and subtopic names
-- Chapter headings
+The syllabus is organized into UNITS (UNIT - I, UNIT - II, UNIT - III, UNIT - IV, ...).
+Read the document and return the content grouped BY UNIT.
 
-Return ONLY a JSON object in this exact format, no markdown, no extra text:
+Return ONLY a JSON object in this EXACT format. No markdown, no commentary, no extra text before or after:
 {
-  "subjects": ["Subject Name 1", "Subject Name 2"],
-  "topics": ["Topic 1", "Topic 2", "Topic 3", "Topic 4", "Topic 5", "Topic 6", "Topic 7", "Topic 8"],
-  "rawText": "all the text you could read from the document as a single string"
+  "units": [
+    { "number": 1, "content": "all the syllabus text that belongs to Unit 1 (topics, subtopics, keywords)" },
+    { "number": 2, "content": "all the syllabus text that belongs to Unit 2" }
+  ],
+  "topics": ["Broad Topic 1", "Broad Topic 2", "Broad Topic 3", "Broad Topic 4", "Broad Topic 5", "Broad Topic 6"],
+  "rawText": "all readable text from the document as one string"
 }
 
-Rules:
-- topics array must have between 4 and 10 items
-- each topic must be a REAL academic topic/unit TITLE (e.g. "Problem Solving by Search", "Propositional Logic")
-- REMOVE unit numbers and labels: "UNIT I: Propositional Logic" -> "Propositional Logic"
-- do NOT include meta lines like "Identify the Subject", "Units and Topics", "Title", "Syllabus", or the bare words "Unit"/"Chapter"
-- GROUP small subtopics under their broader theme; do NOT list every tiny subtopic
-- return 6 to 12 BROAD topics covering EVERY unit (skip none), grouping tiny subtopics under their theme; each 2-5 words, no duplicates
-- rawText should contain as much text from the image as possible
-- if you cannot read the document clearly, still return valid JSON with what you can see`;
+STRICT RULES:
+- "units": one object per unit you can see. "number" is the unit number (1,2,3,4...). "content" is the actual academic text of that unit (list its topics/subtopics). Do NOT put commentary, reasoning, or headings like "Identify the subject" in content.
+- If the document has no clear units, return "units": [].
+- "topics": 6-12 BROAD topic names (2-5 words each), grouping tiny subtopics under their theme. No unit numbers, no meta lines.
+- "rawText": as much readable text as possible.
+- Output ONLY the JSON object. Do NOT write any explanation or thinking.`;
 
   return await groqVisionCompletion(imageBuffer, mimeType, prompt);
+}
+
+// Build clean unit objects from the vision model's structured "units" array
+function unitsFromVision(parsedUnits) {
+  if (!Array.isArray(parsedUnits)) return [];
+  const byNum = new Map();
+  for (const u of parsedUnits) {
+    if (!u || typeof u !== "object") continue;
+    let n = u.number;
+    if (typeof n === "string") n = parseInt(n.replace(/\D/g, ""), 10);
+    if (!Number.isFinite(n) || n < 1 || n > 20) continue;
+    const content = (typeof u.content === "string" ? u.content : "").trim();
+    if (content.replace(/\s/g, "").length < 25) continue;   // needs real content
+    if (byNum.has(n)) continue;
+    byNum.set(n, {
+      id: "Unit " + n,
+      title: "",
+      label: "Unit " + n,          // number-only button
+      text: content.slice(0, 4000)
+    });
+  }
+  return Array.from(byNum.values()).sort((a, b) =>
+    parseInt(a.id.replace(/\D/g, ""), 10) - parseInt(b.id.replace(/\D/g, ""), 10)
+  ).slice(0, 12);
 }
 
 // ── Use Groq text to extract topics from text ──────────────────
@@ -211,7 +231,6 @@ function parseTopics(responseText) {
       return cleanTopicList(parsed.topics);
     }
   } catch (e) {
-    // Fallback: try to salvage a JSON array embedded in the text
     const arrMatch = responseText.match(/\[[\s\S]*\]/);
     if (arrMatch) {
       try {
@@ -221,10 +240,9 @@ function parseTopics(responseText) {
         }
       } catch (_) {}
     }
-    // Last resort: line-by-line, but strip junk/meta lines
     const lines = responseText
       .split("\n")
-      .map(l => l.replace(/^[\s\-\*\d\.\)]+/, "").trim())   // strip bullets/numbers
+      .map(l => l.replace(/^[\s\-\*\d\.\)]+/, "").trim())
       .map(l => l.replace(/^(unit|chapter|module|topic|title)\s*[ivxlcdm0-9]*[:\-\.]?\s*/i, "").trim());
     return cleanTopicList(lines);
   }
@@ -244,7 +262,7 @@ function cleanTopicList(list) {
       .replace(/\s+/g, " ")
       .trim();
     if (t.length < 3 || t.length > 60) continue;
-    if (BAD.test(t)) continue;                 // drop meta/instruction lines
+    if (BAD.test(t)) continue;
     const key = t.toLowerCase();
     if (seen.has(key)) continue;
     seen.add(key);
@@ -258,7 +276,6 @@ function cleanTopicList(list) {
 function splitIntoUnits(rawText) {
   if (!rawText) return [];
   const text = rawText.replace(/\r/g, "");
-  // Match a unit HEADER at the start of a line: "UNIT - I", "UNIT I", "UNIT-1", "Unit 1"
   const re = /(?:^|\n)\s*UNIT\s*[-:]?\s*([IVXLCDM]+|\d+)\b/gi;
   const marks = [];
   let m;
@@ -266,26 +283,24 @@ function splitIntoUnits(rawText) {
     const num = romanOrNum(m[1].toUpperCase());
     marks.push({ num, index: m.index, headerEnd: re.lastIndex });
   }
-  if (marks.length < 2) return []; // not a clearly unit-structured syllabus
+  if (marks.length < 2) return [];
 
-  const byNum = new Map();  // de-duplicate: keep first occurrence per unit number
+  const byNum = new Map();
   for (let i = 0; i < marks.length; i++) {
     const n = marks[i].num;
     if (byNum.has(n)) continue;
     const start = marks[i].headerEnd;
     const end = i + 1 < marks.length ? marks[i + 1].index : text.length;
     const body = text.slice(start, end).trim().slice(0, 4000);
-    // Require some real content so we don't create empty/junk units
     if (body.replace(/\s/g, "").length < 25) continue;
     byNum.set(n, {
       id: "Unit " + n,
-      title: "",                 // number only, per request
-      label: "Unit " + n,        // button shows just "Unit 1", "Unit 2", ...
+      title: "",
+      label: "Unit " + n,
       text: body
     });
   }
 
-  // Sort by numeric unit order and return
   const units = Array.from(byNum.values()).sort((a, b) => {
     const na = parseInt(a.id.replace(/\D/g, ""), 10);
     const nb = parseInt(b.id.replace(/\D/g, ""), 10);
@@ -351,23 +366,26 @@ export default async function handler(req, res) {
         syllabusText = visionResponse;
       }
 
+      let unitsImg = [];
       if (parsed) {
         if (parsed.topics && Array.isArray(parsed.topics)) {
           topics = cleanTopicList(parsed.topics);
         }
         syllabusText = parsed.rawText || visionResponse;
+        unitsImg = unitsFromVision(parsed.units);
       }
 
-      if (topics.length === 0) {
+      if (unitsImg.length < 2) {
+        const alt = splitIntoUnits(syllabusText);
+        unitsImg = alt.length >= 2 ? alt : [];
+      }
+
+      if (topics.length === 0 && unitsImg.length === 0) {
         return res.status(400).json({
           error: "We couldn't extract enough readable syllabus content. Please upload a clearer image or another document."
         });
       }
 
-      // Only attempt unit-splitting on image text if it clearly has multiple real UNIT headers.
-      // (Vision output is often the model's rewrite, so be conservative to avoid junk units.)
-      let unitsImg = splitIntoUnits(syllabusText);
-      if (unitsImg.length < 2) unitsImg = [];
       return res.status(200).json({ topics, units: unitsImg, syllabusText: syllabusText.slice(0, 6000) });
     }
 
@@ -377,7 +395,6 @@ export default async function handler(req, res) {
       const hasText = extractedText && extractedText.trim().length > 80;
 
       if (hasText) {
-        // Text PDF — use text-based topic detection via Groq
         syllabusText = extractedText.slice(0, 8000);
         const topicsResponse = await extractTopicsFromText(syllabusText);
         topics = parseTopics(topicsResponse);
@@ -398,7 +415,6 @@ export default async function handler(req, res) {
       }
     }
 
-    // ── Unsupported file type ───────────────────────────────────
     return res.status(400).json({
       error: "Unsupported file type. Please upload a PDF, JPG, PNG, or WEBP file."
     });
