@@ -3,7 +3,9 @@
 
 let syllabusText = "";
 let detectedTopics = [];
+let detectedUnits = [];
 let selectedTopic = "";
+let selectedUnitText = "";
 let isGenerating = false;
 let isUploading = false;
 
@@ -52,7 +54,9 @@ function backToStart() {
 function resetAISetup() {
   syllabusText = "";
   detectedTopics = [];
+  detectedUnits = [];
   selectedTopic = "";
+  selectedUnitText = "";
   isGenerating = false;
   isUploading = false;
 
@@ -160,7 +164,6 @@ async function handleSyllabusUpload(input) {
 async function processFile(file) {
   if (isUploading) return;
 
-  // Validate
   const validationError = validateFile(file);
   if (validationError) {
     showAIError(validationError);
@@ -170,7 +173,6 @@ async function processFile(file) {
 
   isUploading = true;
 
-  // Reset downstream steps
   document.getElementById("ai-step2").style.display = "none";
   document.getElementById("ai-step3").style.display = "none";
   document.getElementById("ai-step4").style.display = "none";
@@ -178,7 +180,6 @@ async function processFile(file) {
 
   setUploadAreaState("uploading");
 
-  // Show upload loading with cycling messages
   const uploadLoadingEl = document.getElementById("ai-upload-loading");
   const uploadLoadingText = document.getElementById("ai-upload-loading-text");
   uploadLoadingEl.style.display = "flex";
@@ -212,9 +213,14 @@ async function processFile(file) {
 
     syllabusText = data.syllabusText || "";
     detectedTopics = data.topics || [];
+    detectedUnits = Array.isArray(data.units) ? data.units : [];
 
     setUploadAreaState("success", file.name);
-    showTopics(detectedTopics);
+    if (detectedUnits.length >= 2) {
+      showUnits(detectedUnits);
+    } else {
+      showTopics(detectedTopics);
+    }
 
   } catch (err) {
     clearInterval(msgInterval);
@@ -226,7 +232,40 @@ async function processFile(file) {
   isUploading = false;
 }
 
-// ── Topics ─────────────────────────────────────────────────────
+// ── Units / Topics ─────────────────────────────────────────────
+
+function showUnits(units) {
+  const step2 = document.getElementById("ai-step2");
+  const topicsContainer = document.getElementById("ai-topics");
+  step2.style.display = "block";
+  topicsContainer.innerHTML = "";
+  selectedTopic = "";
+  selectedUnitText = "";
+
+  units.forEach(unit => {
+    const btn = document.createElement("button");
+    btn.className = "ai-topic-btn";
+    btn.textContent = unit.label || unit.id;
+    btn.onclick = () => selectUnit(unit, btn);
+    topicsContainer.appendChild(btn);
+  });
+
+  document.getElementById("ai-step3").style.display = "none";
+  document.getElementById("ai-step4").style.display = "none";
+  step2.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function selectUnit(unit, btn) {
+  playClickSound();
+  selectedTopic = unit.title || unit.id;
+  selectedUnitText = unit.text || "";
+  document.querySelectorAll(".ai-topic-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  const step3 = document.getElementById("ai-step3");
+  step3.style.display = "block";
+  document.getElementById("ai-step4").style.display = "none";
+  step3.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
 
 function showTopics(topics) {
   if (!topics || topics.length === 0) {
@@ -250,14 +289,13 @@ function showTopics(topics) {
 
   document.getElementById("ai-step3").style.display = "none";
   document.getElementById("ai-step4").style.display = "none";
-
-  // Scroll to topics
   step2.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
 function selectTopic(topic, btn) {
   playClickSound();
   selectedTopic = topic;
+  selectedUnitText = "";
   document.querySelectorAll(".ai-topic-btn").forEach(b => b.classList.remove("active"));
   btn.classList.add("active");
   const step3 = document.getElementById("ai-step3");
@@ -309,7 +347,7 @@ async function generateAndStart() {
       body: JSON.stringify({
         topic: selectedTopic,
         difficulty: gameState.difficulty,
-        syllabusText: syllabusText
+        syllabusText: (selectedUnitText && selectedUnitText.length > 40) ? selectedUnitText : syllabusText
       })
     });
 
