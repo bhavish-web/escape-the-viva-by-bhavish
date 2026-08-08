@@ -1,7 +1,6 @@
 /* ============================================================
    ESCAPE THE VIVA — Gameplay Redesign controller (loads LAST)
-   v7: does NOT override startGame (fixes the skipped home screen
-       + Loading freeze). Layout, images, timer, guards intact.
+   v7: no startGame override, portrait polish, streak pop.
    ============================================================ */
 (function(){
   const PROF_BY_ANGER = [
@@ -14,6 +13,7 @@
   const STUD = { nervous:'assets/student/nervous.png', happy:'assets/student/happy.png', panic:'assets/student/panic.png', confident:'assets/student/confident.png' };
   const MOTIVES = ['Stay calm. Think smart.','Breathe. You know this.','One question at a time.','Confidence beats panic.','Trust your prep.','Keep your cool.','You\u2019ve got this.'];
   let impressedUntil = 0;
+  let _lastStreak = 0;
 
   function profSrc(a){ a=Math.max(0,Math.min(100,a||0)); return (PROF_BY_ANGER.find(t=>a<=t.max)||PROF_BY_ANGER[0]).src; }
   function anger(){ try{ return gameState.anger||0; }catch(e){ return 0; } }
@@ -89,11 +89,11 @@
     }catch(e){}
   }
 
-  if(typeof updateHUD==='function'){ const _u=updateHUD; window.updateHUD=function(){ const r=_u.apply(this,arguments); updateContext(); return r; }; }
+  if(typeof updateHUD==='function'){ const _u=updateHUD; window.updateHUD=function(){ const r=_u.apply(this,arguments); updateContext();
+    try{ const cur=streak(); if(cur>_lastStreak){ const sd=document.getElementById('streak-display'); const chip=sd&&sd.closest?sd.closest('.rd-chip'):null; if(chip){ chip.classList.remove('pop'); void chip.offsetWidth; chip.classList.add('pop'); } } _lastStreak=cur; }catch(e){}
+    return r; }; }
   if(typeof loadQuestion==='function'){ const _l=loadQuestion; window.loadQuestion=function(){ const r=_l.apply(this,arguments);
     try{ impressedUntil=0;
-      // reset lifelines display for a fresh game/question
-      ['btn-hint','btn-5050'].forEach(id=>{ const b=document.getElementById(id); if(b && !gameState['lifelineUsed'+(id==='btn-hint'?'Hint':'5050')]) b.classList.remove('used'); });
       const m=document.getElementById('rd-motivate'); if(m) m.textContent=MOTIVES[Math.floor(Math.random()*MOTIVES.length)];
       const pr=document.getElementById('rd-progress'); if(pr){ const p=Math.round(((gameState.currentQ||0)/(gameState.totalQ||10))*100); pr.style.width=p+'%'; }
       setStud('nervous'); setProfByAnger(); updateContext(); applyLayout();
