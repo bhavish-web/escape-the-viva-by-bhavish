@@ -1,8 +1,8 @@
 /* ============================================================
    ESCAPE THE VIVA — Visual Polish layer (loads LAST)
    7 features: results screen, professor/bg reaction, timer tension,
-   Bloom badge, confetti, answer reveal, screen transitions.
-   Crash-proof: every wrapper runs the original first.
+   Bloom badge, confetti, answer reveal, smooth screen transitions.
+   Crash-proof: every wrapper runs the original first. No MutationObserver.
    ============================================================ */
 (function(){
   "use strict";
@@ -115,7 +115,7 @@
       [['stat-score'],['stat-highscore']].forEach(([id])=>{
         const el = $(id); if(!el) return;
         const m = (el.textContent||'').match(/\d+/); if(!m) return;
-        countUp(el, parseInt(m[0]), el.textContent.replace(/\d+/, '')); 
+        countUp(el, parseInt(m[0]), el.textContent.replace(/\d+/, ''));
       });
       const list = $('achievements-list');
       if(list){ Array.from(list.children).forEach((c,i)=>{ c.style.animation='none'; void c.offsetWidth; c.style.animation=`rdPop .45s ${0.5+i*0.12}s both`; }); }
@@ -133,6 +133,16 @@
     requestAnimationFrame(step);
   }
 
+  /* re-trigger the question/options fade-in every round */
+  function reanimateQuestion(){
+    try{
+      const qt = q('#game-screen .question-text');
+      const opts = document.querySelectorAll('#game-screen .options-grid .option-btn');
+      if(qt){ qt.style.animation='none'; void qt.offsetWidth; qt.style.animation=''; }
+      opts.forEach(function(o){ o.style.animation='none'; void o.offsetWidth; o.style.animation=''; });
+    }catch(e){}
+  }
+
   /* ---------- 7) SMOOTH SCREEN TRANSITIONS ---------- */
   function animateScreenIn(el){
     try{ if(!el) return; el.classList.remove('rd-screen-in'); void el.offsetWidth; el.classList.add('rd-screen-in'); }catch(e){}
@@ -147,7 +157,7 @@
   }
 
   window.addEventListener('load', function(){
-    wrap('loadQuestion', function(){ showBloomBadge(); reactBackground(); });
+    wrap('loadQuestion', function(){ showBloomBadge(); reactBackground(); reanimateQuestion(); });
     wrap('selectAnswer', function(idx){
       animateReveal(); reactBackground();
       try{ const cur=questions[gameState.currentQ]; if(cur && idx===cur.correct){ burst('correct'); } }catch(e){}
