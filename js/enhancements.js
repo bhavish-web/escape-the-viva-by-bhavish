@@ -95,7 +95,11 @@ function revealAnswer() {
     nb.textContent = (gameState.currentQ >= gameState.totalQ - 1) ? 'See Results →' : 'Next Question →';
   }
   clearTimeout(autoAdvanceTimer);
-  autoAdvanceTimer = setTimeout(nextQuestion, REVEAL_MS);
+  // Practice mode: no clock, no rush — let the student read the explanation
+  // and advance manually. Viva mode keeps the original auto-advance pressure.
+  if (gameState.mode !== 'practice') {
+    autoAdvanceTimer = setTimeout(nextQuestion, REVEAL_MS);
+  }
 }
 
 /* Guarded advance: prevents double-clicks skipping two questions
