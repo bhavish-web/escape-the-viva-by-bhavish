@@ -171,10 +171,13 @@
 /* Shorten the 3rd lifeline's footprint a little everywhere. */
 #game-screen .rd-life.ask b { color: #d9b8ff; }
 
-/* Compact the HUD before it ever needs to scroll — covers common laptop/tablet widths.
-   Scoped above the phone breakpoint (821px+) so it doesn't fight the dedicated
-   mobile HUD layout defined in redesign.css. */
-@media (min-width: 821px) and (max-width: 1400px) {
+/* Compact the HUD before it ever needs to scroll. The desktop layout is a
+   FIXED 920×600 card (see #game-container in style.css) — it does not grow
+   with a wide monitor, so this must key off that same fixed-card condition,
+   not an arbitrary viewport-width range (a 1920px-wide window still renders
+   the same 920px-wide card). Scoped above the phone breakpoint (821px+) so
+   it doesn't fight the dedicated mobile HUD layout in redesign.css. */
+@media (min-width: 821px) {
   #game-screen .rd-hud { gap: clamp(4px,1vw,10px); padding: 7px 10px; }
   #game-screen .rd-chip .lb { display: none; }               /* icon + value says enough */
   #game-screen .rd-chip .ic { font-size: 16px; }
@@ -184,6 +187,7 @@
   #game-screen .rd-hud .rd-lifelines { padding-left: 8px; gap: 5px; }
   #game-screen .rd-life { padding: 6px 9px; font-size: 11px; gap: 4px; }
   #game-screen .rd-life .li-ic { font-size: 13px; }
+  #game-screen .rd-life span:not(.li-ic) { max-width: 46px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 }
 
 /* ---------- Mobile action row: 4 controls (Hint · Timer · 50/50 · Ask) ---------- */
