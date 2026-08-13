@@ -8,8 +8,8 @@ let gameState = {
   currentQ: 0, stress: 20, anger: 10,
   score: 0, correctCount: 0, answered: false,
   totalQ: 10, streak: 0, bestStreak: 0,
-  timeLeft: 10, difficulty: 'medium',
-  lifelineUsed5050: false, lifelineUsedHint: false,
+  timeLeft: 10, difficulty: 'medium', mode: 'viva',
+  lifelineUsed5050: false, lifelineUsedHint: false, lifelineUsedAsk: false,
   achievements: [], subject: null, advancing: false
 };
 
@@ -60,6 +60,14 @@ function startTimer() {
   const timerNum = document.getElementById('timer-num');
   const timerDisp = document.getElementById('timer-display');
 
+  // Practice mode: no timer, no time pressure. Just park the display and bail.
+  if (gameState.mode === 'practice') {
+    if (timerDisp) timerDisp.classList.add('practice-hidden');
+    if (timerNum) timerNum.textContent = '∞';
+    return;
+  }
+  if (timerDisp) timerDisp.classList.remove('practice-hidden');
+
   timerBar.style.transition = 'none';
   timerBar.style.width = '100%';
   timerBar.style.background = 'linear-gradient(90deg, #e63030, #ff9900, #ffee00)';
@@ -97,7 +105,7 @@ function stopTimer() {
 }
 
 function timeUp() {
-  if (gameState.answered) return;
+  if (gameState.answered || gameState.mode === 'practice') return;
   gameState.answered = true;
 
   const q = questions[gameState.currentQ];
@@ -117,6 +125,7 @@ function timeUp() {
   updateHUD(gameState);
   playWrongSound();
   flashScreen('rgba(255,0,0,0.28)');
+  showExplanation(q, false);
 
   revealAnswer();   // show correct answer + Skip/Next (enhancements.js)
 }
@@ -132,6 +141,7 @@ function loadQuestion() {
   if (_nb) { _nb.style.display = 'none'; _nb.classList.remove('show'); }
 
   hideHintBox();
+  hideExplanation();
 
   // Update badges
   document.getElementById('topic-badge').textContent = q.topic;
@@ -139,6 +149,12 @@ function loadQuestion() {
   const cfg = diffConfig[gameState.difficulty];
   diffBadge.textContent = cfg.label;
   diffBadge.className = `diff-badge ${cfg.class}`;
+
+  const modeBadge = document.getElementById('rd-mode');
+  if (modeBadge) {
+    modeBadge.textContent = gameState.mode === 'practice' ? '📘 Practice' : '😈 Viva';
+    modeBadge.classList.toggle('practice', gameState.mode === 'practice');
+  }
 
   // Speech bubble
   setSpeechText(q.professorAsk);
@@ -170,6 +186,10 @@ function loadQuestion() {
     document.getElementById('btn-hint').disabled = false;
     document.getElementById('btn-hint').classList.remove('used');
   }
+  if (!gameState.lifelineUsedAsk) {
+    const askBtn = document.getElementById('btn-ask');
+    if (askBtn) { askBtn.disabled = false; askBtn.classList.remove('used'); }
+  }
 
   resetOptionAnimations();
   setProfExpression('neutral');
@@ -196,11 +216,13 @@ function selectAnswer(idx) {
 
   const cfg = diffConfig[gameState.difficulty];
 
+  const practice = gameState.mode === 'practice';
+
   if (isCorrect) {
     playCorrectSound();
     setProfExpression('happy');
 
-    const timeBonus = gameState.timeLeft * 6;
+    const timeBonus = practice ? 0 : gameState.timeLeft * 6;
     const streakBonus = gameState.streak * 12;
     const points = 100 + timeBonus + streakBonus;
     gameState.score += points;
@@ -219,24 +241,35 @@ function selectAnswer(idx) {
 
     setTimeout(() => setSpeechText(q.correctReaction), 350);
     checkAchievements(gameState.timeLeft);
+    showExplanation(q, true);
 
   } else {
     playWrongSound();
     gameState.streak = 0;
 
-    const angerState = gameState.anger > 65 ? 'very-angry' : 'angry';
-    setProfExpression(angerState);
+    if (practice) {
+      // Practice mode: professor stays a mentor, not a monster. Dampened penalties.
+      setProfExpression('surprised');
+      const stressInc = Math.round((cfg.stressUp + Math.floor(gameState.anger / 9)) * 0.3);
+      gameState.stress = Math.min(60, gameState.stress + stressInc);
+      gameState.anger = Math.min(30, gameState.anger + Math.round(cfg.angerUp * 0.3));
+      showStressChange(stressInc, true);
+    } else {
+      const angerState = gameState.anger > 65 ? 'very-angry' : 'angry';
+      setProfExpression(angerState);
 
-    const stressInc = cfg.stressUp + Math.floor(gameState.anger / 9);
-    gameState.stress = Math.min(100, gameState.stress + stressInc);
-    gameState.anger = Math.min(100, gameState.anger + cfg.angerUp);
+      const stressInc = cfg.stressUp + Math.floor(gameState.anger / 9);
+      gameState.stress = Math.min(100, gameState.stress + stressInc);
+      gameState.anger = Math.min(100, gameState.anger + cfg.angerUp);
 
-    showStressChange(stressInc, true);
-    spawnParticles(false);
-    flashScreen('rgba(255,0,0,0.18)');
+      showStressChange(stressInc, true);
+      spawnParticles(false);
+      flashScreen('rgba(255,0,0,0.18)');
+    }
 
     setTimeout(() => setSpeechText(q.wrongReaction), 350);
     setTimeout(() => setSpeechText(q.wrongComment), 2200);
+    showExplanation(q, false);
   }
 
   updateHUD(gameState);
@@ -290,15 +323,98 @@ function useHint() {
   playLifelineSound();
 }
 
+/* ---------- Lifeline: Ask The Professor ---------- */
+function useAskProfessor() {
+  if (gameState.lifelineUsedAsk || gameState.answered) return;
+  const modal = document.getElementById('ask-prof-modal');
+  if (!modal) return;
+
+  // "More time" only makes sense when a timer is actually running (Viva mode)
+  const timeOpt = document.getElementById('ask-opt-time');
+  if (timeOpt) timeOpt.style.display = (gameState.mode === 'practice') ? 'none' : '';
+
+  modal.classList.add('open');
+  playLifelineSound();
+}
+
+function closeAskProfessor() {
+  const modal = document.getElementById('ask-prof-modal');
+  if (modal) modal.classList.remove('open');
+}
+
+function resolveAskProfessor(choice) {
+  if (gameState.lifelineUsedAsk || gameState.answered) { closeAskProfessor(); return; }
+  gameState.lifelineUsedAsk = true;
+
+  if (choice === 'calm') {
+    gameState.stress = Math.max(0, gameState.stress - 30);
+    gameState.anger = Math.max(0, gameState.anger - 25);
+    setProfExpression(gameState.anger > 65 ? 'angry' : 'neutral');
+    setSpeechText("🎓 Fine... take a breath. Don't waste my time again!");
+    showStressChange(30, false);
+  } else if (choice === 'time') {
+    const cfg = diffConfig[gameState.difficulty];
+    const bonus = Math.max(3, Math.round(cfg.time * 0.5));
+    gameState.timeLeft += bonus;
+
+    const timerNum = document.getElementById('timer-num');
+    const timerBar = document.getElementById('timer-bar');
+    if (timerNum) timerNum.textContent = gameState.timeLeft;
+    if (timerBar) {
+      const pct = Math.max(0, Math.min(100, (gameState.timeLeft / cfg.time) * 100));
+      timerBar.style.transition = 'none';
+      timerBar.style.width = pct + '%';
+      setTimeout(() => {
+        timerBar.style.transition = `width ${gameState.timeLeft}s linear`;
+        timerBar.style.width = '0%';
+      }, 60);
+    }
+    setSpeechText(`🎓 ${bonus} extra seconds. Use them wisely!`);
+  }
+
+  updateHUD(gameState);
+  const btn = document.getElementById('btn-ask');
+  if (btn) { btn.disabled = true; btn.classList.add('used'); }
+  const cnt = document.getElementById('ask-count');
+  if (cnt) cnt.textContent = 'x0';
+  closeAskProfessor();
+}
+
+/* ---------- Answer Explanations ---------- */
+function showExplanation(q, isCorrect) {
+  const box = document.getElementById('explain-box');
+  if (!box || !q) return;
+  box.className = 'explain-box show ' + (isCorrect ? 'ok' : 'bad');
+  box.innerHTML = isCorrect
+    ? `✅ <b>Why:</b> ${q.hint || 'You nailed the core concept.'}`
+    : `📘 <b>Explanation:</b> ${q.wrongComment || q.hint || 'Review this topic before the real viva.'}`;
+  box.style.display = 'block';
+}
+
+function hideExplanation() {
+  const box = document.getElementById('explain-box');
+  if (box) box.style.display = 'none';
+}
+
+/* ---------- Practice vs Viva ---------- */
+function setMode(mode) {
+  gameState.mode = mode;
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.querySelector(`.mode-btn[data-mode="${mode}"]`);
+  if (btn) btn.classList.add('active');
+  playClickSound();
+}
+
 /* ---------- Keyboard ---------- */
 document.addEventListener('keydown', e => {
   const map = { a:0, b:1, c:2, d:3, A:0, B:1, C:2, D:3, '1':0, '2':1, '3':2, '4':3 };
   if (map[e.key] !== undefined && document.getElementById('game-screen').classList.contains('active')) {
     selectAnswer(map[e.key]);
   }
-  // H for hint, F for 50-50
+  // H for hint, F for 50-50, G to ask the professor
   if (e.key === 'h' || e.key === 'H') useHint();
   if (e.key === 'f' || e.key === 'F') useFiftyFifty();
+  if (e.key === 'g' || e.key === 'G') useAskProfessor();
 });
 
 /* ---------- Start Game ---------- */
@@ -324,8 +440,8 @@ if (window.AI_QUESTIONS && window.AI_QUESTIONS.length > 0) {
     score: 0, correctCount: 0, answered: false,
     totalQ: 10, streak: 0, bestStreak: 0,
     timeLeft: diffConfig[gameState.difficulty].time,
-    difficulty: gameState.difficulty,
-    lifelineUsed5050: false, lifelineUsedHint: false,
+    difficulty: gameState.difficulty, mode: gameState.mode,
+    lifelineUsed5050: false, lifelineUsedHint: false, lifelineUsedAsk: false,
     achievements: [], subject: gameState.subject, advancing: false
   };
 
@@ -363,31 +479,14 @@ function showEndScreen() {
   const endGrade = document.getElementById('end-grade');
   const gradeInfo = getGrade(s.score);
 
-  // Determine ending
-  let ending;
-  if (s.stress >= 100) ending = 'failed';
-  else if (s.correctCount >= 9) ending = 'legendary';
-  else if (s.anger <= 20 && s.correctCount >= 5) ending = 'adopted';
-  else ending = 'escaped';
-
-  // Stats
+  // Stats (shared by both modes)
   document.getElementById('stat-stress').textContent = s.stress + '%';
   document.getElementById('stat-anger').textContent = s.anger + '%';
   document.getElementById('stat-questions').textContent = s.correctCount + '/' + s.totalQ;
   document.getElementById('stat-streak').textContent = s.bestStreak + ' 🔥';
   document.getElementById('stat-score').textContent = s.score + ' pts';
 
-  // High score
-  const prevHS = parseInt(localStorage.getItem('etv_highscore') || '0');
-  if (s.score > prevHS) {
-    localStorage.setItem('etv_highscore', s.score);
-    const hsRow = document.getElementById('high-score-row');
-    hsRow.style.display = 'flex';
-    document.getElementById('stat-highscore').textContent = s.score + ' pts';
-    updateHighScoreDisplay();
-  }
-
-  // Achievements panel
+  // Achievements panel (shared by both modes)
   if (s.achievements.length > 0) {
     const panel = document.getElementById('achievements-panel');
     const list = document.getElementById('achievements-list');
@@ -399,6 +498,35 @@ function showEndScreen() {
   }
 
   endGrade.style.color = gradeInfo.color;
+
+  // Practice mode: a calm recap, no fail/legend drama, no high-score save.
+  if (s.mode === 'practice') {
+    endTitle.textContent = '📘 PRACTICE COMPLETE';
+    endTitle.style.color = '#3498db';
+    endTitle.style.fontSize = '';
+    endGrade.textContent = `${s.correctCount}/${s.totalQ} correct — ${gradeInfo.comment}`;
+    endChars.innerHTML = getEscapedStudentSVG();
+    endSpeech.style.display = 'none';
+    playEscapeSound();
+    return;
+  }
+
+  // Determine ending
+  let ending;
+  if (s.stress >= 100) ending = 'failed';
+  else if (s.correctCount >= 9) ending = 'legendary';
+  else if (s.anger <= 20 && s.correctCount >= 5) ending = 'adopted';
+  else ending = 'escaped';
+
+  // High score (Viva only)
+  const prevHS = parseInt(localStorage.getItem('etv_highscore') || '0');
+  if (s.score > prevHS) {
+    localStorage.setItem('etv_highscore', s.score);
+    const hsRow = document.getElementById('high-score-row');
+    hsRow.style.display = 'flex';
+    document.getElementById('stat-highscore').textContent = s.score + ' pts';
+    updateHighScoreDisplay();
+  }
 
   if (ending === 'failed') {
     endTitle.textContent = 'YOU FAILED!';
