@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="css/phase5.css">
 <link rel="stylesheet" href="css/redesign.css">
 <link rel="stylesheet" href="css/polish.css">
+<link rel="stylesheet" href="css/mode.css">
 </head>
 <body>
 
@@ -156,6 +157,22 @@
           <span>🆘 Lifelines per game:</span>
           <span class="ll-badge">50/50</span>
           <span class="ll-badge">💡 Hint</span>
+          <span class="ll-badge">🎓 Ask Prof</span>
+        </div>
+
+        <!-- Mode -->
+        <div class="mode-selector">
+          <div class="diff-label">SELECT MODE:</div>
+          <div class="mode-btns">
+            <button class="mode-btn" data-mode="practice" onclick="setMode('practice')">
+              📘 Practice
+              <small>No timer · explanations</small>
+            </button>
+            <button class="mode-btn active" data-mode="viva" onclick="setMode('viva')">
+              😈 Viva
+              <small>Strict timer · scored</small>
+            </button>
+          </div>
         </div>
 
         <!-- Difficulty -->
@@ -226,6 +243,7 @@
       <div class="rd-lifelines">
         <button class="rd-life" id="btn-hint" onclick="useHint()"><span class="li-ic">💡</span><span>Hint</span><b id="hint-count">x1</b></button>
         <button class="rd-life fifty" id="btn-5050" onclick="useFiftyFifty()"><span class="li-ic">✂</span><span>50/50</span><b id="fifty-count">x1</b></button>
+        <button class="rd-life ask" id="btn-ask" onclick="useAskProfessor()"><span class="li-ic">🎓</span><span>Ask Prof</span><b id="ask-count">x1</b></button>
       </div>
     </div>
 
@@ -233,6 +251,7 @@
     <div class="rd-context z">
       <span class="rd-tag subj" id="rd-subject">📚 Subject</span>
       <span class="rd-tag diff" id="rd-diff">Medium</span>
+      <span class="rd-tag mode" id="rd-mode">😈 Viva</span>
       <div class="rd-prog"><div class="rd-prog-fl" id="rd-progress"></div></div>
       <span class="rd-msg" id="rd-motivate">Stay calm. Think smart.</span>
       <span class="rd-ai" id="rd-aihint">💡 Hint ready</span>
@@ -257,6 +276,7 @@
         <div class="rd-qhead"><span class="topic-badge" id="topic-badge">TOPIC</span><span class="diff-badge" id="diff-badge">MEDIUM</span></div>
         <div class="question-text" id="question-text">Loading…</div>
         <div class="hint-box" id="hint-box" style="display:none"></div>
+        <div class="explain-box" id="explain-box" style="display:none"></div>
         <div class="options-grid" id="options-grid">
           <button class="option-btn opt-a" onclick="selectAnswer(0)"><span class="option-letter">A</span><span class="opt-text">Option A</span><span class="opt-tick" style="display:none">✓</span></button>
           <button class="option-btn opt-b" onclick="selectAnswer(1)"><span class="option-letter">B</span><span class="opt-text">Option B</span><span class="opt-tick" style="display:none">✓</span></button>
@@ -283,6 +303,25 @@
     <div class="stress-change" id="stress-change"></div>
     <div class="streak-popup" id="streak-popup"></div>
     <div class="achievement-popup" id="achievement-popup"></div>
+  </div>
+
+  <!-- ===== ASK THE PROFESSOR (lifeline modal) ===== -->
+  <div class="ask-prof-modal" id="ask-prof-modal">
+    <div class="ask-prof-box">
+      <div class="ask-prof-title">🎓 Ask The Professor</div>
+      <div class="ask-prof-sub">One favor, sir. Choose wisely — this only works once.</div>
+      <div class="ask-prof-options">
+        <button class="ask-prof-opt" onclick="resolveAskProfessor('calm')">
+          <span class="apo-ic">😌</span>
+          <span class="apo-tx">Calm Down<br><small>−30% Stress &amp; Anger</small></span>
+        </button>
+        <button class="ask-prof-opt" id="ask-opt-time" onclick="resolveAskProfessor('time')">
+          <span class="apo-ic">⏱️</span>
+          <span class="apo-tx">More Time<br><small>+time on this question</small></span>
+        </button>
+      </div>
+      <button class="ask-prof-cancel" onclick="closeAskProfessor()">Nevermind</button>
+    </div>
   </div>
 
   <!-- cinematic start transition + rotate hint (fixed overlays) -->
