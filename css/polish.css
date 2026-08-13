@@ -1,0 +1,85 @@
+/* ============================================================
+   ESCAPE THE VIVA — Visual Polish styles (load LAST)
+   ============================================================ */
+
+/* ---------- 4) BLOOM BADGE ---------- */
+#game-screen .rd-bloom{
+  display:inline-flex; align-items:center; gap:4px;
+  font-size:10px; font-weight:800; letter-spacing:.3px;
+  padding:3px 9px; border-radius:20px; margin-left:6px;
+  color:var(--bl,#4ee1ff);
+  background:color-mix(in srgb, var(--bl,#4ee1ff) 16%, transparent);
+  border:1px solid color-mix(in srgb, var(--bl,#4ee1ff) 45%, transparent);
+}
+#game-screen .rd-bloom b{ font-weight:900; }
+
+/* ---------- 6) ANSWER REVEAL ---------- */
+@keyframes rdGlow{
+  0%{ box-shadow:0 0 0 rgba(57,224,138,0); }
+  40%{ box-shadow:0 0 26px rgba(57,224,138,.75); }
+  100%{ box-shadow:0 0 14px rgba(57,224,138,.35); }
+}
+#game-screen .option-btn.rd-glow{ animation:rdGlow .6s ease; }
+@keyframes rdShake{
+  0%,100%{ transform:translateX(0); }
+  20%{ transform:translateX(-6px); } 40%{ transform:translateX(6px); }
+  60%{ transform:translateX(-4px); } 80%{ transform:translateX(4px); }
+}
+#game-screen .option-btn.rd-shake{ animation:rdShake .4s ease; }
+
+/* ---------- 5) CONFETTI ---------- */
+#rd-confetti-layer{ position:fixed; inset:0; z-index:9997; pointer-events:none; overflow:hidden; }
+.rd-confetti{
+  position:absolute; width:9px; height:9px; border-radius:2px; opacity:.95;
+  animation:rdConfetti 1.4s ease-out forwards;
+}
+@keyframes rdConfetti{
+  0%{ transform:translate(0,0) rotate(0); opacity:1; }
+  100%{ transform:translate(var(--dx), var(--dy)) rotate(var(--rot)); opacity:0; }
+}
+
+/* ---------- 2) PROFESSOR MOOD / BACKGROUND reaction ---------- */
+#game-screen::after{
+  content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:radial-gradient(120% 90% at 50% 40%, transparent 55%, rgba(180,0,0, calc(var(--rd-heat,0) * .5)));
+  opacity:var(--rd-heat,0); transition:opacity .5s ease;
+}
+#game-screen.rd-tense .rd-prof-img{ filter:drop-shadow(0 0 14px rgba(255,60,60,.6)) brightness(1.05); }
+#game-screen.rd-tense{ animation:rdTensePulse 2s ease-in-out infinite; }
+@keyframes rdTensePulse{ 0%,100%{ filter:none; } 50%{ filter:saturate(1.15) contrast(1.03); } }
+
+/* ---------- 3) TIMER TENSION (last 5s) ---------- */
+#game-screen .rd-timer.rd-tension{ animation:rdTimerTension .6s ease-in-out infinite; }
+@keyframes rdTimerTension{
+  0%,100%{ transform:scale(1); }
+  50%{ transform:scale(1.09); }
+}
+#game-screen .rd-timer.rd-tension .rr-fg{ stroke:#ff3b3b !important; filter:drop-shadow(0 0 10px #ff3b3b); }
+#game-screen .rd-timer.rd-tension .rd-tnum span{ color:#ff5a5a !important; }
+/* screen-edge flash in the final seconds */
+#game-screen.rd-edgeflash::before{
+  content:""; position:absolute; inset:0; z-index:6; pointer-events:none;
+  box-shadow:inset 0 0 60px 8px rgba(255,40,40,.5); opacity:0;
+  animation:rdEdge .5s ease;
+}
+@keyframes rdEdge{ 0%{opacity:0} 30%{opacity:1} 100%{opacity:0} }
+
+/* ---------- 7) SMOOTH SCREEN TRANSITIONS ---------- */
+.screen.rd-screen-in{ animation:rdScreenIn .45s ease both; }
+@keyframes rdScreenIn{ from{ opacity:0; transform:translateY(14px) scale(.99); } to{ opacity:1; transform:none; } }
+
+/* ---------- 1) CINEMATIC RESULTS ---------- */
+#end-screen.rd-cine .end-title,
+#end-screen.rd-cine #end-title{ animation:rdTitleIn .7s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes rdTitleIn{ 0%{ opacity:0; transform:scale(.7) translateY(-10px); } 60%{ transform:scale(1.08); } 100%{ opacity:1; transform:scale(1); } }
+#end-screen.rd-cine #end-grade{ animation:rdFadeUp .6s .25s both; }
+#end-screen.rd-cine #end-characters{ animation:rdTrophyIn .8s .15s cubic-bezier(.2,.9,.2,1.2) both; }
+@keyframes rdTrophyIn{ 0%{ opacity:0; transform:scale(.5) rotate(-8deg);} 70%{ transform:scale(1.12) rotate(3deg);} 100%{ opacity:1; transform:none; } }
+#end-screen.rd-cine .stats-grid,
+#end-screen.rd-cine #stats-grid{ animation:rdFadeUp .6s .4s both; }
+#end-screen.rd-cine #high-score-row{ animation:rdFadeUp .6s .55s both; }
+#end-screen.rd-cine #achievements-panel{ animation:rdFadeUp .6s .55s both; }
+@keyframes rdFadeUp{ from{ opacity:0; transform:translateY(16px);} to{ opacity:1; transform:none; } }
+@keyframes rdPop{ 0%{ opacity:0; transform:scale(.4);} 70%{ transform:scale(1.15);} 100%{ opacity:1; transform:scale(1);} }
+
+#end-screen.rd-cine #end-title{ background-size:200% auto; }
