@@ -41,15 +41,18 @@
       const qzone=gs.querySelector('.rd-qzone');
       const hint=document.getElementById('btn-hint');
       const fifty=document.getElementById('btn-5050');
+      const ask=document.getElementById('btn-ask');
       const timer=document.getElementById('timer-display');
       if(!qzone||!hint||!fifty||!timer) return;
       let row=document.getElementById('rd-actionrow');
       if(mobile){
         if(!row){ row=document.createElement('div'); row.id='rd-actionrow'; row.className='rd-actionrow z'; }
         if(row.parentNode!==gs || row.nextSibling!==qzone) gs.insertBefore(row,qzone);
-        if(row.firstChild!==hint || timer.parentNode!==row || fifty.parentNode!==row){ row.appendChild(hint); row.appendChild(timer); row.appendChild(fifty); }
+        if(row.firstChild!==hint || timer.parentNode!==row || fifty.parentNode!==row || (ask && ask.parentNode!==row)){
+          row.appendChild(hint); row.appendChild(timer); row.appendChild(fifty); if(ask) row.appendChild(ask);
+        }
       } else {
-        if(llWrap){ if(hint.parentNode!==llWrap) llWrap.appendChild(hint); if(fifty.parentNode!==llWrap) llWrap.appendChild(fifty); }
+        if(llWrap){ if(hint.parentNode!==llWrap) llWrap.appendChild(hint); if(fifty.parentNode!==llWrap) llWrap.appendChild(fifty); if(ask && ask.parentNode!==llWrap) llWrap.appendChild(ask); }
         if(timer.parentNode!==qzone) qzone.appendChild(timer);
         if(row&&row.parentNode) row.parentNode.removeChild(row);
       }
