@@ -65,8 +65,32 @@
 @keyframes rdEdge{ 0%{opacity:0} 30%{opacity:1} 100%{opacity:0} }
 
 /* ---------- 7) SMOOTH SCREEN TRANSITIONS ---------- */
-.screen.rd-screen-in{ animation:rdScreenIn .45s ease both; }
-@keyframes rdScreenIn{ from{ opacity:0; transform:translateY(14px) scale(.99); } to{ opacity:1; transform:none; } }
+.screen.rd-screen-in{ animation:rdScreenIn .6s cubic-bezier(.22,.61,.36,1) both; will-change:opacity, transform; }
+@keyframes rdScreenIn{
+  0%{ opacity:0; transform:translateY(22px) scale(.985); filter:blur(4px); }
+  60%{ filter:blur(0); }
+  100%{ opacity:1; transform:none; filter:blur(0); }
+}
+
+/* stagger the inner blocks of the game screen so it flows in, not snaps */
+#game-screen.rd-screen-in .rd-hud{ animation:rdInUp .55s .05s cubic-bezier(.22,.61,.36,1) both; }
+#game-screen.rd-screen-in .rd-scene{ animation:rdInUp .55s .12s cubic-bezier(.22,.61,.36,1) both; }
+#game-screen.rd-screen-in #rd-actionrow,
+#game-screen.rd-screen-in .rd-actionrow{ animation:rdInUp .55s .18s cubic-bezier(.22,.61,.36,1) both; }
+#game-screen.rd-screen-in .rd-qzone{ animation:rdInUp .6s .24s cubic-bezier(.22,.61,.36,1) both; }
+@keyframes rdInUp{ from{ opacity:0; transform:translateY(16px); } to{ opacity:1; transform:none; } }
+
+/* fresh question fades/slides in each round */
+#game-screen .question-text{ animation:rdQIn .45s ease both; }
+#game-screen .options-grid .option-btn{ animation:rdQIn .45s ease both; }
+#game-screen .options-grid .option-btn:nth-child(1){ animation-delay:.04s; }
+#game-screen .options-grid .option-btn:nth-child(2){ animation-delay:.10s; }
+#game-screen .options-grid .option-btn:nth-child(3){ animation-delay:.16s; }
+#game-screen .options-grid .option-btn:nth-child(4){ animation-delay:.22s; }
+@keyframes rdQIn{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:none; } }
+
+/* gentle global smoothing for interactive bits */
+#game-screen .option-btn, #game-screen .rd-life, #game-screen .next-btn{ transition:transform .18s ease, box-shadow .25s ease, border-color .25s ease, background .25s ease; }
 
 /* ---------- 1) CINEMATIC RESULTS ---------- */
 #end-screen.rd-cine .end-title,
