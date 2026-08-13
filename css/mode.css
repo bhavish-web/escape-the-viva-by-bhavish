@@ -113,7 +113,10 @@
 }
 .ask-prof-cancel:hover { color: #d9b8ff; }
 
-/* ---------- Answer explanation box ---------- */
+@media (max-width: 420px) {
+  .ask-prof-options { flex-direction: column; }
+  .ask-prof-opt { flex-direction: row; justify-content: flex-start; text-align: left; }
+}
 .explain-box {
   background: rgba(78,205,196,0.1);
   border: 1.5px solid rgba(78,205,196,0.35);
@@ -138,4 +141,77 @@
   .mode-btns { gap: 6px; }
   .mode-btn { font-size: 11px; padding: 7px 9px; }
   .mode-btn small { font-size: 8px; }
+}
+
+/* ============================================================
+   HUD FIX — the 3rd lifeline (Ask The Professor) pushed the top
+   HUD past the viewport edge on laptop/tablet widths, clipping
+   the button. Never let the HUD hard-overflow again: compact it
+   at medium widths, and fall back to a scroll instead of a clip
+   at the tightest widths. Also stop the score value from
+   line-wrapping inside its chip.
+   ============================================================ */
+
+/* Never silently clip HUD content — scroll instead of cutting a button in half. */
+#game-screen .rd-hud,
+#game-screen .rd-context {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+#game-screen .rd-hud::-webkit-scrollbar,
+#game-screen .rd-context::-webkit-scrollbar { display: none; }
+
+/* Keep chip numbers (esp. the score, e.g. "212 pts") on one line instead of wrapping. */
+#game-screen .rd-chip .tx { flex-shrink: 0; }
+#game-screen .rd-chip .lb,
+#game-screen .rd-chip .vl { white-space: nowrap; }
+
+/* Shorten the 3rd lifeline's footprint a little everywhere. */
+#game-screen .rd-life.ask b { color: #d9b8ff; }
+
+/* Compact the HUD before it ever needs to scroll — covers common laptop/tablet widths.
+   Scoped above the phone breakpoint (821px+) so it doesn't fight the dedicated
+   mobile HUD layout defined in redesign.css. */
+@media (min-width: 821px) and (max-width: 1400px) {
+  #game-screen .rd-hud { gap: clamp(4px,1vw,10px); padding: 7px 10px; }
+  #game-screen .rd-chip .lb { display: none; }               /* icon + value says enough */
+  #game-screen .rd-chip .ic { font-size: 16px; }
+  #game-screen .rd-chip .vl { font-size: 14px; }
+  #game-screen .rd-chip .mini { width: 30px; }
+  #game-screen .rd-chip.q { padding-left: 8px; }
+  #game-screen .rd-hud .rd-lifelines { padding-left: 8px; gap: 5px; }
+  #game-screen .rd-life { padding: 6px 9px; font-size: 11px; gap: 4px; }
+  #game-screen .rd-life .li-ic { font-size: 13px; }
+}
+
+/* ---------- Mobile action row: 4 controls (Hint · Timer · 50/50 · Ask) ---------- */
+@media (max-width: 820px) {
+  #game-screen .rd-actionrow { gap: 6px; flex-wrap: nowrap; }
+  #game-screen .rd-actionrow .rd-life { padding: 8px 5px; font-size: 10px; gap: 3px; min-width: 0; }
+  #game-screen .rd-actionrow .rd-life span:not(.li-ic) { overflow: hidden; text-overflow: ellipsis; }
+  #game-screen .rd-actionrow .rd-life .li-ic { font-size: 13px; }
+  #game-screen .rd-actionrow .rd-life b { font-size: 9px; }
+  #game-screen .rd-actionrow .rd-timer { width: 58px; }
+}
+
+@media (max-width: 380px) {
+  #game-screen .rd-actionrow .rd-life span:not(.li-ic) { display: none; }  /* icon + count only on very small phones */
+  #game-screen .rd-actionrow .rd-life { padding: 8px 6px; }
+  #game-screen .rd-actionrow .rd-timer { width: 50px; }
+}
+
+/* ---------- iOS notch / Android gesture-bar safe areas ---------- */
+@media (max-width: 820px) {
+  #game-container {
+    padding-left: max(0px, env(safe-area-inset-left));
+    padding-right: max(0px, env(safe-area-inset-right));
+  }
+  #game-screen.active {
+    padding-top: max(7px, env(safe-area-inset-top));
+    padding-bottom: max(0px, env(safe-area-inset-bottom));
+  }
+  #game-screen .next-btn { margin-bottom: max(6px, env(safe-area-inset-bottom)); }
+  .ask-prof-modal, .notes-modal { padding-bottom: max(16px, env(safe-area-inset-bottom)); }
 }
