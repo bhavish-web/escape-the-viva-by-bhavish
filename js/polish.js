@@ -147,17 +147,23 @@
   }
 
   window.addEventListener('load', function(){
-    wrap('loadQuestion', function(){ showBloomBadge(); reactBackground(); animateScreenIn($('game-screen')); });
+    wrap('loadQuestion', function(){ showBloomBadge(); reactBackground(); });
     wrap('selectAnswer', function(idx){
       animateReveal(); reactBackground();
       try{ const cur=questions[gameState.currentQ]; if(cur && idx===cur.correct){ burst('correct'); } }catch(e){}
     });
     wrap('updateHUD', function(){ reactBackground(); });
     wrap('startTimer', function(){ const d=$('timer-display'); if(d) d.classList.remove('rd-tension'); });
-    wrap('showEndScreen', function(){ setTimeout(()=>cinematicResults(currentEnding()), 60); });
+    wrap('showEndScreen', function(){ setTimeout(function(){ animateScreenIn($('end-screen')); cinematicResults(currentEnding()); }, 60); });
 
-    setInterval(watchTimer, 250);
-    hookScreenObserver();
+    // smooth screen transitions — hook the functions that switch screens (NO MutationObserver → no loop)
+    wrap('startGame', function(){ setTimeout(function(){ animateScreenIn($('game-screen')); }, 30); });
+    wrap('showAISetupScreen', function(){ setTimeout(function(){ animateScreenIn($('ai-setup-screen')); }, 30); });
+    wrap('backToStart', function(){ setTimeout(function(){ animateScreenIn($('start-screen')); }, 30); });
+    wrap('restartGame', function(){ setTimeout(function(){ animateScreenIn($('start-screen')); }, 30); });
+
+    // timer tension: poll only while the game screen is active
+    setInterval(function(){ try{ const g=$('game-screen'); if(g && g.classList.contains('active')) watchTimer(); }catch(e){} }, 300);
   });
 
   function currentEnding(){
@@ -170,12 +176,4 @@
     }catch(e){ return 'escaped'; }
   }
 
-  function hookScreenObserver(){
-    try{
-      document.querySelectorAll('.screen').forEach(sc=>{
-        const obs = new MutationObserver(()=>{ if(sc.classList.contains('active')) animateScreenIn(sc); });
-        obs.observe(sc, { attributes:true, attributeFilter:['class'] });
-      });
-    }catch(e){}
-  }
 })();
