@@ -132,3 +132,23 @@
   .dash-top-right{ order:1; margin-left:auto; }
   .ring{ width:140px; height:140px; }
 }
+
+/* ===== Leaderboard ===== */
+.lb-row{ display:flex; align-items:center; gap:12px; padding:11px 12px; border-radius:11px; margin-bottom:7px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); }
+.lb-row.me{ background:rgba(240,180,41,.12); border-color:rgba(240,180,41,.4); }
+.lb-rank{ width:24px; text-align:center; font-weight:900; color:#f0b429; font-size:15px; }
+.lb-av{ width:36px; height:36px; border-radius:50%; }
+.lb-name{ flex:1; font-weight:700; font-size:14px; color:#ece7df; }
+.lb-xp{ font-weight:900; color:#f0b429; font-size:13px; }
+
+/* ===== Achievements ===== */
+.ach-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+.ach-card{ text-align:center; padding:18px 12px; border-radius:14px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08); opacity:.55; }
+.ach-card.got{ opacity:1; background:rgba(240,180,41,.08); border-color:rgba(240,180,41,.35); box-shadow:0 8px 22px rgba(240,180,41,.14); }
+.ach-ic{ font-size:34px; }
+.ach-nm{ font-weight:900; font-size:14px; color:#fff; margin-top:8px; }
+.ach-ds{ font-size:11px; color:#9a9184; margin-top:4px; line-height:1.4; }
+.ach-badge{ margin-top:10px; font-size:10px; font-weight:800; color:#1a1206; background:linear-gradient(135deg,#f0b429,#b87200); padding:4px 10px; border-radius:20px; display:inline-block; letter-spacing:1px; }
+.ach-lock{ margin-top:10px; font-size:10px; color:#6f685e; }
+@media (max-width:900px){ .ach-grid{ grid-template-columns:repeat(2,1fr); } }
+@media (max-width:520px){ .ach-grid{ grid-template-columns:1fr; } }
