@@ -1,17 +1,23 @@
 /* ============================================================
-   ESCAPE THE VIVA — Dashboard (shell + navigation)
-   Wave 0: builds the shell with placeholder data.
-   Real Supabase data is wired in later waves.
+   ESCAPE THE VIVA — Dashboard (real Supabase data)
+   Wave 1: main dashboard (readiness, subjects, at-a-glance) + nav.
+   Weak Areas / Leaderboard / Achievements sections wired too.
    ============================================================ */
 (function(){
   "use strict";
   function $(id){ return document.getElementById(id); }
+  function client(){ return window.supaClient || null; }
+  function user(){ return window.CURRENT_USER || null; }
 
-  // show/hide helpers used by auth flow
+  let cache = null;   // fetched rows cached per dashboard open
+
+  /* ---------- open / close ---------- */
   window.showDashboard = function(){
     document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-    const d=$('dashboard-screen'); if(d){ d.classList.add('active'); }
-    renderShell();
+    const d=$('dashboard-screen'); if(d) d.classList.add('active');
+    renderShellStatic();
+    loadData();          // fetch + fill real data
+    dashNav('home');
   };
   window.enterGameFromDash = function(){
     const d=$('dashboard-screen'); if(d) d.classList.remove('active');
@@ -20,59 +26,226 @@
   window.toggleDashSidebar = function(){
     const s=document.querySelector('.dash-side'); if(s) s.classList.toggle('open');
   };
-
-  // Show + populate the dashboard pill on the start screen (logged-in users only)
   window.refreshDashPill = function(){
     const pill=$('dash-pill'); if(!pill) return;
-    if(window.CURRENT_USER){
-      const nm=greetingName();
-      const nmEl=$('dash-pill-name'); if(nmEl) nmEl.textContent=nm;
+    if(user()){
+      const nmEl=$('dash-pill-name'); if(nmEl) nmEl.textContent=greetingName();
       const av=$('dash-pill-avatar'); if(av) av.src=avatarSrc();
       pill.style.display='inline-flex';
-    } else {
-      pill.style.display='none';
-    }
+    } else { pill.style.display='none'; }
   };
 
+  /* ---------- section navigation ---------- */
+  window.dashNav = function(section){
+    document.querySelectorAll('.dash-section').forEach(s=>s.style.display='none');
+    const el=$('sec-'+section); if(el) el.style.display='block';
+    document.querySelectorAll('.dash-nav a[data-sec]').forEach(a=>{
+      a.classList.toggle('active', a.getAttribute('data-sec')===section);
+    });
+    // close mobile sidebar after choosing
+    const sb=document.querySelector('.dash-side'); if(sb) sb.classList.remove('open');
+    if(section==='leaderboard') loadLeaderboard();
+    if(section==='weak') renderWeak();
+    if(section==='achievements') renderAchievements();
+  };
+
+  /* ---------- identity ---------- */
   function greetingName(){
     try{
-      const u=window.CURRENT_USER;
+      const u=user();
       if(u && u.user_metadata && u.user_metadata.display_name) return u.user_metadata.display_name;
       if(u && u.email) return u.email.split('@')[0];
     }catch(e){}
     return 'Student';
   }
-  function avatarSrc(){
-    const n = window.CURRENT_AVATAR || '1';
-    return 'assets/avatars/'+n+'.png';
-  }
+  function avatarSrc(){ return 'assets/avatars/'+(window.CURRENT_AVATAR||'1')+'.png'; }
 
-  let built=false;
-  function renderShell(){
-    // update dynamic bits each open
+  function renderShellStatic(){
     const nm=greetingName();
     const hi=$('dash-hi-name'); if(hi) hi.textContent=nm;
     const sf=$('dash-foot-name'); if(sf) sf.textContent=nm;
     document.querySelectorAll('.dash-avatar').forEach(img=>{ img.src=avatarSrc(); });
-    if(built) return;
-    built=true;
-    // set the readiness ring placeholder (72%)
-    setRing('ready-ring', 72);
-    // subject rings placeholder
-    setSubjRing('subj1', 76, '#a78bff'); setSubjRing('subj2', 64, '#4ee1ff'); setSubjRing('subj3', 58, '#2ecc71');
   }
 
-  function setRing(id, pct){
+  /* ---------- data fetch ---------- */
+  async function loadData(){
+    if(!client() || !user()){ showEmpty(); return; }
+    try{
+      const uid = user().id;
+      const [{ data:attempts }, { data:games }] = await Promise.all([
+        client().from('attempts').select('subject,unit,topic,bloom,is_correct,created_at').eq('user_id', uid),
+        client().from('games').select('subject,accuracy,score,correct_q,total_q,created_at').eq('user_id', uid).order('created_at',{ascending:true})
+      ]);
+      cache = { attempts: attempts||[], games: games||[] };
+      fillMain(cache);
+    }catch(e){ console.warn('dashboard load failed', e); showEmpty(); }
+  }
+
+  function pct(correct, total){ return total ? Math.round(correct/total*100) : 0; }
+
+  function fillMain(d){
+    const A=d.attempts, G=d.games;
+    const totalQ=A.length;
+    const correct=A.filter(a=>a.is_correct).length;
+    const overall=pct(correct,totalQ);
+
+    // Exam readiness = overall accuracy
+    setRing('ready-ring', overall);
+    const rt=$('ready-pct'); if(rt) rt.textContent=overall+'%';
+
+    // At a glance
+    setText('gl-attempted', totalQ);
+    setText('gl-correct', correct);
+    setText('gl-accuracy', overall+'%');
+    setText('gl-games', G.length);
+
+    // Subjects: group attempts by subject
+    const bySubj={};
+    A.forEach(a=>{
+      const s=a.subject||'Unknown';
+      (bySubj[s]=bySubj[s]||{c:0,t:0,topics:new Set()});
+      bySubj[s].t++; if(a.is_correct) bySubj[s].c++;
+      if(a.topic) bySubj[s].topics.add(a.topic);
+    });
+    renderSubjects(bySubj);
+
+    // Progress over time (accuracy per game)
+    renderProgress(G);
+
+    // mini weak preview on home
+    renderWeakMini();
+
+    // hide the "sample data" note
+    const note=$('dash-sample-note'); if(note) note.style.display='none';
+  }
+
+  function renderWeakMini(){
+    const box=$('weak-mini'); if(!box) return;
+    if(!cache || cache.attempts.length===0){ box.innerHTML='<div style="color:#9a9184;font-size:12px;padding:8px 0;">No data yet.</div>'; return; }
+    const byTopic={};
+    cache.attempts.forEach(a=>{ if(a.topic){ (byTopic[a.topic]=byTopic[a.topic]||{c:0,t:0}); byTopic[a.topic].t++; if(a.is_correct) byTopic[a.topic].c++; } });
+    const topics=Object.keys(byTopic).map(k=>({k,p:pct(byTopic[k].c,byTopic[k].t)})).sort((a,b)=>a.p-b.p).slice(0,2);
+    box.innerHTML=topics.map(t=>'<div class="weak-item"><div class="weak-top"><span>'+escapeHtml(t.k)+'</span><span class="wp">'+t.p+'%</span></div><div class="weak-bar"><div class="weak-fill" style="width:'+t.p+'%"></div></div></div>').join('');
+  }
+
+  function renderSubjects(bySubj){
+    const wrap=$('subjects-wrap'); if(!wrap) return;
+    const names=Object.keys(bySubj);
+    if(names.length===0){
+      wrap.innerHTML='<div class="card" style="grid-column:1/-1;text-align:center;color:#9a9184;">No subjects played yet — start a game to see your prep %.</div>';
+      return;
+    }
+    const colors=['#a78bff','#4ee1ff','#2ecc71','#ff9f45','#f0b429','#ff6ad5'];
+    wrap.innerHTML='';
+    names.slice(0,6).forEach((name,i)=>{
+      const s=bySubj[name]; const p=pct(s.c,s.t);
+      const tag = p>=75?['strong','Strong ↗'] : p>=60?['good','Good ↗'] : p>=45?['avg','Average →'] : ['weak','Weak ↘'];
+      const col=colors[i%colors.length];
+      const r=42, circ=2*Math.PI*r, off=circ*(1-p/100);
+      const card=document.createElement('div'); card.className='card';
+      card.innerHTML=
+        '<div class="subj-name">📘 '+escapeHtml(name)+'</div>'+
+        '<div class="subj-ring"><svg width="104" height="104" viewBox="0 0 100 100">'+
+          '<circle class="sbg" cx="50" cy="50" r="42"></circle>'+
+          '<circle class="sfg" cx="50" cy="50" r="42" style="stroke:'+col+';stroke-dasharray:'+circ+';stroke-dashoffset:'+off+'"></circle>'+
+        '</svg><b>'+p+'%</b></div>'+
+        '<div class="subj-tag '+tag[0]+'">'+tag[1]+'</div>'+
+        '<div class="subj-topics">'+s.topics.size+' topics practiced</div>';
+      wrap.appendChild(card);
+    });
+  }
+
+  function renderProgress(G){
+    const svg=$('prog-svg'); if(!svg) return;
+    if(!G || G.length===0){ svg.innerHTML='<text x="250" y="105" fill="#6f685e" font-size="13" text-anchor="middle">Play games to see your progress</text>'; return; }
+    const pts=G.slice(-8).map(g=>g.accuracy||0);
+    const W=500,H=200,pad=24;
+    const stepX=(W-pad*2)/Math.max(1,pts.length-1);
+    const xy=pts.map((v,i)=>[pad+i*stepX, H-pad-(v/100)*(H-pad*2)]);
+    const line=xy.map(p=>p[0].toFixed(0)+','+p[1].toFixed(0)).join(' ');
+    const area=line+' '+(pad+(pts.length-1)*stepX).toFixed(0)+','+(H-pad)+' '+pad+','+(H-pad);
+    let dots=xy.map(p=>'<circle cx="'+p[0].toFixed(0)+'" cy="'+p[1].toFixed(0)+'" r="4.5" fill="#f0b429"/>').join('');
+    let labels=xy.map((p,i)=>'<text x="'+p[0].toFixed(0)+'" y="'+(p[1]-10).toFixed(0)+'" fill="#e8e2d8" font-size="11" text-anchor="middle">'+pts[i]+'%</text>').join('');
+    svg.innerHTML=
+      '<polygon fill="rgba(240,180,41,0.12)" points="'+area+'"/>'+
+      '<polyline fill="none" stroke="#f0b429" stroke-width="3" points="'+line+'"/>'+dots+labels;
+  }
+
+  function showEmpty(){
+    setRing('ready-ring',0);
+    const rt=$('ready-pct'); if(rt) rt.textContent='0%';
+    ['gl-attempted','gl-correct','gl-accuracy','gl-games'].forEach(id=>setText(id,'0'));
+    const wrap=$('subjects-wrap'); if(wrap) wrap.innerHTML='<div class="card" style="grid-column:1/-1;text-align:center;color:#9a9184;">Play a game while logged in to see your stats here.</div>';
+    const svg=$('prog-svg'); if(svg) svg.innerHTML='<text x="250" y="105" fill="#6f685e" font-size="13" text-anchor="middle">No games yet</text>';
+  }
+
+  /* ---------- WEAK AREAS ---------- */
+  function renderWeak(){
+    const box=$('weak-body'); if(!box) return;
+    if(!cache || cache.attempts.length===0){ box.innerHTML='<div style="color:#9a9184;text-align:center;padding:20px;">No data yet — play a few games first.</div>'; return; }
+    const byTopic={}, byBloom={};
+    cache.attempts.forEach(a=>{
+      if(a.topic){ (byTopic[a.topic]=byTopic[a.topic]||{c:0,t:0}); byTopic[a.topic].t++; if(a.is_correct) byTopic[a.topic].c++; }
+      if(a.bloom){ (byBloom[a.bloom]=byBloom[a.bloom]||{c:0,t:0}); byBloom[a.bloom].t++; if(a.is_correct) byBloom[a.bloom].c++; }
+    });
+    const topics=Object.keys(byTopic).map(k=>({k,p:pct(byTopic[k].c,byTopic[k].t)})).sort((a,b)=>a.p-b.p).slice(0,5);
+    const blooms=Object.keys(byBloom).map(k=>({k,p:pct(byBloom[k].c,byBloom[k].t)})).sort((a,b)=>a.p-b.p);
+    const bloomNames={L1:'Remember',L2:'Understand',L3:'Apply',L4:'Analyze',L5:'Evaluate',L6:'Create'};
+    let html='';
+    topics.forEach(t=>{
+      html+='<div class="weak-item"><div class="weak-top"><span>'+escapeHtml(t.k)+'</span><span class="wp">'+t.p+'%</span></div><div class="weak-bar"><div class="weak-fill" style="width:'+t.p+'%"></div></div></div>';
+    });
+    if(blooms.length){ const w=blooms[0]; html+='<div class="weak-bloom"><small>Weakest Bloom\u2019s Level</small><b>'+w.k+' · '+(bloomNames[w.k]||'')+' ('+w.p+'%)</b></div>'; }
+    html+='<button class="weak-cta" onclick="enterGameFromDash()">⚡ Practice Weak Spots</button>';
+    box.innerHTML=html;
+  }
+
+  /* ---------- LEADERBOARD ---------- */
+  async function loadLeaderboard(){
+    const box=$('leaderboard-body'); if(!box) return;
+    if(!client()){ box.innerHTML='<div style="color:#9a9184;">Log in to see the leaderboard.</div>'; return; }
+    box.innerHTML='<div style="color:#9a9184;">Loading…</div>';
+    try{
+      const { data } = await client().from('profiles').select('display_name,xp,avatar_url').order('xp',{ascending:false}).limit(10);
+      if(!data || data.length===0){ box.innerHTML='<div style="color:#9a9184;">No players yet.</div>'; return; }
+      const myName=greetingName();
+      let html='';
+      data.forEach((p,i)=>{
+        const me = p.display_name===myName;
+        const av = p.avatar_url && /^[0-9]+$/.test(p.avatar_url) ? 'assets/avatars/'+p.avatar_url+'.png' : 'assets/avatars/1.png';
+        html+='<div class="lb-row'+(me?' me':'')+'"><span class="lb-rank">'+(i+1)+'</span>'+
+              '<img class="lb-av" src="'+av+'"><span class="lb-name">'+escapeHtml(p.display_name||'Player')+(me?' (You)':'')+'</span>'+
+              '<span class="lb-xp">'+(p.xp||0)+' XP</span></div>';
+      });
+      box.innerHTML=html;
+    }catch(e){ box.innerHTML='<div style="color:#9a9184;">Couldn\u2019t load leaderboard.</div>'; }
+  }
+
+  /* ---------- ACHIEVEMENTS ---------- */
+  function renderAchievements(){
+    const box=$('achievements-body'); if(!box) return;
+    const defs=[
+      {ic:'🩸',name:'First Blood',desc:'Answer your first question',need:a=>a.length>=1},
+      {ic:'🔥',name:'On Fire',desc:'Answer 25 questions',need:a=>a.length>=25},
+      {ic:'💯',name:'Century',desc:'Answer 100 questions',need:a=>a.length>=100},
+      {ic:'🎯',name:'Sharpshooter',desc:'Reach 80% overall accuracy',need:a=>{const c=a.filter(x=>x.is_correct).length;return a.length>=10 && c/a.length>=0.8;}},
+      {ic:'🧠',name:'Deep Thinker',desc:'Answer an L5/L6 question correctly',need:a=>a.some(x=>x.is_correct && (x.bloom==='L5'||x.bloom==='L6'))},
+      {ic:'📚',name:'Explorer',desc:'Play 3 different subjects',need:a=>new Set(a.map(x=>x.subject)).size>=3}
+    ];
+    const A=(cache&&cache.attempts)||[];
+    box.innerHTML=defs.map(d=>{
+      const got=d.need(A);
+      return '<div class="ach-card'+(got?' got':'')+'"><div class="ach-ic">'+d.ic+'</div><div class="ach-nm">'+d.name+'</div><div class="ach-ds">'+d.desc+'</div>'+(got?'<div class="ach-badge">Unlocked</div>':'<div class="ach-lock">🔒 Locked</div>')+'</div>';
+    }).join('');
+  }
+
+  /* ---------- helpers ---------- */
+  function setRing(id, p){
     const c=$(id); if(!c) return;
     const r=52, circ=2*Math.PI*r;
-    c.setAttribute('stroke-dasharray', circ);
-    c.setAttribute('stroke-dashoffset', circ*(1-pct/100));
+    c.style.strokeDasharray=circ;
+    c.style.strokeDashoffset=circ*(1-p/100);
   }
-  function setSubjRing(id, pct, color){
-    const c=$(id); if(!c) return;
-    const r=42, circ=2*Math.PI*r;
-    c.style.stroke=color;
-    c.setAttribute('stroke-dasharray', circ);
-    c.setAttribute('stroke-dashoffset', circ*(1-pct/100));
-  }
+  function setText(id,v){ const e=$(id); if(e) e.textContent=v; }
+  function escapeHtml(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 })();
