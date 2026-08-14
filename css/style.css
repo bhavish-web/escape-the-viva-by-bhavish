@@ -29,8 +29,8 @@ html, body {
 
 @media (min-width: 900px) and (min-height: 600px) {
   #game-container {
-    width: 920px;
-    height: 600px;
+    width: min(96vw, 1600px);
+    height: min(92vh, 900px);
     border-radius: 14px;
     box-shadow: 0 0 80px rgba(255,60,0,0.35), 0 0 200px rgba(255,60,0,0.1);
   }
