@@ -163,7 +163,7 @@
             </div>
             <div class="dash-top-right">
               <div class="dash-streak"><span class="fire">🔥</span><div>7<small>DAY STREAK</small></div></div>
-              <button class="dash-play-btn" onclick="enterGameFromDash()">▶ Play</button>
+              <button class="dash-back-btn" onclick="enterGameFromDash()">▶ Back to Game</button>
             </div>
           </div>
 
@@ -226,7 +226,7 @@
             </div>
           </div>
 
-          <div style="text-align:center; color:#666; font-size:11px; margin-top:20px;">Showing sample data — your real stats appear as you play.</div>
+          <div class="dash-note">Showing sample data — your real stats appear as you play.</div>
         </main>
       </div>
     </div>
@@ -283,6 +283,13 @@
 
   <div class="screen" id="start-screen">
     <div class="bg-particles" id="bg-particles"></div>
+
+    <!-- Dashboard pill (logged-in users only) -->
+    <button class="dash-pill" id="dash-pill" style="display:none;" onclick="showDashboard()">
+      <img class="dash-avatar" id="dash-pill-avatar" src="assets/avatars/1.png" alt="">
+      <span id="dash-pill-name">Dashboard</span>
+      <span class="dash-pill-ic">📊</span>
+    </button>
 
     <div class="start-content">
       <div class="start-left">
