@@ -1,17 +1,18 @@
 /* ============================================================
-   ESCAPE THE VIVA — Auth (login / signup / guest)
-   Uses Supabase JS v2 (loaded via CDN in index.html).
-   Optional login: guests can still play; login unlocks dashboard.
+   ESCAPE THE VIVA — Auth (login / signup / guest / avatar pick)
+   Avatar is chosen AFTER login (not at signup).
+   Stores chosen avatar number ("1".."8") in profiles.avatar_url.
    ============================================================ */
 (function(){
   "use strict";
 
   let supa = null;
+  const AVATAR_COUNT = 4;
+  let pendingAvatar = "1";
   window.CURRENT_USER = null;
+  window.CURRENT_AVATAR = "1";
 
-  function ready(){
-    return supa && window.SUPABASE_URL && window.SUPABASE_URL.indexOf('PASTE_')<0;
-  }
+  function ready(){ return supa && window.SUPABASE_URL && window.SUPABASE_URL.indexOf('PASTE_')<0; }
 
   function initClient(){
     try{
@@ -23,29 +24,45 @@
   }
 
   function $(id){ return document.getElementById(id); }
-  function show(el){ if(el) el.style.display=''; }
-  function hide(el){ if(el) el.style.display='none'; }
   function msg(text, isErr){
     const m=$('auth-msg'); if(!m) return;
     m.textContent=text||''; m.className='auth-msg '+(isErr?'err':'ok');
     m.style.display = text ? 'block' : 'none';
   }
+  function setBusy(b){ document.querySelectorAll('.auth-btn').forEach(x=>x.disabled=b); }
 
   function showAuthScreen(){
     document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
     const a=$('auth-screen'); if(a) a.classList.add('active');
+    showPanel('auth');
   }
   function enterApp(){
     const a=$('auth-screen'); if(a) a.classList.remove('active');
     const start=$('start-screen'); if(start) start.classList.add('active');
   }
 
+  /* panels inside auth card: 'auth' (login/signup) or 'avatar' */
+  function showPanel(which){
+    const authPanel=$('auth-main'), avPanel=$('avatar-panel');
+    if(!authPanel||!avPanel) return;
+    if(which==='avatar'){ authPanel.style.display='none'; avPanel.style.display='block'; buildAvatarGrid(); }
+    else { authPanel.style.display='block'; avPanel.style.display='none'; }
+  }
+
+  /* ---- tabs: smooth slide between login & signup ---- */
   window.authTab = function(which){
-    const login=$('auth-login-form'), signup=$('auth-signup-form');
+    const tabs=$('auth-tabs'); const login=$('auth-login-form'), signup=$('auth-signup-form');
     const tL=$('tab-login'), tS=$('tab-signup');
     msg('');
-    if(which==='signup'){ hide(login); show(signup); tS.classList.add('active'); tL.classList.remove('active'); }
-    else { show(login); hide(signup); tL.classList.add('active'); tS.classList.remove('active'); }
+    if(which==='signup'){
+      tabs.classList.add('show-signup');
+      tS.classList.add('active'); tL.classList.remove('active');
+      login.classList.add('out-left'); signup.classList.remove('out-right');
+    } else {
+      tabs.classList.remove('show-signup');
+      tL.classList.add('active'); tS.classList.remove('active');
+      signup.classList.add('out-right'); login.classList.remove('out-left');
+    }
   };
 
   window.playAsGuest = function(){
@@ -54,36 +71,29 @@
     enterApp();
   };
 
+  /* ---------- sign up (no avatar here) ---------- */
   window.doSignup = async function(){
     if(!ready()){ msg('Login isn\u2019t configured yet. You can still Play as Guest.', true); return; }
     const name=($('su-name').value||'').trim();
     const email=($('su-email').value||'').trim();
     const pass=($('su-pass').value||'').trim();
-    const file=$('su-avatar').files[0];
     if(!name || !email || pass.length<6){ msg('Enter a name, email, and password (6+ chars).', true); return; }
     setBusy(true);
     try{
-      const { data, error } = await supa.auth.signUp({
-        email, password: pass,
-        options:{ data:{ display_name: name } }
-      });
+      const { data, error } = await supa.auth.signUp({ email, password: pass, options:{ data:{ display_name:name } } });
       if(error){ msg(error.message, true); setBusy(false); return; }
-      const user = data.user;
-      if(user && file){
-        const url = await uploadAvatar(user.id, file);
-        if(url){ await supa.from('profiles').update({ avatar_url:url, display_name:name }).eq('id', user.id); }
-      }
       if(!data.session){
         msg('Account created! Check your email to confirm, then log in.', false);
         window.authTab('login'); setBusy(false); return;
       }
-      window.CURRENT_USER = user;
-      msg('Welcome, '+name+'!', false);
-      setTimeout(enterApp, 500);
+      window.CURRENT_USER = data.user;
+      msg('', false);
+      showPanel('avatar');           // ← pick avatar after signup
     }catch(e){ msg('Something went wrong. Try again.', true); }
     setBusy(false);
   };
 
+  /* ---------- log in ---------- */
   window.doLogin = async function(){
     if(!ready()){ msg('Login isn\u2019t configured yet. You can still Play as Guest.', true); return; }
     const email=($('li-email').value||'').trim();
@@ -94,8 +104,11 @@
       const { data, error } = await supa.auth.signInWithPassword({ email, password: pass });
       if(error){ msg(error.message, true); setBusy(false); return; }
       window.CURRENT_USER = data.user;
-      msg('Logged in!', false);
-      setTimeout(enterApp, 400);
+      msg('', false);
+      // if they already have an avatar, skip the picker
+      const existing = await getMyAvatar(data.user.id);
+      if(existing){ window.CURRENT_AVATAR = existing; enterApp(); }
+      else { showPanel('avatar'); }
     }catch(e){ msg('Login failed. Try again.', true); }
     setBusy(false);
   };
@@ -106,34 +119,55 @@
     showAuthScreen();
   };
 
-  async function uploadAvatar(userId, file){
+  /* ---------- avatar picker ---------- */
+  function buildAvatarGrid(){
+    const grid=$('avatar-grid'); if(!grid || grid.dataset.built) return;
+    grid.innerHTML='';
+    for(let i=1;i<=AVATAR_COUNT;i++){
+      const b=document.createElement('button');
+      b.className='avatar-opt'+(i===1?' selected':'');
+      b.innerHTML='<img src="assets/avatars/'+i+'.png" alt="Avatar '+i+'">';
+      b.onclick=function(){
+        pendingAvatar=String(i);
+        grid.querySelectorAll('.avatar-opt').forEach(x=>x.classList.remove('selected'));
+        b.classList.add('selected');
+      };
+      grid.appendChild(b);
+    }
+    grid.dataset.built='1';
+  }
+
+  window.confirmAvatar = async function(){
+    window.CURRENT_AVATAR = pendingAvatar;
+    setBusy(true);
     try{
-      const ext = (file.name.split('.').pop()||'png').toLowerCase();
-      const path = userId + '/avatar.' + ext;
-      const { error } = await supa.storage.from('avatars').upload(path, file, { upsert:true });
-      if(error){ console.warn('avatar upload', error); return null; }
-      const { data } = supa.storage.from('avatars').getPublicUrl(path);
-      return data.publicUrl;
+      if(ready() && window.CURRENT_USER){
+        await supa.from('profiles').update({ avatar_url: pendingAvatar }).eq('id', window.CURRENT_USER.id);
+      }
+    }catch(e){ console.warn('avatar save skipped', e); }
+    setBusy(false);
+    enterApp();
+  };
+
+  async function getMyAvatar(uid){
+    try{
+      const { data } = await supa.from('profiles').select('avatar_url').eq('id', uid).single();
+      return data && data.avatar_url ? data.avatar_url : null;
     }catch(e){ return null; }
   }
 
-  function setBusy(b){
-    document.querySelectorAll('.auth-btn').forEach(btn=>{ btn.disabled=b; });
-  }
-
+  /* ---------- boot ---------- */
   window.addEventListener('load', function(){
     const ok = initClient();
     if(ok){
-      supa.auth.getSession().then(({data})=>{
+      supa.auth.getSession().then(async ({data})=>{
         if(data && data.session){
           window.CURRENT_USER = data.session.user;
-          enterApp();
-        } else {
-          showAuthScreen();
-        }
+          const av = await getMyAvatar(data.session.user.id);
+          if(av){ window.CURRENT_AVATAR = av; enterApp(); }
+          else { showAuthScreen(); showPanel('avatar'); }
+        } else { showAuthScreen(); }
       }).catch(()=>showAuthScreen());
-    } else {
-      showAuthScreen();
-    }
+    } else { showAuthScreen(); }
   });
 })();
