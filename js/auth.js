@@ -7,7 +7,7 @@
   "use strict";
 
   let supa = null;
-  const AVATAR_COUNT = 8;
+  const AVATAR_COUNT = 4;
   let pendingAvatar = "1";
   window.CURRENT_USER = null;
   window.CURRENT_AVATAR = "1";
@@ -128,7 +128,7 @@
     for(let i=1;i<=AVATAR_COUNT;i++){
       const b=document.createElement('button');
       b.className='avatar-opt'+(i===1?' selected':'');
-      b.innerHTML='<img src="assets/avatars/'+i+'.png" alt="Avatar '+i+'">';
+      b.innerHTML='<img src="assets/avatars/'+i+'.png" alt="" onerror="this.style.visibility=\'hidden\'">';
       b.onclick=function(){
         pendingAvatar=String(i);
         grid.querySelectorAll('.avatar-opt').forEach(x=>x.classList.remove('selected'));
