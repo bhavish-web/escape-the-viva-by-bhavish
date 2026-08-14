@@ -70,6 +70,21 @@
         score: s.score || 0,
         accuracy: total ? Math.round((correct/total)*100) : 0
       });
+
+      // ---- Award XP (10 per correct answer + 1 per 10 score points) ----
+      try{
+        const earned = correct*10 + Math.floor((s.score||0)/10);
+        if(earned>0){
+          const uid = user().id;
+          const { data: prof } = await client().from('profiles').select('xp,best_streak').eq('id', uid).single();
+          const curXp = (prof && prof.xp) ? prof.xp : 0;
+          const curBest = (prof && prof.best_streak) ? prof.best_streak : 0;
+          await client().from('profiles').update({
+            xp: curXp + earned,
+            best_streak: Math.max(curBest, s.bestStreak||0)
+          }).eq('id', uid);
+        }
+      }catch(xe){ console.warn('xp award skipped', xe); }
     }catch(e){ console.warn('save-progress flush failed', e); }
   }
 
