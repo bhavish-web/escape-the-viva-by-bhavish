@@ -7,7 +7,7 @@
   "use strict";
 
   let supa = null;
-  const AVATAR_COUNT = 4;
+  const AVATAR_COUNT = 8;
   let pendingAvatar = "1";
   window.CURRENT_USER = null;
   window.CURRENT_AVATAR = "1";
@@ -38,12 +38,9 @@
   }
   function enterApp(){
     const a=$('auth-screen'); if(a) a.classList.remove('active');
-    // Logged-in users land on the dashboard; guests go to the game start screen.
-    if(window.CURRENT_USER && typeof window.showDashboard==='function'){
-      window.showDashboard();
-    } else {
-      const start=$('start-screen'); if(start) start.classList.add('active');
-    }
+    const start=$('start-screen'); if(start) start.classList.add('active');
+    // reveal the dashboard pill for logged-in users
+    try{ if(typeof window.refreshDashPill==='function') window.refreshDashPill(); }catch(e){}
   }
 
   /* panels inside auth card: 'auth' (login/signup) or 'avatar' */
