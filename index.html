@@ -6,6 +6,7 @@
 <title>Escape The Viva</title>
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/auth.css">
+<link rel="stylesheet" href="css/dashboard.css">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
 <link rel="stylesheet" href="css/ai-setup.css">
 <link rel="stylesheet" href="css/features.css">
@@ -124,6 +125,112 @@
     <div class="ai-error" id="ai-error" style="display:none"></div>
   </div>
 </div>
+
+  <!-- ============ DASHBOARD SCREEN ============ -->
+  <div class="screen" id="dashboard-screen">
+    <div class="dash">
+      <svg width="0" height="0"><defs>
+        <linearGradient id="goldgrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#f0b429"/><stop offset="100%" stop-color="#e63030"/>
+        </linearGradient>
+      </defs></svg>
+
+      <div class="dash-wrap">
+        <!-- SIDEBAR -->
+        <aside class="dash-side">
+          <div class="dash-logo">ESCAPE<br>THE <span class="vi">VIVA</span><small>Dashboard</small></div>
+          <nav class="dash-nav">
+            <a class="active"><span class="ic">🏠</span> Dashboard</a>
+            <a onclick="enterGameFromDash()"><span class="ic">🎮</span> Play Game</a>
+            <a><span class="ic">📊</span> Analytics</a>
+            <a><span class="ic">🎯</span> Weak Areas</a>
+            <a><span class="ic">🏆</span> Leaderboard</a>
+            <a><span class="ic">🏅</span> Achievements</a>
+            <a onclick="doLogout()"><span class="ic">🚪</span> Log Out</a>
+          </nav>
+          <div class="dash-side-foot">
+            <img class="dash-avatar" src="assets/avatars/1.png" alt="">
+            <div><div class="nm" id="dash-foot-name">Student</div><div class="lv">Level 1</div></div>
+          </div>
+        </aside>
+
+        <!-- MAIN -->
+        <main class="dash-main">
+          <div class="dash-top">
+            <button class="dash-burger" onclick="toggleDashSidebar()">☰</button>
+            <div class="dash-hi">Good to see you, <span class="accent" id="dash-hi-name">Student</span>! 👋
+              <small>Let's escape that viva today.</small>
+            </div>
+            <div class="dash-top-right">
+              <div class="dash-streak"><span class="fire">🔥</span><div>7<small>DAY STREAK</small></div></div>
+              <button class="dash-play-btn" onclick="enterGameFromDash()">▶ Play</button>
+            </div>
+          </div>
+
+          <!-- ROW 1: readiness + 3 subjects + glance -->
+          <div class="dash-grid g-4" style="margin-bottom:16px;">
+            <div class="card">
+              <h3>🎯 Exam Readiness</h3>
+              <div class="ring-wrap">
+                <div class="ring">
+                  <svg width="150" height="150" viewBox="0 0 120 120">
+                    <circle class="rbg" cx="60" cy="60" r="52"></circle>
+                    <circle class="rfg" id="ready-ring" cx="60" cy="60" r="52"></circle>
+                  </svg>
+                  <div class="rtxt"><b>72%</b><span>READY</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="subj-name">🧠 Art. Intelligence</div>
+              <div class="subj-ring"><svg width="96" height="96" viewBox="0 0 100 100"><circle class="sbg" cx="50" cy="50" r="42"></circle><circle class="sfg" id="subj1" cx="50" cy="50" r="42"></circle></svg><b>76%</b></div>
+              <div class="subj-tag strong">Strong ↗</div>
+              <div class="subj-topics">24 / 32 Topics</div>
+            </div>
+
+            <div class="card">
+              <div class="subj-name">🗄️ DBMS</div>
+              <div class="subj-ring"><svg width="96" height="96" viewBox="0 0 100 100"><circle class="sbg" cx="50" cy="50" r="42"></circle><circle class="sfg" id="subj2" cx="50" cy="50" r="42"></circle></svg><b>64%</b></div>
+              <div class="subj-tag good">Good ↗</div>
+              <div class="subj-topics">16 / 25 Topics</div>
+            </div>
+
+            <div class="card">
+              <div class="subj-name">🖥️ Operating Sys.</div>
+              <div class="subj-ring"><svg width="96" height="96" viewBox="0 0 100 100"><circle class="sbg" cx="50" cy="50" r="42"></circle><circle class="sfg" id="subj3" cx="50" cy="50" r="42"></circle></svg><b>58%</b></div>
+              <div class="subj-tag avg">Average →</div>
+              <div class="subj-topics">14 / 24 Topics</div>
+            </div>
+          </div>
+
+          <!-- ROW 2: progress + weak areas -->
+          <div class="dash-grid g-2">
+            <div class="card">
+              <h3>📈 Progress Over Time</h3>
+              <svg class="prog-svg" viewBox="0 0 500 210" preserveAspectRatio="none">
+                <polyline fill="none" stroke="#f0b429" stroke-width="3" points="30,170 140,150 250,120 360,95 470,60"/>
+                <polygon fill="rgba(240,180,41,0.12)" points="30,170 140,150 250,120 360,95 470,60 470,210 30,210"/>
+                <circle cx="30" cy="170" r="5" fill="#f0b429"/><circle cx="140" cy="150" r="5" fill="#f0b429"/>
+                <circle cx="250" cy="120" r="5" fill="#f0b429"/><circle cx="360" cy="95" r="5" fill="#f0b429"/>
+                <circle cx="470" cy="60" r="5" fill="#f0b429"/>
+              </svg>
+            </div>
+
+            <div class="card">
+              <h3>🎯 Weak Areas</h3>
+              <div class="weak-item"><div class="weak-top"><span>Classical Planning</span><span class="wp">42%</span></div><div class="weak-bar"><div class="weak-fill" style="width:42%"></div></div></div>
+              <div class="weak-item"><div class="weak-top"><span>First-Order Logic</span><span class="wp">55%</span></div><div class="weak-bar"><div class="weak-fill" style="width:55%"></div></div></div>
+              <div class="weak-bloom"><small>Weakest Bloom's Level</small><b>L4 · Analyze</b></div>
+              <button class="weak-cta">⚡ Practice Weak Spots</button>
+            </div>
+          </div>
+
+          <div style="text-align:center; color:#666; font-size:11px; margin-top:20px;">Showing sample data — your real stats appear as you play.</div>
+        </main>
+      </div>
+    </div>
+  </div>
 
   <!-- ===== START / LAUNCH SCREEN (home) ===== -->
   <!-- ============ AUTH SCREEN (shows first) ============ -->
@@ -475,6 +582,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase-config.js"></script>
 <script src="js/auth.js"></script>
+<script src="js/dashboard.js"></script>
 <script src="js/audio.js"></script>
 <script src="js/questions.js"></script>
 <script src="js/subjects.js"></script>
