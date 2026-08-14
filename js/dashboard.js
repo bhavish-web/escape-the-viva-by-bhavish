@@ -21,6 +21,19 @@
     const s=document.querySelector('.dash-side'); if(s) s.classList.toggle('open');
   };
 
+  // Show + populate the dashboard pill on the start screen (logged-in users only)
+  window.refreshDashPill = function(){
+    const pill=$('dash-pill'); if(!pill) return;
+    if(window.CURRENT_USER){
+      const nm=greetingName();
+      const nmEl=$('dash-pill-name'); if(nmEl) nmEl.textContent=nm;
+      const av=$('dash-pill-avatar'); if(av) av.src=avatarSrc();
+      pill.style.display='inline-flex';
+    } else {
+      pill.style.display='none';
+    }
+  };
+
   function greetingName(){
     try{
       const u=window.CURRENT_USER;
