@@ -407,8 +407,16 @@ function setMode(mode) {
 
 /* ---------- Keyboard ---------- */
 document.addEventListener('keydown', e => {
+  // Ignore game hotkeys while typing in a field (login, signup, etc.)
+  const t = e.target;
+  if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+  // Only respond to game hotkeys while the game screen is active
+  const gameActive = document.getElementById('game-screen') &&
+                     document.getElementById('game-screen').classList.contains('active');
+  if (!gameActive) return;
+
   const map = { a:0, b:1, c:2, d:3, A:0, B:1, C:2, D:3, '1':0, '2':1, '3':2, '4':3 };
-  if (map[e.key] !== undefined && document.getElementById('game-screen').classList.contains('active')) {
+  if (map[e.key] !== undefined) {
     selectAnswer(map[e.key]);
   }
   // H for hint, F for 50-50, G to ask the professor
