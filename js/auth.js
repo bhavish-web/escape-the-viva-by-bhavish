@@ -38,7 +38,12 @@
   }
   function enterApp(){
     const a=$('auth-screen'); if(a) a.classList.remove('active');
-    const start=$('start-screen'); if(start) start.classList.add('active');
+    // Logged-in users land on the dashboard; guests go to the game start screen.
+    if(window.CURRENT_USER && typeof window.showDashboard==='function'){
+      window.showDashboard();
+    } else {
+      const start=$('start-screen'); if(start) start.classList.add('active');
+    }
   }
 
   /* panels inside auth card: 'auth' (login/signup) or 'avatar' */
