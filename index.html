@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Escape The Viva</title>
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/auth.css">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
 <link rel="stylesheet" href="css/ai-setup.css">
 <link rel="stylesheet" href="css/features.css">
@@ -125,7 +126,49 @@
 </div>
 
   <!-- ===== START / LAUNCH SCREEN (home) ===== -->
-  <div class="screen active" id="start-screen">
+  <!-- ============ AUTH SCREEN (shows first) ============ -->
+  <div class="screen active" id="auth-screen">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="a1">ESCAPE THE <span class="vi">VIVA</span></div>
+        <div class="a2">AI-Powered Exam Prep Game</div>
+      </div>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login" onclick="authTab('login')">Log In</button>
+        <button class="auth-tab" id="tab-signup" onclick="authTab('signup')">Sign Up</button>
+      </div>
+
+      <!-- LOGIN -->
+      <div id="auth-login-form">
+        <div class="auth-field"><label>Email</label><input id="li-email" type="email" placeholder="you@example.com" autocomplete="email"></div>
+        <div class="auth-field"><label>Password</label><input id="li-pass" type="password" placeholder="Your password" autocomplete="current-password"></div>
+        <button class="auth-btn" onclick="doLogin()">Log In</button>
+      </div>
+
+      <!-- SIGNUP -->
+      <div id="auth-signup-form" style="display:none;">
+        <div class="auth-field"><label>Display Name</label><input id="su-name" type="text" placeholder="Your name"></div>
+        <div class="auth-field"><label>Email</label><input id="su-email" type="email" placeholder="you@example.com" autocomplete="email"></div>
+        <div class="auth-field"><label>Password (6+ chars)</label><input id="su-pass" type="password" placeholder="Create a password" autocomplete="new-password"></div>
+        <div class="auth-field">
+          <label>Profile Picture (optional)</label>
+          <div class="auth-avatar">
+            <img id="su-avatar-prev" class="prev" alt="">
+            <div class="file"><input id="su-avatar" type="file" accept="image/*" onchange="(function(i){var f=i.files[0];if(f){document.getElementById('su-avatar-prev').src=URL.createObjectURL(f);}})(this)"></div>
+          </div>
+        </div>
+        <button class="auth-btn" onclick="doSignup()">Create Account</button>
+      </div>
+
+      <div class="auth-msg" id="auth-msg"></div>
+
+      <div class="auth-divider">or</div>
+      <button class="auth-btn secondary" onclick="playAsGuest()">🎮 Play as Guest</button>
+    </div>
+  </div>
+
+  <div class="screen" id="start-screen">
     <div class="bg-particles" id="bg-particles"></div>
 
     <div class="start-content">
@@ -423,6 +466,9 @@
 </div>
 
 <!-- Scripts - ORDER MATTERS -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/auth.js"></script>
 <script src="js/audio.js"></script>
 <script src="js/questions.js"></script>
 <script src="js/subjects.js"></script>
