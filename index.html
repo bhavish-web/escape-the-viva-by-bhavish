@@ -134,37 +134,43 @@
         <div class="a2">AI-Powered Exam Prep Game</div>
       </div>
 
-      <div class="auth-tabs">
-        <button class="auth-tab active" id="tab-login" onclick="authTab('login')">Log In</button>
-        <button class="auth-tab" id="tab-signup" onclick="authTab('signup')">Sign Up</button>
-      </div>
+      <!-- MAIN: login / signup -->
+      <div id="auth-main">
+        <div class="auth-tabs" id="auth-tabs">
+          <div class="auth-pill"></div>
+          <button class="auth-tab active" id="tab-login" onclick="authTab('login')">Log In</button>
+          <button class="auth-tab" id="tab-signup" onclick="authTab('signup')">Sign Up</button>
+        </div>
 
-      <!-- LOGIN -->
-      <div id="auth-login-form">
-        <div class="auth-field"><label>Email</label><input id="li-email" type="email" placeholder="you@example.com" autocomplete="email"></div>
-        <div class="auth-field"><label>Password</label><input id="li-pass" type="password" placeholder="Your password" autocomplete="current-password"></div>
-        <button class="auth-btn" onclick="doLogin()">Log In</button>
-      </div>
-
-      <!-- SIGNUP -->
-      <div id="auth-signup-form" style="display:none;">
-        <div class="auth-field"><label>Display Name</label><input id="su-name" type="text" placeholder="Your name"></div>
-        <div class="auth-field"><label>Email</label><input id="su-email" type="email" placeholder="you@example.com" autocomplete="email"></div>
-        <div class="auth-field"><label>Password (6+ chars)</label><input id="su-pass" type="password" placeholder="Create a password" autocomplete="new-password"></div>
-        <div class="auth-field">
-          <label>Profile Picture (optional)</label>
-          <div class="auth-avatar">
-            <img id="su-avatar-prev" class="prev" alt="">
-            <div class="file"><input id="su-avatar" type="file" accept="image/*" onchange="(function(i){var f=i.files[0];if(f){document.getElementById('su-avatar-prev').src=URL.createObjectURL(f);}})(this)"></div>
+        <div class="auth-forms">
+          <!-- LOGIN -->
+          <div class="auth-form" id="auth-login-form">
+            <div class="auth-field"><label>Email</label><input id="li-email" type="email" placeholder="you@example.com" autocomplete="email"></div>
+            <div class="auth-field"><label>Password</label><input id="li-pass" type="password" placeholder="Your password" autocomplete="current-password"></div>
+            <button class="auth-btn" onclick="doLogin()">Log In</button>
+          </div>
+          <!-- SIGNUP (no avatar here) -->
+          <div class="auth-form out-right" id="auth-signup-form">
+            <div class="auth-field"><label>Display Name</label><input id="su-name" type="text" placeholder="Your name"></div>
+            <div class="auth-field"><label>Email</label><input id="su-email" type="email" placeholder="you@example.com" autocomplete="email"></div>
+            <div class="auth-field"><label>Password (6+ chars)</label><input id="su-pass" type="password" placeholder="Create a password" autocomplete="new-password"></div>
+            <button class="auth-btn" onclick="doSignup()">Create Account</button>
           </div>
         </div>
-        <button class="auth-btn" onclick="doSignup()">Create Account</button>
+
+        <div class="auth-msg" id="auth-msg"></div>
+        <div class="auth-divider">OR</div>
+        <button class="auth-btn secondary" onclick="playAsGuest()">🎮 Play as Guest</button>
       </div>
 
-      <div class="auth-msg" id="auth-msg"></div>
+      <!-- AVATAR PICKER (after login) -->
+      <div id="avatar-panel" style="display:none;">
+        <div class="avatar-pick-title">Choose Your Avatar</div>
+        <div class="avatar-pick-sub">Pick a character to represent you</div>
+        <div class="avatar-grid" id="avatar-grid"></div>
+        <button class="auth-btn" onclick="confirmAvatar()" style="margin-top:18px;">Continue →</button>
+      </div>
 
-      <div class="auth-divider">or</div>
-      <button class="auth-btn secondary" onclick="playAsGuest()">🎮 Play as Guest</button>
     </div>
   </div>
 
