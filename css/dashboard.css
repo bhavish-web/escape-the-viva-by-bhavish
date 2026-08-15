@@ -73,7 +73,7 @@
 .card h3{ margin:0 0 16px; font-size:12.5px; letter-spacing:1.2px; text-transform:uppercase; color:#d8cba8; display:flex; align-items:center; gap:8px; font-weight:800; }
 
 /* readiness ring */
-.ring-wrap{ display:flex; align-items:center; justify-content:center; }
+.ring-wrap{ display:block; text-align:center; }
 .ring{ position:relative; width:158px; height:158px; }
 .ring .rbg{ fill:none; stroke:rgba(255,255,255,.07); stroke-width:11; }
 .ring .rfg{ fill:none; stroke:url(#goldgrad); stroke-width:11; stroke-linecap:round; transition:stroke-dashoffset 1.1s cubic-bezier(.2,.8,.2,1); }
@@ -169,23 +169,13 @@
    ============================================================ */
 
 /* consistent card rhythm + equal-height cards in a row */
-.dash-grid{ align-items:stretch; }
-.dash-grid > .card{ display:flex; flex-direction:column; align-items:center; }
-.dash-grid > .card > h3{ align-self:flex-start; }
-.dash-grid > .card > .glance-row,
-.dash-grid > .card > #weak-mini,
-.dash-grid > .card > .weak-item,
-.dash-grid > .card > .prog-svg,
-.dash-grid > .card > svg{ align-self:stretch; width:100%; }
+/* cards are plain blocks; ring centering done on ring elements directly */
 .card h3{ margin-bottom:14px; }
 
 /* subject cards: equal height, centered content */
-#subjects-wrap .card, .dash-grid.g-4 .card{ justify-content:flex-start; }
-.subj-ring{ margin-top:auto; margin-bottom:auto; }
 .subj-tag{ margin-top:auto; }
 
 /* readiness card: center the ring vertically */
-.dash-grid .card .ring-wrap{ flex:1; }
 
 /* progress graph: add breathing room + baseline */
 .prog-svg{ margin-top:4px; }
@@ -294,4 +284,20 @@
 /* ===== ring centering handled by .dash-grid > .card align-items:center above ===== */
 
 /* subject card: keep the name at top-left, center only the ring/tag */
-#subjects-wrap .card > .subj-name{ align-self:flex-start; }
+
+/* ============================================================
+   CLEAN RING CENTERING (block layout, no flex conflicts)
+   ============================================================ */
+.card{ display:block; }                 /* cards are simple blocks */
+.ring-wrap{ display:block; text-align:center; width:100%; }
+.ring{ display:inline-block; position:relative; }   /* centered by text-align:center on parent */
+.subj-ring{ display:block; margin:0 auto; }         /* auto-centers in block */
+.ring-wrap svg, .ring svg{ display:block; }
+
+/* ===== FORCE readiness ring centered (verified via render) ===== */
+.ring-wrap{ text-align:center !important; }
+.ring{ display:inline-block !important; margin:0 auto !important; }
+
+/* ===== FIX: make ring SVG scale to its container (was overflowing) ===== */
+.ring svg{ width:100% !important; height:100% !important; display:block; }
+.subj-ring svg{ width:100% !important; height:100% !important; display:block; }
