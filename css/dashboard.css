@@ -170,7 +170,13 @@
 
 /* consistent card rhythm + equal-height cards in a row */
 .dash-grid{ align-items:stretch; }
-.dash-grid > .card{ display:flex; flex-direction:column; }
+.dash-grid > .card{ display:flex; flex-direction:column; align-items:center; }
+.dash-grid > .card > h3{ align-self:flex-start; }
+.dash-grid > .card > .glance-row,
+.dash-grid > .card > #weak-mini,
+.dash-grid > .card > .weak-item,
+.dash-grid > .card > .prog-svg,
+.dash-grid > .card > svg{ align-self:stretch; width:100%; }
 .card h3{ margin-bottom:14px; }
 
 /* subject cards: equal height, centered content */
@@ -285,9 +291,7 @@
 }
 
 /* ===== FIX: center ring & content inside flex cards (polish pass broke margin:auto) ===== */
-#subjects-wrap .card{ align-items:center; text-align:center; }
-#subjects-wrap .subj-name{ align-self:flex-start; text-align:left; }
-.subj-ring{ align-self:center; }
-.ring-wrap{ align-self:center; width:100%; }
-/* readiness card ring stays centered */
-.dash-grid.g-4 > .card .ring-wrap{ display:flex; justify-content:center; }
+/* ===== ring centering handled by .dash-grid > .card align-items:center above ===== */
+
+/* subject card: keep the name at top-left, center only the ring/tag */
+#subjects-wrap .card > .subj-name{ align-self:flex-start; }
