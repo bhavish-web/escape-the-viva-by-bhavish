@@ -160,7 +160,7 @@
           '<circle class="sfg" cx="50" cy="50" r="42" style="stroke:'+col+';stroke-dasharray:'+circ+';stroke-dashoffset:'+off+'"></circle>'+
         '</svg><b>'+p+'%</b></div>'+
         '<div class="subj-tag '+tag[0]+'">'+tag[1]+'</div>'+
-        '<div class="subj-topics">'+s.topics.size+' topics practiced</div>';
+        '<div class="subj-topics">'+s.topics.size+(s.topics.size===1?' topic':' topics')+' practiced</div>';
       wrap.appendChild(card);
     });
   }
