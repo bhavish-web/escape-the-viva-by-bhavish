@@ -90,7 +90,9 @@ async function groqTextCompletion(prompt) {
       model: GROQ_TEXT_MODEL,
       messages: [{ role: "user", content: prompt }],
       temperature: 0.3,
-      max_tokens: 4000
+      max_tokens: 4000,
+      reasoning_effort: "low",
+      reasoning_format: "hidden"
     })
   });
 
@@ -127,7 +129,8 @@ async function groqVisionCompletion(imageBuffer, mimeType, prompt) {
         }
       ],
       temperature: 0.3,
-      max_tokens: 4000
+      max_tokens: 4000,
+      reasoning_format: "hidden"
     })
   });
 
