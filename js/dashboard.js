@@ -72,11 +72,12 @@
     if(!client() || !user()){ showEmpty(); return; }
     try{
       const uid = user().id;
-      const [{ data:attempts }, { data:games }] = await Promise.all([
+      const [{ data:attempts }, { data:games }, { data:prof }] = await Promise.all([
         client().from('attempts').select('subject,unit,topic,bloom,is_correct,created_at').eq('user_id', uid),
-        client().from('games').select('subject,accuracy,score,correct_q,total_q,created_at').eq('user_id', uid).order('created_at',{ascending:true})
+        client().from('games').select('subject,accuracy,score,correct_q,total_q,created_at').eq('user_id', uid).order('created_at',{ascending:true}),
+        client().from('profiles').select('xp,current_streak,best_streak').eq('id', uid).single()
       ]);
-      cache = { attempts: attempts||[], games: games||[] };
+      cache = { attempts: attempts||[], games: games||[], profile: prof||{} };
       fillMain(cache);
     }catch(e){ console.warn('dashboard load failed', e); showEmpty(); }
   }
@@ -111,6 +112,14 @@
 
     // Progress over time (accuracy per game)
     renderProgress(G);
+
+    // Real streak
+    const streak = (d.profile && d.profile.current_streak) ? d.profile.current_streak : 0;
+    const stEl=$('dash-streak-num');
+    if(stEl){
+      if(streak>0){ stEl.innerHTML='<div style="font-size:44px;">🔥</div><div style="font-size:32px;font-weight:900;color:#f0b429;">'+streak+' day'+(streak>1?'s':'')+'</div><div style="font-size:11px;color:#9a9184;margin-top:4px;">in a row — keep it alive!</div>'; }
+      else { stEl.innerHTML='<div style="font-size:44px;">🔥</div><div style="font-size:22px;font-weight:900;color:#f0b429;">Start today!</div><div style="font-size:11px;color:#9a9184;margin-top:4px;">Play daily to build a streak</div>'; }
+    }
 
     // mini weak preview on home
     renderWeakMini();
