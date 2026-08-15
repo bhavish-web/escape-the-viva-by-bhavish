@@ -47,6 +47,7 @@
     if(section==='leaderboard') loadLeaderboard();
     if(section==='weak') renderWeak();
     if(section==='achievements') renderAchievements();
+    if(section==='analytics') renderAnalytics();
   };
 
   /* ---------- identity ---------- */
@@ -246,6 +247,74 @@
       const got=d.need(A);
       return '<div class="ach-card'+(got?' got':'')+'"><div class="ach-ic">'+d.ic+'</div><div class="ach-nm">'+d.name+'</div><div class="ach-ds">'+d.desc+'</div>'+(got?'<div class="ach-badge">Unlocked</div>':'<div class="ach-lock">🔒 Locked</div>')+'</div>';
     }).join('');
+  }
+
+  /* ---------- ANALYTICS ---------- */
+  function renderAnalytics(){
+    const A=(cache&&cache.attempts)||[], G=(cache&&cache.games)||[], P=(cache&&cache.profile)||{};
+    // totals
+    setText('an-games', G.length);
+    setText('an-questions', A.length);
+    setText('an-streak', P.best_streak||0);
+    setText('an-xp', P.xp||0);
+
+    // accuracy over time (bigger graph, reuse renderer into an-prog-svg)
+    renderProgressInto('an-prog-svg', G);
+
+    // Bloom's breakdown
+    const bloomBox=$('an-bloom');
+    if(bloomBox){
+      const byB={};
+      A.forEach(a=>{ if(a.bloom){ (byB[a.bloom]=byB[a.bloom]||{c:0,t:0}); byB[a.bloom].t++; if(a.is_correct) byB[a.bloom].c++; } });
+      const names={L1:'Remember',L2:'Understand',L3:'Apply',L4:'Analyze',L5:'Evaluate',L6:'Create'};
+      const order=['L1','L2','L3','L4','L5','L6'];
+      const have=order.filter(l=>byB[l]);
+      if(have.length===0){ bloomBox.innerHTML='<div style="color:#9a9184;font-size:12px;padding:16px 0;text-align:center;">Play AI Viva questions (they carry Bloom levels) to see this.</div>'; }
+      else{
+        bloomBox.innerHTML=order.map(l=>{
+          if(!byB[l]) return '';
+          const p=pct(byB[l].c,byB[l].t);
+          const col = p>=70?'#2ecc71':p>=45?'#f0b429':'#e63030';
+          return '<div class="an-bloom-row"><span class="an-bloom-lbl">'+l+' · '+names[l]+'</span>'+
+                 '<div class="an-bloom-bar"><div class="an-bloom-fill" style="width:'+p+'%;background:'+col+'"></div></div>'+
+                 '<span class="an-bloom-pct">'+p+'%</span></div>';
+        }).join('');
+      }
+    }
+
+    // Accuracy by subject
+    const subjBox=$('an-subjects');
+    if(subjBox){
+      const byS={};
+      A.forEach(a=>{ const s=a.subject||'Unknown'; (byS[s]=byS[s]||{c:0,t:0}); byS[s].t++; if(a.is_correct) byS[s].c++; });
+      const names=Object.keys(byS);
+      if(names.length===0){ subjBox.innerHTML='<div style="color:#9a9184;font-size:12px;padding:8px 0;">No subjects yet.</div>'; }
+      else{
+        subjBox.innerHTML=names.map(n=>{
+          const p=pct(byS[n].c,byS[n].t);
+          const col = p>=70?'#2ecc71':p>=45?'#f0b429':'#e63030';
+          return '<div class="an-bloom-row"><span class="an-bloom-lbl">'+escapeHtml(n)+'</span>'+
+                 '<div class="an-bloom-bar"><div class="an-bloom-fill" style="width:'+p+'%;background:'+col+'"></div></div>'+
+                 '<span class="an-bloom-pct">'+p+'%</span></div>';
+        }).join('');
+      }
+    }
+  }
+
+  // generic progress renderer (used by home + analytics)
+  function renderProgressInto(svgId, G){
+    const svg=$(svgId); if(!svg) return;
+    if(!G || G.length===0){ svg.innerHTML='<text x="250" y="110" fill="#6f685e" font-size="13" text-anchor="middle">Play games to see your progress</text>'; return; }
+    const pts=G.slice(-8).map(g=>g.accuracy||0);
+    const W=500,H=220,pad=26;
+    const stepX=(W-pad*2)/Math.max(1,pts.length-1);
+    const xy=pts.map((v,i)=>[pad+i*stepX, H-pad-(v/100)*(H-pad*2)]);
+    const line=xy.map(p=>p[0].toFixed(0)+','+p[1].toFixed(0)).join(' ');
+    const area=line+' '+(pad+(pts.length-1)*stepX).toFixed(0)+','+(H-pad)+' '+pad+','+(H-pad);
+    const dots=xy.map(p=>'<circle cx="'+p[0].toFixed(0)+'" cy="'+p[1].toFixed(0)+'" r="4.5" fill="#f0b429"/>').join('');
+    const labels=xy.map((p,i)=>'<text x="'+p[0].toFixed(0)+'" y="'+(p[1]-10).toFixed(0)+'" fill="#e8e2d8" font-size="11" text-anchor="middle">'+pts[i]+'%</text>').join('');
+    svg.innerHTML='<polygon fill="rgba(240,180,41,0.12)" points="'+area+'"/>'+
+      '<polyline fill="none" stroke="#f0b429" stroke-width="3" points="'+line+'"/>'+dots+labels;
   }
 
   /* ---------- helpers ---------- */
