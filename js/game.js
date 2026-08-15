@@ -17,9 +17,10 @@ let timerInterval = null;
 
 /* ---------- Difficulty Config ---------- */
 const diffConfig = {
-  easy:   { time: 15, stressUp: 15, angerUp: 10, stressDown: 18, label: 'EASY',   class: 'easy' },
-  medium: { time: 10, stressUp: 20, angerUp: 15, stressDown: 15, label: 'MEDIUM', class: 'medium' },
-  hard:   { time:  7, stressUp: 28, angerUp: 20, stressDown: 12, label: 'HARD',   class: 'hard' }
+  easy:     { time: 15, stressUp: 15, angerUp: 10, stressDown: 18, label: 'EASY',     class: 'easy' },
+  medium:   { time: 10, stressUp: 20, angerUp: 15, stressDown: 15, label: 'MEDIUM',   class: 'medium' },
+  hard:     { time:  7, stressUp: 28, angerUp: 20, stressDown: 12, label: 'HARD',     class: 'hard' },
+  adaptive: { time: 10, stressUp: 20, angerUp: 15, stressDown: 15, label: 'ADAPTIVE', class: 'medium' }
 };
 
 /* ---------- Achievements ---------- */
