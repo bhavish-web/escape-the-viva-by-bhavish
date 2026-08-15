@@ -112,7 +112,7 @@
     renderSubjects(bySubj);
 
     // Progress over time (accuracy per game)
-    renderProgress(G);
+    renderProgressInto('prog-svg', G);
 
     // Real streak
     const streak = (d.profile && d.profile.current_streak) ? d.profile.current_streak : 0;
@@ -306,14 +306,22 @@
     const svg=$(svgId); if(!svg) return;
     if(!G || G.length===0){ svg.innerHTML='<text x="250" y="110" fill="#6f685e" font-size="13" text-anchor="middle">Play games to see your progress</text>'; return; }
     const pts=G.slice(-8).map(g=>g.accuracy||0);
-    const W=500,H=220,pad=26;
+    const W=500,H=220,pad=30;
+    // faint horizontal gridlines at 0/25/50/75/100
+    let grid='';
+    [0,25,50,75,100].forEach(v=>{
+      const y=H-pad-(v/100)*(H-pad*2);
+      grid+='<line x1="'+pad+'" y1="'+y.toFixed(0)+'" x2="'+(W-pad)+'" y2="'+y.toFixed(0)+'" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>';
+      grid+='<text x="'+(pad-6)+'" y="'+(y+4).toFixed(0)+'" fill="#6f685e" font-size="9" text-anchor="end">'+v+'</text>';
+    });
     const stepX=(W-pad*2)/Math.max(1,pts.length-1);
     const xy=pts.map((v,i)=>[pad+i*stepX, H-pad-(v/100)*(H-pad*2)]);
     const line=xy.map(p=>p[0].toFixed(0)+','+p[1].toFixed(0)).join(' ');
     const area=line+' '+(pad+(pts.length-1)*stepX).toFixed(0)+','+(H-pad)+' '+pad+','+(H-pad);
-    const dots=xy.map(p=>'<circle cx="'+p[0].toFixed(0)+'" cy="'+p[1].toFixed(0)+'" r="4.5" fill="#f0b429"/>').join('');
-    const labels=xy.map((p,i)=>'<text x="'+p[0].toFixed(0)+'" y="'+(p[1]-10).toFixed(0)+'" fill="#e8e2d8" font-size="11" text-anchor="middle">'+pts[i]+'%</text>').join('');
-    svg.innerHTML='<polygon fill="rgba(240,180,41,0.12)" points="'+area+'"/>'+
+    const dots=xy.map(p=>'<circle cx="'+p[0].toFixed(0)+'" cy="'+p[1].toFixed(0)+'" r="4.5" fill="#f0b429" stroke="#1a1206" stroke-width="1.5"/>').join('');
+    const labels=xy.map((p,i)=>'<text x="'+p[0].toFixed(0)+'" y="'+(p[1]-11).toFixed(0)+'" fill="#f0e0c0" font-size="11" font-weight="700" text-anchor="middle">'+pts[i]+'%</text>').join('');
+    svg.innerHTML=grid+
+      '<polygon fill="rgba(240,180,41,0.12)" points="'+area+'"/>'+
       '<polyline fill="none" stroke="#f0b429" stroke-width="3" points="'+line+'"/>'+dots+labels;
   }
 
