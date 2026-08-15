@@ -115,7 +115,6 @@
             // replace the pre-picked questions with adaptive ones (10)
             window.questions = [];
             for(let i=0;i<10;i++) window.questions.push(pickAdaptiveQuestion());
-            gameState.difficulty = 'medium'; // use medium timing as the base for adaptive
             const b=$('adaptive-badge'); if(b) b.style.display='';
             updateBadge(0);
             if(typeof loadQuestion==='function') loadQuestion();
