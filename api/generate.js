@@ -30,13 +30,13 @@ export default async function handler(req, res) {
   const allowedBloom = bloomForDifficulty[difficulty] || bloomForDifficulty.medium;
 
   const prompt = `You are a strict engineering professor creating viva exam questions.
-Generate exactly 30 multiple choice questions based ONLY on this syllabus content.
+Generate exactly 10 multiple choice questions based ONLY on this syllabus content.
 
 Topic to focus on: ${topic}
 Difficulty level: ${difficulty.toUpperCase()} (${difficultyGuide[difficulty] || difficultyGuide.medium})
 
 Syllabus content:
-${syllabusText}
+${(syllabusText || "").slice(0, 3500)}
 
 STRICT RULES:
 - Questions must come ONLY from the syllabus content above
@@ -81,9 +81,7 @@ Note: "correct" is always 0 in your output (the first option). The game will shu
         model: process.env.GROQ_MODEL || "openai/gpt-oss-120b",
         messages: [{ role: "user", content: prompt }],
         temperature: 0.8,
-        max_tokens: 8000,
-        reasoning_effort: "low",
-        reasoning_format: "hidden"
+        max_tokens: 6000
       })
     });
 
