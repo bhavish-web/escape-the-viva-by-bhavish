@@ -78,10 +78,12 @@ Note: "correct" is always 0 in your output (the first option). The game will shu
         "Authorization": `Bearer ${process.env.GROQ_API_KEY}`
       },
       body: JSON.stringify({
-        model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
+        model: process.env.GROQ_MODEL || "openai/gpt-oss-120b",
         messages: [{ role: "user", content: prompt }],
         temperature: 0.8,
-        max_tokens: 8000
+        max_tokens: 8000,
+        reasoning_effort: "low",
+        reasoning_format: "hidden"
       })
     });
 
@@ -100,7 +102,16 @@ Note: "correct" is always 0 in your output (the first option). The game will shu
     // Parse and validate
     let questions = [];
     try {
-      const cleaned = responseText.replace(/```json|```/g, "").trim();
+      let cleaned = responseText
+        .replace(/<think>[\s\S]*?<\/think>/gi, "")   // remove reasoning blocks
+        .replace(/```json|```/g, "")
+        .trim();
+      // if there's still prose around it, grab the JSON array
+      const arrStart = cleaned.indexOf("[");
+      const arrEnd = cleaned.lastIndexOf("]");
+      if (arrStart !== -1 && arrEnd !== -1 && arrEnd > arrStart) {
+        cleaned = cleaned.slice(arrStart, arrEnd + 1);
+      }
       questions = JSON.parse(cleaned);
     } catch (e) {
       console.error("JSON parse failed:", e, "\nRaw response:", responseText);
