@@ -268,3 +268,10 @@
   .dash-hi{ order:1; font-size:17px; }
   .dash-burger{ margin-bottom:2px; }
 }
+
+/* ===== Leaderboard period tabs ===== */
+.lb-tabs{ display:flex; gap:8px; margin-bottom:16px; }
+.lb-tab{ flex:1; padding:9px 10px; border-radius:10px; border:1px solid rgba(240,180,41,.2); background:rgba(0,0,0,.3); color:#c3bcb0; font-weight:800; font-size:12px; cursor:pointer; transition:all .18s ease; }
+.lb-tab:hover{ background:rgba(240,180,41,.08); color:#fff; }
+.lb-tab.active{ background:linear-gradient(120deg,#f0b429,#b87200); color:#1a1206; border-color:transparent; box-shadow:0 4px 12px rgba(240,180,41,.3); }
+@media (max-width:520px){ .lb-tab{ font-size:11px; padding:8px 6px; } }
