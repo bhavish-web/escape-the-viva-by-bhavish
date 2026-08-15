@@ -231,3 +231,40 @@
   .lb-name{ font-size:13px; }
   .lb-xp{ font-size:12px; }
 }
+
+/* ============================================================
+   MOBILE DASHBOARD REFINEMENT (from real screenshots)
+   ============================================================ */
+@media (max-width:520px){
+  /* tighten cards — less wasted vertical space */
+  .card{ padding:15px 15px; }
+  .dash-grid{ gap:12px; }
+
+  /* readiness ring: smaller + lighter stroke so it doesn't dominate */
+  #sec-home .ring{ width:132px; height:132px; }
+  #sec-home .ring .rfg, #sec-home .ring .rbg{ stroke-width:9; }
+  #sec-home .ring .rtxt b{ font-size:30px; }
+  .ring-wrap{ padding:4px 0; }
+
+  /* readiness card doesn't need to be so tall */
+  #sec-home .dash-grid.g-4 > .card:first-child{ padding-bottom:10px; }
+
+  /* subject cards: tighter, rings a touch smaller */
+  #subjects-wrap .subj-ring{ width:88px; height:88px; }
+  #subjects-wrap .subj-ring b{ font-size:20px; }
+  #subjects-wrap .subj-name{ margin-bottom:8px; font-size:13px; }
+  #subjects-wrap .subj-tag{ margin-top:10px; }
+  #subjects-wrap .subj-topics{ margin-top:3px; }
+
+  /* at-a-glance rows a bit tighter */
+  .glance-row{ padding:9px 0; font-size:13px; }
+
+  /* section headers tighter */
+  .dash-main > .dash-section > h3, .dash-grid + h3{ margin-top:18px !important; margin-bottom:10px; }
+
+  /* top bar: back-to-game + greeting stack cleanly */
+  .dash-top{ flex-direction:column; align-items:flex-start; gap:10px; margin-bottom:16px; }
+  .dash-top-right{ order:0; width:auto; }
+  .dash-hi{ order:1; font-size:17px; }
+  .dash-burger{ margin-bottom:2px; }
+}
