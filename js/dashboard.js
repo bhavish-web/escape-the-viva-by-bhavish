@@ -211,24 +211,59 @@
   }
 
   /* ---------- LEADERBOARD ---------- */
+  let lbPeriod = 'all';
+  window.setLbPeriod = function(p){
+    lbPeriod = p;
+    document.querySelectorAll('.lb-tab').forEach(t=>t.classList.toggle('active', t.getAttribute('data-lb')===p));
+    loadLeaderboard();
+  };
+
   async function loadLeaderboard(){
     const box=$('leaderboard-body'); if(!box) return;
     if(!client()){ box.innerHTML='<div style="color:#9a9184;">Log in to see the leaderboard.</div>'; return; }
     box.innerHTML='<div style="color:#9a9184;">Loading…</div>';
     try{
-      const { data } = await client().from('profiles').select('display_name,xp,avatar_url').order('xp',{ascending:false}).limit(10);
-      if(!data || data.length===0){ box.innerHTML='<div style="color:#9a9184;">No players yet.</div>'; return; }
       const myName=greetingName();
-      let html='';
-      data.forEach((p,i)=>{
-        const me = p.display_name===myName;
-        const av = p.avatar_url && /^[0-9]+$/.test(p.avatar_url) ? 'assets/avatars/'+p.avatar_url+'.png' : 'assets/avatars/1.png';
-        html+='<div class="lb-row'+(me?' me':'')+'"><span class="lb-rank">'+(i+1)+'</span>'+
-              '<img class="lb-av" src="'+av+'"><span class="lb-name">'+escapeHtml(p.display_name||'Player')+(me?' (You)':'')+'</span>'+
-              '<span class="lb-xp">'+(p.xp||0)+' XP</span></div>';
-      });
-      box.innerHTML=html;
+
+      if(lbPeriod==='all'){
+        // All-time: rank by total XP
+        const { data } = await client().from('profiles').select('display_name,xp,avatar_url').order('xp',{ascending:false}).limit(10);
+        if(!data || data.length===0){ box.innerHTML='<div style="color:#9a9184;">No players yet.</div>'; return; }
+        box.innerHTML = data.map((p,i)=>lbRow(i, p.display_name, p.avatar_url, (p.xp||0)+' XP', p.display_name===myName)).join('');
+        return;
+      }
+
+      // Week/Month: sum score from games in the period, per user, then join names
+      const since = new Date();
+      if(lbPeriod==='week') since.setDate(since.getDate()-7);
+      else since.setMonth(since.getMonth()-1);
+      const sinceStr = since.toISOString();
+
+      const [{ data:games }, { data:profs }] = await Promise.all([
+        client().from('games').select('user_id,score,created_at').gte('created_at', sinceStr),
+        client().from('profiles').select('id,display_name,avatar_url')
+      ]);
+      if(!games || games.length===0){ box.innerHTML='<div style="color:#9a9184;">No games played in this period yet.</div>'; return; }
+
+      const byUser={};
+      games.forEach(g=>{ byUser[g.user_id]=(byUser[g.user_id]||0)+(g.score||0); });
+      const profMap={}; (profs||[]).forEach(p=>{ profMap[p.id]=p; });
+      const ranked=Object.keys(byUser).map(uid=>({
+        name: profMap[uid] ? profMap[uid].display_name : 'Player',
+        avatar: profMap[uid] ? profMap[uid].avatar_url : '1',
+        pts: byUser[uid]
+      })).sort((a,b)=>b.pts-a.pts).slice(0,10);
+
+      box.innerHTML = ranked.map((r,i)=>lbRow(i, r.name, r.avatar, r.pts+' pts', r.name===myName)).join('');
     }catch(e){ box.innerHTML='<div style="color:#9a9184;">Couldn\u2019t load leaderboard.</div>'; }
+  }
+
+  function lbRow(i, name, avatarNum, valueText, isMe){
+    const av = avatarNum && /^[0-9]+$/.test(avatarNum) ? 'assets/avatars/'+avatarNum+'.png' : 'assets/avatars/1.png';
+    const medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
+    return '<div class="lb-row'+(isMe?' me':'')+'"><span class="lb-rank">'+medal+'</span>'+
+           '<img class="lb-av" src="'+av+'"><span class="lb-name">'+escapeHtml(name||'Player')+(isMe?' (You)':'')+'</span>'+
+           '<span class="lb-xp">'+valueText+'</span></div>';
   }
 
   /* ---------- ACHIEVEMENTS ---------- */
