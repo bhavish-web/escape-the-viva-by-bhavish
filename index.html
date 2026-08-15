@@ -142,6 +142,7 @@
             <a data-sec="home" class="active" onclick="dashNav('home')"><span class="ic">🏠</span> Dashboard</a>
             <a onclick="enterGameFromDash()"><span class="ic">🎮</span> Play Game</a>
             <a data-sec="weak" onclick="dashNav('weak')"><span class="ic">🎯</span> Weak Areas</a>
+            <a data-sec="analytics" onclick="dashNav('analytics')"><span class="ic">📊</span> Analytics</a>
             <a data-sec="leaderboard" onclick="dashNav('leaderboard')"><span class="ic">🏆</span> Leaderboard</a>
             <a data-sec="achievements" onclick="dashNav('achievements')"><span class="ic">🏅</span> Achievements</a>
             <a onclick="doLogout()"><span class="ic">🚪</span> Log Out</a>
@@ -210,6 +211,30 @@
               </div>
             </div>
             <div class="dash-note" id="dash-sample-note">Loading your stats…</div>
+          </div>
+
+          <!-- ===== SECTION: ANALYTICS ===== -->
+          <div class="dash-section" id="sec-analytics" style="display:none;">
+            <div class="dash-grid g-4" style="margin-bottom:16px;">
+              <div class="card an-stat"><div class="an-num" id="an-games">0</div><div class="an-lbl">Games Played</div></div>
+              <div class="card an-stat"><div class="an-num" id="an-questions">0</div><div class="an-lbl">Questions Answered</div></div>
+              <div class="card an-stat"><div class="an-num" id="an-streak">0</div><div class="an-lbl">Best Streak</div></div>
+              <div class="card an-stat"><div class="an-num" id="an-xp">0</div><div class="an-lbl">Total XP</div></div>
+            </div>
+            <div class="dash-grid g-2" style="margin-bottom:16px;">
+              <div class="card">
+                <h3>📈 Accuracy Over Time</h3>
+                <svg class="prog-svg" id="an-prog-svg" viewBox="0 0 500 220" preserveAspectRatio="none"></svg>
+              </div>
+              <div class="card">
+                <h3>🧠 Bloom's Mastery</h3>
+                <div id="an-bloom"></div>
+              </div>
+            </div>
+            <div class="card">
+              <h3>📚 Accuracy by Subject</h3>
+              <div id="an-subjects"></div>
+            </div>
           </div>
 
           <!-- ===== SECTION: WEAK ===== -->
