@@ -44,7 +44,9 @@ STRICT RULES:
 - Only ONE option is correct
 - No duplicate or nearly identical questions
 - Questions must be technically accurate
-- Keep questions clear and concise
+- Keep every QUESTION reasonably concise: aim for 25 words or fewer, no long preambles or filler
+- Keep OPTIONS concise: aim for 10 words or fewer each
+- Questions should be readable and answerable within the time limit, but still meaningful
 - The wrong options should be plausible but clearly wrong
 - Every question MUST match the cognitive level for this difficulty: ${difficulty.toUpperCase()} uses Bloom's levels ${allowedBloom.join(" and ")} only
 - Tag each question with its Bloom's level in a "bloom" field (one of ${allowedBloom.join(", ")})
@@ -56,8 +58,8 @@ Use exactly this format:
   {
     "topic": "${topic}",
     "difficulty": "${difficulty}",
-    "question": "What is...?",
-    "options": ["Correct answer", "Wrong option 1", "Wrong option 2", "Wrong option 3"],
+    "question": "Which search algorithm uses a heuristic to guide its path?",
+    "options": ["A* search", "Breadth-first search", "Depth-first search", "Uniform cost search"],
     "correct": 0,
     "hint": "Think about...",
     "professorAsk": "Short version of question for professor bubble",
