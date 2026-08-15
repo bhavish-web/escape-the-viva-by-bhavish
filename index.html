@@ -245,7 +245,15 @@
 
           <!-- ===== SECTION: LEADERBOARD ===== -->
           <div class="dash-section" id="sec-leaderboard" style="display:none;">
-            <div class="card"><h3>🏆 Leaderboard</h3><div id="leaderboard-body"></div></div>
+            <div class="card">
+              <h3>🏆 Leaderboard</h3>
+              <div class="lb-tabs">
+                <button class="lb-tab active" data-lb="all" onclick="setLbPeriod('all')">All Time</button>
+                <button class="lb-tab" data-lb="week" onclick="setLbPeriod('week')">This Week</button>
+                <button class="lb-tab" data-lb="month" onclick="setLbPeriod('month')">This Month</button>
+              </div>
+              <div id="leaderboard-body"></div>
+            </div>
           </div>
 
           <!-- ===== SECTION: ACHIEVEMENTS ===== -->
