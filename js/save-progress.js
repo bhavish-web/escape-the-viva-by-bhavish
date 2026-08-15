@@ -71,20 +71,38 @@
         accuracy: total ? Math.round((correct/total)*100) : 0
       });
 
-      // ---- Award XP (10 per correct answer + 1 per 10 score points) ----
+      // ---- Award XP (10 per correct answer + 1 per 10 score points) + streak ----
       try{
         const earned = correct*10 + Math.floor((s.score||0)/10);
-        if(earned>0){
-          const uid = user().id;
-          const { data: prof } = await client().from('profiles').select('xp,best_streak').eq('id', uid).single();
-          const curXp = (prof && prof.xp) ? prof.xp : 0;
-          const curBest = (prof && prof.best_streak) ? prof.best_streak : 0;
-          await client().from('profiles').update({
-            xp: curXp + earned,
-            best_streak: Math.max(curBest, s.bestStreak||0)
-          }).eq('id', uid);
+        const uid = user().id;
+        const { data: prof } = await client().from('profiles')
+          .select('xp,best_streak,current_streak,last_played').eq('id', uid).single();
+        const curXp = (prof && prof.xp) ? prof.xp : 0;
+        const curBest = (prof && prof.best_streak) ? prof.best_streak : 0;
+
+        // streak logic based on last_played date
+        const today = new Date(); today.setHours(0,0,0,0);
+        const todayStr = today.toISOString().slice(0,10);
+        let streak = (prof && prof.current_streak) ? prof.current_streak : 0;
+        const last = (prof && prof.last_played) ? new Date(prof.last_played) : null;
+        if(last){
+          last.setHours(0,0,0,0);
+          const diffDays = Math.round((today - last)/86400000);
+          if(diffDays === 0){ /* already played today — streak unchanged */ }
+          else if(diffDays === 1){ streak = streak + 1; }   // consecutive day
+          else { streak = 1; }                              // missed day(s) — reset
+        } else {
+          streak = 1; // first ever play
         }
-      }catch(xe){ console.warn('xp award skipped', xe); }
+
+        await client().from('profiles').update({
+          xp: curXp + earned,
+          best_streak: Math.max(curBest, streak, s.bestStreak||0),
+          current_streak: streak,
+          last_played: todayStr
+        }).eq('id', uid);
+        window.CURRENT_STREAK = streak;
+      }catch(xe){ console.warn('xp/streak update skipped', xe); }
     }catch(e){ console.warn('save-progress flush failed', e); }
   }
 
