@@ -1,0 +1,17 @@
+/* Adaptive difficulty badge (in-game HUD) */
+.adaptive-badge{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:5px 12px; margin:6px auto 0; border-radius:20px;
+  font-size:11px; font-weight:800; letter-spacing:.5px; color:#fff;
+  background:color-mix(in srgb, var(--adc,#f0b429) 18%, rgba(0,0,0,.4));
+  border:1px solid var(--adc,#f0b429);
+  box-shadow:0 0 14px color-mix(in srgb, var(--adc,#f0b429) 40%, transparent);
+}
+.adaptive-badge .ad-ttl{ font-size:8px; letter-spacing:1.5px; color:#bbb; }
+.adaptive-badge b{ color:var(--adc,#f0b429); }
+.adaptive-badge .ad-up{ color:#2ecc71; } .adaptive-badge .ad-down{ color:#ff7a45; }
+.adaptive-badge.ad-flash{ animation:adFlash .6s ease; }
+@keyframes adFlash{ 0%{ transform:scale(1);} 40%{ transform:scale(1.18);} 100%{ transform:scale(1);} }
+
+/* the adaptive difficulty button (start screen) */
+.diff-btn[data-diff="adaptive"].active{ border-color:#4ee1ff !important; background:rgba(78,225,255,.15) !important; color:#4ee1ff !important; }
