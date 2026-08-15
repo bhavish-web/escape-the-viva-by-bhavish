@@ -163,3 +163,71 @@
 .an-bloom-fill{ height:100%; border-radius:6px; transition:width .9s ease; }
 .an-bloom-pct{ flex:0 0 44px; text-align:right; font-weight:900; font-size:13px; color:#fff; }
 @media (max-width:520px){ .an-bloom-lbl{ flex-basis:96px; font-size:11px; } }
+
+/* ============================================================
+   POLISH PASS — spacing, alignment, consistency, mobile
+   ============================================================ */
+
+/* consistent card rhythm + equal-height cards in a row */
+.dash-grid{ align-items:stretch; }
+.dash-grid > .card{ display:flex; flex-direction:column; }
+.card h3{ margin-bottom:14px; }
+
+/* subject cards: equal height, centered content */
+#subjects-wrap .card, .dash-grid.g-4 .card{ justify-content:flex-start; }
+.subj-ring{ margin-top:auto; margin-bottom:auto; }
+.subj-tag{ margin-top:auto; }
+
+/* readiness card: center the ring vertically */
+.dash-grid .card .ring-wrap{ flex:1; }
+
+/* progress graph: add breathing room + baseline */
+.prog-svg{ margin-top:4px; }
+
+/* section header consistency */
+.dash-section h3, .dash-main > .dash-section > h3{ letter-spacing:1px; }
+.dash-grid + h3{ margin-top:24px !important; }
+
+/* nicer empty-state text */
+.card [style*="text-align:center"]{ line-height:1.5; }
+
+/* buttons: unified feel */
+.dash-back-btn, .weak-cta, .dash-play-btn{ transition:transform .15s ease, box-shadow .25s ease, filter .15s ease; }
+.dash-back-btn:active, .weak-cta:active{ transform:translateY(0) scale(.99); }
+
+/* section fade-in when switching nav */
+.dash-section{ animation:dashFade .35s ease both; }
+@keyframes dashFade{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:none; } }
+
+/* tighten top bar on desktop */
+.dash-top{ padding-bottom:4px; border-bottom:1px solid rgba(240,180,41,.08); }
+
+/* ---- MOBILE refinements ---- */
+@media (max-width:900px){
+  .dash-main{ padding:14px 13px 40px; }
+  .card{ padding:16px; border-radius:15px; }
+  .dash-top{ gap:12px; align-items:flex-start; }
+  .dash-hi{ font-size:16px; }
+  .dash-hi small{ font-size:11px; }
+  .dash-back-btn{ padding:10px 16px; font-size:11.5px; }
+  .ring{ width:150px; height:150px; }
+  .ring .rtxt b{ font-size:32px; }
+  .subj-ring{ width:96px; height:96px; }
+  .subj-ring b{ font-size:21px; }
+  /* give the burger a fixed spot */
+  .dash-burger{ position:sticky; top:0; }
+  /* graphs don't overflow */
+  .prog-svg{ height:180px; }
+  .an-bloom-lbl{ font-size:11.5px; }
+}
+@media (max-width:520px){
+  .dash-main{ padding:12px 11px 36px; }
+  .g-4{ grid-template-columns:1fr 1fr; gap:11px; }
+  .card h3{ font-size:11.5px; }
+  .dash-hi{ font-size:15px; width:100%; }
+  .dash-top-right{ width:100%; justify-content:flex-start; }
+  .ring{ width:130px; height:130px; }
+  .ring .rtxt b{ font-size:28px; }
+  .lb-name{ font-size:13px; }
+  .lb-xp{ font-size:12px; }
+}
