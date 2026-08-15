@@ -152,3 +152,14 @@
 .ach-lock{ margin-top:10px; font-size:10px; color:#6f685e; }
 @media (max-width:900px){ .ach-grid{ grid-template-columns:repeat(2,1fr); } }
 @media (max-width:520px){ .ach-grid{ grid-template-columns:1fr; } }
+
+/* ===== Analytics ===== */
+.an-stat{ text-align:center; padding:22px 12px; }
+.an-num{ font-size:32px; font-weight:900; color:#f0b429; text-shadow:2px 2px 0 #000; }
+.an-lbl{ font-size:11px; color:#9a9184; margin-top:6px; letter-spacing:.5px; text-transform:uppercase; font-weight:700; }
+.an-bloom-row{ display:flex; align-items:center; gap:12px; padding:8px 0; }
+.an-bloom-lbl{ flex:0 0 130px; font-size:12.5px; font-weight:700; color:#e8e2d8; }
+.an-bloom-bar{ flex:1; height:10px; border-radius:6px; background:rgba(255,255,255,.08); overflow:hidden; }
+.an-bloom-fill{ height:100%; border-radius:6px; transition:width .9s ease; }
+.an-bloom-pct{ flex:0 0 44px; text-align:right; font-weight:900; font-size:13px; color:#fff; }
+@media (max-width:520px){ .an-bloom-lbl{ flex-basis:96px; font-size:11px; } }
