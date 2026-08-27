@@ -1,5 +1,6 @@
 /* Daily Challenge button (start screen) — matches game gold/red theme */
 .daily-btn{
+  position:relative;
   display:block; width:100%; max-width:420px; margin:14px auto 0;
   padding:15px; border:1px solid rgba(240,180,41,.5); border-radius:14px; cursor:pointer;
   font-weight:900; font-size:15px; letter-spacing:1px; text-transform:uppercase; color:#f0b429;
@@ -12,4 +13,23 @@
 .daily-btn.daily-done{
   background:linear-gradient(135deg, rgba(46,204,113,.18), rgba(30,158,89,.18));
   border-color:rgba(46,204,113,.5); color:#5fd88a;
+}
+
+/* small pulsing "unclaimed today" dot, top-right corner of the button —
+   only shown while daily-pending is set (i.e. not yet completed today) */
+.daily-btn.daily-pending::after{
+  content:'';
+  position:absolute; top:-5px; right:-5px;
+  width:13px; height:13px; border-radius:50%;
+  background:#e63030; border:2px solid #1a0800;
+  box-shadow:0 0 0 0 rgba(230,48,48,.65);
+  animation:dailyPendingPulse 2s ease-in-out infinite;
+}
+@keyframes dailyPendingPulse{
+  0%   { box-shadow:0 0 0 0 rgba(230,48,48,.55); }
+  70%  { box-shadow:0 0 0 7px rgba(230,48,48,0); }
+  100% { box-shadow:0 0 0 0 rgba(230,48,48,0); }
+}
+@media (prefers-reduced-motion: reduce){
+  .daily-btn.daily-pending::after{ animation:none; }
 }
