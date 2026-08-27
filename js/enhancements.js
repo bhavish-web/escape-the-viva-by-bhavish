@@ -52,7 +52,8 @@ function toggleSubjectDropdown() {
   const panel = document.getElementById('subject-dropdown-panel');
   if (!wrap || !panel) return;
   const open = wrap.classList.toggle('open');
-  panel.style.display = open ? 'block' : 'none';
+  panel.style.display = open ? 'flex' : 'none';
+  document.body.classList.toggle('modal-open', open);
   if (typeof playClickSound === 'function') playClickSound();
 }
 
@@ -61,13 +62,19 @@ function closeSubjectDropdown() {
   const panel = document.getElementById('subject-dropdown-panel');
   if (wrap) wrap.classList.remove('open');
   if (panel) panel.style.display = 'none';
+  document.body.classList.remove('modal-open');
 }
 
-// close the dropdown when clicking anywhere outside it
-document.addEventListener('click', e => {
-  const wrap = document.getElementById('subject-select-inline');
-  if (wrap && wrap.classList.contains('open') && !wrap.contains(e.target)) {
-    closeSubjectDropdown();
+// clicking the dimmed backdrop (not the modal box itself) closes the popup
+function handleSubjectPanelClick(e) {
+  if (e.target === e.currentTarget) closeSubjectDropdown();
+}
+
+// close on Escape too
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    const wrap = document.getElementById('subject-select-inline');
+    if (wrap && wrap.classList.contains('open')) closeSubjectDropdown();
   }
 });
 
