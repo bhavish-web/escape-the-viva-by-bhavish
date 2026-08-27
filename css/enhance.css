@@ -188,6 +188,7 @@
    SUBJECT DROPDOWN (on the hero / launch screen)
    ============================================================ */
 .subject-select-inline{ position:relative; margin:6px 0 10px; max-width:420px; }
+body.modal-open{ overflow:hidden; }
 
 .subject-dropdown-btn{
   width:100%; display:flex; align-items:center; justify-content:space-between; gap:10px;
@@ -204,23 +205,52 @@
 .subject-select-inline.open .subject-dropdown-caret{ transform:rotate(180deg); }
 
 .subject-dropdown-panel{
-  position:absolute; top:calc(100% + 6px); left:0; right:0; z-index:50;
-  max-height:300px; overflow:auto; padding:8px;
-  background:#160c05; border:1.5px solid rgba(255,160,60,.3); border-radius:14px;
-  box-shadow:0 20px 50px rgba(0,0,0,.6);
-  animation:p4DropIn .18s ease both;
+  position:fixed; inset:0; z-index:200;
+  display:flex; align-items:center; justify-content:center;
+  padding:24px;
+  background:rgba(8,4,2,.72); backdrop-filter:blur(2px);
+  animation:p4FadeIn .15s ease both;
 }
-@keyframes p4DropIn{ from{opacity:0; transform:translateY(-8px);} to{opacity:1; transform:translateY(0);} }
+@keyframes p4FadeIn{ from{opacity:0;} to{opacity:1;} }
+@keyframes p4PopIn{ from{opacity:0; transform:translateY(10px) scale(.96);} to{opacity:1; transform:translateY(0) scale(1);} }
 
-.subject-dropdown-panel .hero-subject-grid{ display:flex; flex-direction:column; gap:6px; }
+.subject-modal-box{
+  width:100%; max-width:520px; max-height:min(600px,86vh); overflow:auto;
+  padding:16px; border-radius:18px;
+  background:#160c05; border:1.5px solid rgba(255,160,60,.3);
+  box-shadow:0 20px 60px rgba(0,0,0,.65);
+  animation:p4PopIn .18s ease both;
+}
+
+.subject-modal-header{
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:12px; padding-bottom:10px;
+  border-bottom:1px solid rgba(255,160,60,.2);
+  color:#fff5e8; font-weight:800; font-size:15px; letter-spacing:.3px;
+}
+.subject-modal-close{
+  width:30px; height:30px; border-radius:50%; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  color:#ffe6c2; font-size:14px; font-weight:700;
+  background:rgba(255,160,60,.1); border:1.5px solid rgba(255,160,60,.3);
+  transition:background .12s ease, border-color .12s ease;
+}
+.subject-modal-close:hover{ background:rgba(255,160,60,.22); border-color:#ff8a1e; }
+
+.subject-dropdown-panel .hero-subject-grid{
+  display:grid; grid-template-columns:repeat(2,1fr); gap:10px;
+}
+@media (max-width:420px){
+  .subject-dropdown-panel .hero-subject-grid{ grid-template-columns:1fr; }
+}
 
 .hero-subject-chip{
   display:flex; align-items:center; gap:10px; width:100%; text-align:left; cursor:pointer;
-  padding:10px 12px; border-radius:10px; color:#ffe6c2; font-weight:700; font-size:14px;
+  padding:12px; border-radius:12px; color:#ffe6c2; font-weight:700; font-size:14px;
   background:rgba(255,160,60,.06); border:1.5px solid transparent;
   transition:background .12s ease, border-color .12s ease, transform .1s ease;
 }
-.hero-subject-chip .chip-icon{ font-size:20px; line-height:1; flex-shrink:0; }
+.hero-subject-chip .chip-icon{ font-size:22px; line-height:1; flex-shrink:0; }
 .hero-subject-chip:hover{ background:rgba(255,160,60,.16); border-color:var(--accent,#ff8a1e); }
 .hero-subject-chip:active{ transform:scale(.98); }
 .hero-subject-chip.selected{
