@@ -384,15 +384,21 @@
           </div>
         </div>
 
-        <!-- Subject selection (dropdown) -->
+        <!-- Subject selection (popup) -->
         <div class="subject-select-inline" id="subject-select-inline">
           <div class="diff-label">SELECT SUBJECT:</div>
           <button type="button" class="subject-dropdown-btn" id="subject-dropdown-btn" onclick="toggleSubjectDropdown()">
             <span id="subject-dropdown-label">📚 Select Subject</span>
             <span class="subject-dropdown-caret">▾</span>
           </button>
-          <div class="subject-dropdown-panel" id="subject-dropdown-panel" style="display:none">
-            <div class="hero-subject-grid" id="hero-subject-grid"></div>
+          <div class="subject-dropdown-panel" id="subject-dropdown-panel" style="display:none" onclick="handleSubjectPanelClick(event)">
+            <div class="subject-modal-box">
+              <div class="subject-modal-header">
+                <span>📚 Select Subject</span>
+                <button type="button" class="subject-modal-close" onclick="closeSubjectDropdown()" aria-label="Close">✕</button>
+              </div>
+              <div class="hero-subject-grid" id="hero-subject-grid"></div>
+            </div>
           </div>
         </div>
 
