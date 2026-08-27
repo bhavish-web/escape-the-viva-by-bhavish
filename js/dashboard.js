@@ -190,9 +190,12 @@
   }
 
   /* ---------- WEAK AREAS ---------- */
+  function emptyState(icon, title, sub){
+    return '<div class="dash-empty"><div class="de-icon">'+icon+'</div><div class="de-title">'+title+'</div>'+(sub?'<div class="de-sub">'+sub+'</div>':'')+'</div>';
+  }
   function renderWeak(){
     const box=$('weak-body'); if(!box) return;
-    if(!cache || cache.attempts.length===0){ box.innerHTML='<div style="color:#9a9184;text-align:center;padding:20px;">No data yet — play a few games first.</div>'; return; }
+    if(!cache || cache.attempts.length===0){ box.innerHTML=emptyState('🎯','No weak spots yet','Play your first game and we\'ll show you exactly what to practice.'); return; }
     const byTopic={}, byBloom={};
     cache.attempts.forEach(a=>{
       if(a.topic){ (byTopic[a.topic]=byTopic[a.topic]||{c:0,t:0}); byTopic[a.topic].t++; if(a.is_correct) byTopic[a.topic].c++; }
@@ -220,7 +223,7 @@
 
   async function loadLeaderboard(){
     const box=$('leaderboard-body'); if(!box) return;
-    if(!client()){ box.innerHTML='<div style="color:#9a9184;">Log in to see the leaderboard.</div>'; return; }
+    if(!client()){ box.innerHTML=emptyState('🏆','Log in to see the leaderboard','Guest scores stay local to this device.'); return; }
     box.innerHTML='<div style="color:#9a9184;">Loading…</div>';
     try{
       const myName=greetingName();
@@ -228,7 +231,7 @@
       if(lbPeriod==='all'){
         // All-time: rank by total XP
         const { data } = await client().from('profiles').select('display_name,xp,avatar_url').order('xp',{ascending:false}).limit(10);
-        if(!data || data.length===0){ box.innerHTML='<div style="color:#9a9184;">No players yet.</div>'; return; }
+        if(!data || data.length===0){ box.innerHTML=emptyState('🏆','No players yet','Be the first to set a score!'); return; }
         box.innerHTML = data.map((p,i)=>lbRow(i, p.display_name, p.avatar_url, (p.xp||0)+' XP', p.display_name===myName)).join('');
         return;
       }
@@ -243,7 +246,7 @@
         client().from('games').select('user_id,score,created_at').gte('created_at', sinceStr),
         client().from('profiles').select('id,display_name,avatar_url')
       ]);
-      if(!games || games.length===0){ box.innerHTML='<div style="color:#9a9184;">No games played in this period yet.</div>'; return; }
+      if(!games || games.length===0){ box.innerHTML=emptyState('🏆','No games yet this period','Play a round to claim the top spot.'); return; }
 
       const byUser={};
       games.forEach(g=>{ byUser[g.user_id]=(byUser[g.user_id]||0)+(g.score||0); });
@@ -255,7 +258,7 @@
       })).sort((a,b)=>b.pts-a.pts).slice(0,10);
 
       box.innerHTML = ranked.map((r,i)=>lbRow(i, r.name, r.avatar, r.pts+' pts', r.name===myName)).join('');
-    }catch(e){ box.innerHTML='<div style="color:#9a9184;">Couldn\u2019t load leaderboard.</div>'; }
+    }catch(e){ box.innerHTML=emptyState('⚠️','Couldn\u2019t load leaderboard','Check your connection and try again.'); }
   }
 
   function lbRow(i, name, avatarNum, valueText, isMe){
@@ -304,7 +307,7 @@
       const names={L1:'Remember',L2:'Understand',L3:'Apply',L4:'Analyze',L5:'Evaluate',L6:'Create'};
       const order=['L1','L2','L3','L4','L5','L6'];
       const have=order.filter(l=>byB[l]);
-      if(have.length===0){ bloomBox.innerHTML='<div style="color:#9a9184;font-size:12px;padding:16px 0;text-align:center;">Play AI Viva questions (they carry Bloom levels) to see this.</div>'; }
+      if(have.length===0){ bloomBox.innerHTML=emptyState('🧠','No Bloom\u2019s data yet','Play an AI Viva — those questions are tagged by cognitive level.'); }
       else{
         bloomBox.innerHTML=order.map(l=>{
           if(!byB[l]) return '';
@@ -323,7 +326,7 @@
       const byS={};
       A.forEach(a=>{ const s=a.subject||'Unknown'; (byS[s]=byS[s]||{c:0,t:0}); byS[s].t++; if(a.is_correct) byS[s].c++; });
       const names=Object.keys(byS);
-      if(names.length===0){ subjBox.innerHTML='<div style="color:#9a9184;font-size:12px;padding:8px 0;">No subjects yet.</div>'; }
+      if(names.length===0){ subjBox.innerHTML=emptyState('📚','No subjects yet','Play a game in any subject to see your accuracy break down here.'); }
       else{
         subjBox.innerHTML=names.map(n=>{
           const p=pct(byS[n].c,byS[n].t);
