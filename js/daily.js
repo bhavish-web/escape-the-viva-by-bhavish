@@ -116,9 +116,11 @@
     if(done){
       btn.innerHTML = '✅ Daily Done'+sTxt;
       btn.classList.add('daily-done');
+      btn.classList.remove('daily-pending');
     }else{
       btn.innerHTML = '📅 Daily Challenge'+sTxt;
       btn.classList.remove('daily-done');
+      btn.classList.add('daily-pending');   // small pulsing dot nudges an unclaimed challenge
     }
   };
 })();
