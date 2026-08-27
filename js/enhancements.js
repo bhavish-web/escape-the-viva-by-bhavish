@@ -115,6 +115,7 @@ function nextQuestion() {
   if (gameState.advancing) return;
   gameState.advancing = true;
   clearTimeout(autoAdvanceTimer);
+  if (typeof hideStressChange === 'function') hideStressChange();
   const nb = document.getElementById('next-btn');
   if (nb) { nb.style.display = 'none'; nb.classList.remove('show'); }
   advanceQuestion();               // defined in game.js
