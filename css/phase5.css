@@ -11,6 +11,7 @@
   #start-screen{
     background:url('../assets/viva-room.png') center/cover no-repeat #0b0501;
     position:relative;
+    overflow:hidden; /* the LEFT column scrolls internally instead — see below */
   }
   #start-screen::before{
     content:''; position:absolute; inset:0; z-index:0; pointer-events:none;
@@ -54,7 +55,16 @@
     margin-top:auto; margin-bottom:auto;
     gap:clamp(6px,.8vw,9px) !important;
     align-items:flex-start !important; text-align:left;
+    /* fits its own scroll instead of dragging the whole screen (and its
+       background/character) along when the window is short */
+    max-height:100%; overflow-y:auto; overscroll-behavior:contain;
+    padding-right:8px; margin-right:-8px;
+    scrollbar-width:thin; scrollbar-color:rgba(255,160,60,.4) transparent;
   }
+  .start-left::-webkit-scrollbar{ width:6px; }
+  .start-left::-webkit-scrollbar-track{ background:transparent; }
+  .start-left::-webkit-scrollbar-thumb{ background:rgba(255,160,60,.4); border-radius:6px; }
+  .start-left::-webkit-scrollbar-thumb:hover{ background:rgba(255,160,60,.65); }
   .start-left .diff-selector{ align-items:flex-start; }
   .start-left .diff-btns{ justify-content:flex-start; }
   .start-left .lifelines-info{ justify-content:flex-start; }
