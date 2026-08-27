@@ -113,6 +113,16 @@
 .weak-cta{ width:100%; margin-top:14px; padding:13px; border:none; border-radius:11px; font-weight:900; letter-spacing:1px; text-transform:uppercase; font-size:12px; color:#fff; cursor:pointer; background:linear-gradient(135deg,#e63030,#b81d1d); box-shadow:0 6px 18px rgba(230,48,48,.34); transition:transform .15s; }
 .weak-cta:hover{ transform:translateY(-2px); }
 
+/* Friendlier "nothing here yet" placeholder — icon + heading + short line,
+   used in place of a bare grey sentence in Leaderboard/Weak Areas/Analytics. */
+.dash-empty{
+  display:flex; flex-direction:column; align-items:center; text-align:center;
+  gap:6px; padding:28px 16px; color:#9a9184;
+}
+.dash-empty .de-icon{ font-size:32px; opacity:.85; margin-bottom:2px; }
+.dash-empty .de-title{ font-size:13.5px; font-weight:800; color:#d8cba8; }
+.dash-empty .de-sub{ font-size:12px; color:#9a9184; max-width:260px; line-height:1.5; }
+
 .dash-note{ text-align:center; color:#6f685e; font-size:11px; margin-top:22px; }
 
 /* mobile */
