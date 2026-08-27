@@ -670,6 +670,7 @@ html, body {
   border: 1.5px solid rgba(255,150,0,0.35);
   color: #ffb830;
   text-transform: uppercase;
+  text-shadow: 0 1px 2px rgba(0,0,0,.65);
 }
 
 .diff-badge {
@@ -680,10 +681,11 @@ html, body {
   letter-spacing: 1px;
   text-transform: uppercase;
   border: 1.5px solid;
+  text-shadow: 0 1px 2px rgba(0,0,0,.65);
 }
-.diff-badge.easy { color: #2ecc71; border-color: rgba(46,204,113,0.4); background: rgba(46,204,113,0.1); }
-.diff-badge.medium { color: #f39c12; border-color: rgba(243,156,18,0.4); background: rgba(243,156,18,0.1); }
-.diff-badge.hard { color: #e74c3c; border-color: rgba(231,76,60,0.4); background: rgba(231,76,60,0.1); }
+.diff-badge.easy { color: #4ee08a; border-color: rgba(46,204,113,0.5); background: rgba(46,204,113,0.16); }
+.diff-badge.medium { color: #ffc766; border-color: rgba(243,156,18,0.5); background: rgba(243,156,18,0.16); }
+.diff-badge.hard { color: #ff8a7a; border-color: rgba(231,76,60,0.5); background: rgba(231,76,60,0.16); }
 
 .question-text {
   background: rgba(10,5,0,0.88);
