@@ -127,8 +127,11 @@ function hideStressChange() {
 }
 
 /* ---------- Streak Popup ---------- */
+let streakPopupTimer = null;
 function showStreakPopup(streak) {
   const el = document.getElementById('streak-popup');
+  if (!el) return;
+  clearTimeout(streakPopupTimer);
   const msgs = {
     3: '🔥 ON FIRE! x3',
     4: '⚡ LIGHTNING! x4',
@@ -136,25 +139,42 @@ function showStreakPopup(streak) {
     6: '🏆 LEGENDARY! x6',
     7: '👑 GODLIKE! x7'
   };
-  el.textContent = msgs[streak] || `🔥 STREAK x${streak}!`;
+  const bonus = streak * 12;
+  el.innerHTML = (msgs[streak] || `🔥 STREAK x${streak}!`) +
+    `<br><span style="font-size:.6em;font-weight:700;opacity:.85">+${bonus} pts/answer</span>`;
   el.className = 'streak-popup show';
   playStreakSound();
-  setTimeout(() => {
+  streakPopupTimer = setTimeout(() => {
     el.className = 'streak-popup';
     el.style.display = 'none';
   }, 1900);
 }
 
+function hideStreakPopup() {
+  clearTimeout(streakPopupTimer);
+  const el = document.getElementById('streak-popup');
+  if (el) { el.className = 'streak-popup'; el.style.display = 'none'; }
+}
+
 /* ---------- Achievement Popup ---------- */
+let achievementPopupTimer = null;
 function showAchievementPopup(text) {
   const el = document.getElementById('achievement-popup');
+  if (!el) return;
+  clearTimeout(achievementPopupTimer);
   el.textContent = '🏅 ' + text;
   el.className = 'achievement-popup show';
   playAchievementSound();
-  setTimeout(() => {
+  achievementPopupTimer = setTimeout(() => {
     el.className = 'achievement-popup';
     el.style.display = 'none';
   }, 2800);
+}
+
+function hideAchievementPopup() {
+  clearTimeout(achievementPopupTimer);
+  const el = document.getElementById('achievement-popup');
+  if (el) { el.className = 'achievement-popup'; el.style.display = 'none'; }
 }
 
 /* ---------- Particles ---------- */
