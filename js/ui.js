@@ -100,18 +100,30 @@ function updateHUD(gameState) {
 }
 
 /* ---------- Stress Change Popup ---------- */
+let stressChangeTimer = null;
 function showStressChange(amount, isIncrease) {
   const el = document.getElementById('stress-change');
+  if (!el) return;
+  clearTimeout(stressChangeTimer);
   el.style.color = isIncrease ? '#ff4c4c' : '#2ecc71';
   el.style.borderColor = isIncrease ? '#ff4c4c' : '#2ecc71';
   el.innerHTML = `STRESS ${isIncrease ? '+' : '-'}${Math.abs(amount)}<br>
     <span style="font-size:clamp(13px,2.5vw,18px)">${isIncrease ? '😰😫' : '😊👍'}</span>`;
+  // Toggle display off/on (rather than fight the CSS-defined animation with an
+  // inline one) so the stylesheet's fade-in/out timing always plays the same
+  // way, and so a second popup fired mid-animation restarts it cleanly.
+  el.style.display = 'none';
+  void el.offsetWidth;   // force reflow so the animation restarts
   el.style.display = 'block';
-  el.style.animation = 'none';
-  requestAnimationFrame(() => requestAnimationFrame(() => {
-    el.style.animation = 'stressPopup 0.4s cubic-bezier(0.34,1.56,0.64,1)';
-  }));
-  setTimeout(() => el.style.display = 'none', 2000);
+  stressChangeTimer = setTimeout(() => { el.style.display = 'none'; }, 1600);
+}
+
+/* Force-hides the popup immediately — call this whenever a question ends,
+   so a stress change from the last question never bleeds into the next one. */
+function hideStressChange() {
+  clearTimeout(stressChangeTimer);
+  const el = document.getElementById('stress-change');
+  if (el) el.style.display = 'none';
 }
 
 /* ---------- Streak Popup ---------- */
