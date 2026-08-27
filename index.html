@@ -384,22 +384,15 @@
           </div>
         </div>
 
-        <!-- Subject selection (popup) -->
+        <!-- Subject selection (popup trigger — the popup itself lives outside
+             the screen layout, see end of #game-container, so it can never be
+             out-stacked by other positioned elements on this screen) -->
         <div class="subject-select-inline" id="subject-select-inline">
           <div class="diff-label">SELECT SUBJECT:</div>
           <button type="button" class="subject-dropdown-btn" id="subject-dropdown-btn" onclick="toggleSubjectDropdown()">
             <span id="subject-dropdown-label">📚 Select Subject</span>
             <span class="subject-dropdown-caret">▾</span>
           </button>
-          <div class="subject-dropdown-panel" id="subject-dropdown-panel" style="display:none" onclick="handleSubjectPanelClick(event)">
-            <div class="subject-modal-box">
-              <div class="subject-modal-header">
-                <span>📚 Select Subject</span>
-                <button type="button" class="subject-modal-close" onclick="closeSubjectDropdown()" aria-label="Close">✕</button>
-              </div>
-              <div class="hero-subject-grid" id="hero-subject-grid"></div>
-            </div>
-          </div>
         </div>
 
         <button class="start-btn" id="start-game-btn" onclick="startGame()" style="display:none">▶ START GAME</button>
@@ -624,6 +617,20 @@
   <div class="credits">
     Designed &amp; Developed by
     <a href="https://portfoliobhavish2006.vercel.app/" target="_blank" rel="noopener" class="credits-link">Bhavish</a>
+  </div>
+
+  <!-- ===== SUBJECT SELECT POPUP ===== -->
+  <!-- Lives at the top level of #game-container (a sibling of every .screen)
+       so it can never be trapped inside another element's stacking context
+       or drawn over by scene art / characters on any screen. -->
+  <div class="subject-dropdown-panel" id="subject-dropdown-panel" style="display:none" onclick="handleSubjectPanelClick(event)">
+    <div class="subject-modal-box">
+      <div class="subject-modal-header">
+        <span>📚 Select Subject</span>
+        <button type="button" class="subject-modal-close" onclick="closeSubjectDropdown()" aria-label="Close">✕</button>
+      </div>
+      <div class="hero-subject-grid" id="hero-subject-grid"></div>
+    </div>
   </div>
 
 </div>
