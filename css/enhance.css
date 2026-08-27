@@ -205,7 +205,7 @@ body.modal-open{ overflow:hidden; }
 .subject-select-inline.open .subject-dropdown-caret{ transform:rotate(180deg); }
 
 .subject-dropdown-panel{
-  position:fixed; inset:0; z-index:200;
+  position:fixed; inset:0; z-index:10000;
   display:flex; align-items:center; justify-content:center;
   padding:24px;
   background:rgba(8,4,2,.72); backdrop-filter:blur(2px);
