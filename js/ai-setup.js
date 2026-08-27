@@ -331,13 +331,21 @@ async function generateAndStart() {
 
   const loadingEl = document.getElementById("ai-loading");
   const loadingText = document.getElementById("ai-loading-text");
+  const loadingFill = document.getElementById("ai-loading-fill");
   loadingEl.style.display = "flex";
   loadingText.textContent = generateMessages[0];
+  if (loadingFill) loadingFill.style.width = "6%";
 
   let msgIndex = 0;
   const msgInterval = setInterval(() => {
     msgIndex = (msgIndex + 1) % generateMessages.length;
     loadingText.textContent = generateMessages[msgIndex];
+    // step the bar forward with each message, capped short of 100% so it
+    // only completes once the request actually finishes
+    if (loadingFill) {
+      const pct = Math.min(92, Math.round(((msgIndex + 1) / generateMessages.length) * 92));
+      loadingFill.style.width = pct + "%";
+    }
   }, 2000);
 
   try {
@@ -365,6 +373,7 @@ async function generateAndStart() {
     window.AI_QUESTIONS = data.questions;
 
     loadingText.textContent = "✅ Your Viva is Ready!";
+    if (loadingFill) loadingFill.style.width = "100%";
 
     setTimeout(() => {
       isGenerating = false;
