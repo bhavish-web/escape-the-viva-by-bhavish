@@ -308,6 +308,7 @@ html, body {
   position: relative;
   overflow: hidden;
   width: 100%;
+  flex-shrink: 0;
 }
 .start-btn::after {
   content: '';
