@@ -11,6 +11,8 @@
         (currently: OOP, Java, DSA, DBMS, OS, CN, CS, Math,
          CD, CNS, SPPM, CC — in questions-sem7.js;
          DAA, CN_III, DEVOPS, PPL, NLP, ML, FLAT, AI, IOT — in questions-year3.js).
+     II Year (R25): DM, COA, OOPJ, SE, DBMS_II, COSM, OS_II, ADA, CN_II,
+     ML_II — in questions-year2.js.
      4. `sem` = year-semester printed on the syllabus (e.g. 'III-I').
         The same subject in different years gets its own entry and
         topic code (e.g. CN_III), because the syllabus differs.
@@ -54,6 +56,37 @@ const SUBJECTS = [
 
   { id:'CC', sem:'IV-I',   name:'Cloud Computing',               short:'Cloud', icon:'☁️', accent:'#5dade2',
     topics:['CC'],   pdf:'notes/cc.pdf',   blurb:'Service models, virtualization, MapReduce' },
+
+  /* ---- B.Tech II Year, R25 (questions in js/questions-year2.js) ---- */
+  { id:'DM',      sem:'II-I',  name:'Discrete Mathematics',            short:'DM',   icon:'🔣', accent:'#6c5ce7',
+    topics:['DM'],      pdf:'notes/dm.pdf',      blurb:'Logic, sets, algebra, counting, graphs' },
+
+  { id:'COA',     sem:'II-I',  name:'Computer Organization & Architecture', short:'COA', icon:'🖲️', accent:'#e17055',
+    topics:['COA'],     pdf:'notes/coa.pdf',     blurb:'Logic circuits, RTL, CPU, memory, I/O' },
+
+  { id:'OOPJ',    sem:'II-I',  name:'OOP through Java',                short:'Java', icon:'☕', accent:'#e67e22',
+    topics:['OOPJ'],    pdf:'notes/oopj.pdf',    blurb:'Inheritance, exceptions, threads, Swing' },
+
+  { id:'SE',      sem:'II-I',  name:'Software Engineering',            short:'SE',   icon:'🛠️', accent:'#0984e3',
+    topics:['SE'],      pdf:'notes/se.pdf',      blurb:'Process models, SRS, UML, testing, risk' },
+
+  { id:'DBMS_II', sem:'II-I',  name:'Database Management Systems',     short:'DBMS', icon:'🗄️', accent:'#ffb020',
+    topics:['DBMS_II'], pdf:'notes/dbms-ii.pdf', blurb:'ER, SQL, normalization, transactions, B+ trees' },
+
+  { id:'COSM',    sem:'II-II', name:'Computer Oriented Statistical Methods', short:'COSM', icon:'📊', accent:'#00cec9',
+    topics:['COSM'],    pdf:'notes/cosm.pdf',    blurb:'Distributions, estimation, tests, regression' },
+
+  { id:'OS_II',   sem:'II-II', name:'Operating Systems',               short:'OS',   icon:'🖥️', accent:'#2ecc71',
+    topics:['OS_II'],   pdf:'notes/os-ii.pdf',   blurb:'Scheduling, deadlocks, sync, memory, files' },
+
+  { id:'ADA',     sem:'II-II', name:'Algorithms Design & Analysis',    short:'ADA',  icon:'🧮', accent:'#16a085',
+    topics:['ADA'],     pdf:'notes/ada.pdf',     blurb:'Divide & conquer, DP, greedy, NP' },
+
+  { id:'CN_II',   sem:'II-II', name:'Computer Networks',               short:'CN',   icon:'🌐', accent:'#9b59b6',
+    topics:['CN_II'],   pdf:'notes/cn-ii.pdf',   blurb:'Top-down: apps, TCP/UDP, IP, link layer' },
+
+  { id:'ML_II',   sem:'II-II', name:'Machine Learning',                short:'ML',   icon:'🤖', accent:'#27ae60',
+    topics:['ML_II'],   pdf:'notes/ml-ii.pdf',   blurb:'Features, regression, classification, clustering' },
 
   /* ---- B.Tech III Year (questions in js/questions-year3.js) ---- */
   { id:'CN_III', sem:'III-I', name:'Computer Networks',         short:'CN',   icon:'🌐', accent:'#9b59b6',
