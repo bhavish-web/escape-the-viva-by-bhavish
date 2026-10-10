@@ -9,7 +9,8 @@
      1. Add an entry below.
      2. `topics` must match the `topic:` values used in questions.js
         (currently: OOP, Java, DSA, DBMS, OS, CN, CS, Math,
-         CD, CNS, SPPM, CC — the last four live in questions-sem7.js).
+         CD, CNS, SPPM, CC — in questions-sem7.js;
+         DAA, DEVOPS, PPL, NLP, ML, FLAT, AI, IOT + more CN — in questions-year3.js).
      3. Drop a PDF at the `pdf` path (see /notes/README.txt).
    ============================================================ */
 
@@ -50,6 +51,32 @@ const SUBJECTS = [
 
   { id:'CC',   name:'Cloud Computing',               short:'Cloud', icon:'☁️', accent:'#5dade2',
     topics:['CC'],   pdf:'notes/cc.pdf',   blurb:'Service models, virtualization, MapReduce' },
+
+  /* ---- B.Tech III Year (questions in js/questions-year3.js) ----
+     Computer Networks (CN) above also gets 112 more questions from that file. */
+  { id:'DAA',    name:'Design & Analysis of Algorithms', short:'DAA',  icon:'🧮', accent:'#16a085',
+    topics:['DAA'],    pdf:'notes/daa.pdf',    blurb:'Divide & conquer, DP, greedy, NP' },
+
+  { id:'DEVOPS', name:'DevOps',                         short:'DevOps', icon:'🔁', accent:'#2980b9',
+    topics:['DEVOPS'], pdf:'notes/devops.pdf', blurb:'CI/CD, Git, Jenkins, Docker, Ansible' },
+
+  { id:'PPL',    name:'Principles of Programming Languages', short:'PPL', icon:'📝', accent:'#8e44ad',
+    topics:['PPL'],    pdf:'notes/ppl.pdf',    blurb:'Syntax, binding, subprograms, paradigms' },
+
+  { id:'NLP',    name:'Natural Language Processing',    short:'NLP',  icon:'💬', accent:'#d35400',
+    topics:['NLP'],    pdf:'notes/nlp.pdf',    blurb:'Morphology, parsing, semantics, n-grams' },
+
+  { id:'ML',     name:'Machine Learning',               short:'ML',   icon:'🤖', accent:'#27ae60',
+    topics:['ML'],     pdf:'notes/ml.pdf',     blurb:'Perceptrons, SVM, trees, PCA, RL' },
+
+  { id:'FLAT',   name:'Formal Languages & Automata Theory', short:'FLAT', icon:'🔤', accent:'#c0392b',
+    topics:['FLAT'],   pdf:'notes/flat.pdf',   blurb:'DFA, regex, CFG, PDA, Turing machines' },
+
+  { id:'AI',     name:'Artificial Intelligence',        short:'AI',   icon:'🧠', accent:'#f39c12',
+    topics:['AI'],     pdf:'notes/ai.pdf',     blurb:'Search, games, logic, planning, Bayes' },
+
+  { id:'IOT',    name:'Internet of Things',             short:'IoT',  icon:'📡', accent:'#00b894',
+    topics:['IOT'],    pdf:'notes/iot.pdf',    blurb:'M2M, NETCONF, Raspberry Pi, case studies' },
 ];
 
 /* Look up a subject by id (safe). */
