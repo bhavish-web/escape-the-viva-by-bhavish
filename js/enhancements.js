@@ -15,15 +15,80 @@ function showScreen(id) {
 /* ============================================================
    1. SUBJECT-FIRST FLOW
    ============================================================ */
-function renderSubjects() {
-  const grid = document.getElementById('hero-subject-grid');
-  if (!grid) return;
-  grid.innerHTML = SUBJECTS.map(s => `
+/* Subject picker: step 1 = choose a year, step 2 = choose a subject.
+   Year comes from each subject's `sem` field in subjects.js (e.g. 'III-I').
+   Subjects without `sem` are listed under "Core & Placement". */
+const SUBJECT_YEAR_GROUPS = [
+  { key:'CORE', label:'Core & Placement', icon:'⭐' },
+  { key:'I',    label:'I Year',           icon:'1️⃣' },
+  { key:'II',   label:'II Year',          icon:'2️⃣' },
+  { key:'III',  label:'III Year',         icon:'3️⃣' },
+  { key:'IV',   label:'IV Year',          icon:'4️⃣' },
+];
+function subjectYearKey(s) { return s.sem ? String(s.sem).split('-')[0] : 'CORE'; }
+
+function setSubjectModalTitle(text) {
+  const t = document.querySelector('#subject-dropdown-panel .subject-modal-header span');
+  if (t) t.textContent = text;
+}
+
+function subjectChip(s) {
+  return `
     <button type="button" class="hero-subject-chip" data-id="${s.id}" style="--accent:${s.accent}"
             onclick="selectSubject('${s.id}')" title="${s.name}">
       <span class="chip-icon">${s.icon}</span>
       <span class="chip-name">${s.name}</span>
-    </button>`).join('');
+    </button>`;
+}
+
+// Step 1: list of years
+function renderSubjects() {
+  const grid = document.getElementById('hero-subject-grid');
+  if (!grid) return;
+  setSubjectModalTitle('🎓 Select Year');
+  grid.innerHTML = SUBJECT_YEAR_GROUPS.map(y => {
+    const n = SUBJECTS.filter(s => subjectYearKey(s) === y.key).length;
+    if (!n) return '';
+    return `
+    <button type="button" class="hero-subject-chip subject-year-chip" onclick="showYearSubjects('${y.key}')">
+      <span class="chip-icon">${y.icon}</span>
+      <span class="chip-name">${y.label}<br><small style="opacity:.65;font-weight:600">${n} subject${n > 1 ? 's' : ''}</small></span>
+    </button>`;
+  }).join('');
+}
+
+// Step 2: subjects of one year (split by semester when there is more than one)
+function showYearSubjects(key) {
+  const grid = document.getElementById('hero-subject-grid');
+  if (!grid) return;
+  if (typeof playClickSound === 'function') playClickSound();
+  const year = SUBJECT_YEAR_GROUPS.find(y => y.key === key);
+  const list = SUBJECTS.filter(s => subjectYearKey(s) === key);
+  setSubjectModalTitle('📚 ' + (year ? year.label : 'Subjects'));
+
+  const back = `
+    <button type="button" class="hero-subject-chip" style="grid-column:1/-1" onclick="renderSubjects()">
+      <span class="chip-icon">←</span><span class="chip-name">Back to years</span>
+    </button>`;
+
+  const sems = [...new Set(list.map(s => s.sem ? String(s.sem).split('-')[1] : ''))];
+  let body;
+  if (sems.length > 1) {
+    const heading = sem => `
+      <div style="grid-column:1/-1;margin:6px 2px 0;padding-bottom:4px;border-bottom:1px solid rgba(255,160,60,.2);
+           color:#ffb35c;font-size:12px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;">Semester ${sem}</div>`;
+    body = sems.sort().map(sem => heading(sem) +
+      list.filter(s => String(s.sem).split('-')[1] === sem).map(subjectChip).join('')).join('');
+  } else {
+    body = list.map(subjectChip).join('');
+  }
+  grid.innerHTML = back + body;
+
+  // keep the current selection highlighted
+  if (typeof gameState === 'object' && gameState && gameState.subject) {
+    document.querySelectorAll('.hero-subject-chip[data-id]').forEach(c =>
+      c.classList.toggle('selected', c.dataset.id === gameState.subject));
+  }
 }
 
 function selectSubject(id) {
@@ -52,6 +117,7 @@ function toggleSubjectDropdown() {
   const panel = document.getElementById('subject-dropdown-panel');
   if (!wrap || !panel) return;
   const open = wrap.classList.toggle('open');
+  if (open) renderSubjects();           // always start at the year list
   panel.style.display = open ? 'flex' : 'none';
   document.body.classList.toggle('modal-open', open);
   if (typeof playClickSound === 'function') playClickSound();
