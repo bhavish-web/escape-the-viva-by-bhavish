@@ -276,6 +276,16 @@ function changeSubject() {
    ============================================================ */
 window.addEventListener('load', renderSubjects);
 
+/* Home-screen stat: total question count, rounded down to the nearest 100
+   (e.g. 1588 → "1500+"), so it stays accurate as subjects are added. */
+function updateQuestionCountStat() {
+  const el = document.getElementById('stat-question-count');
+  if (!el || typeof allQuestions === 'undefined' || !allQuestions.length) return;
+  const n = allQuestions.length;
+  el.textContent = (n >= 100 ? Math.floor(n / 100) * 100 : n) + '+';
+}
+window.addEventListener('load', updateQuestionCountStat);
+
 /* Enter / Space advances during the answer reveal (only once answered). */
 document.addEventListener('keydown', e => {
   if ((e.key === 'Enter' || e.key === ' ') &&
